@@ -1,0 +1,94 @@
+---
+import '../styles/site.css';
+const mode = Astro.url.searchParams.get('mode') ?? 'login';
+const next = Astro.url.searchParams.get('next') ?? '/app';
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>UFV Shares · Acceso</title>
+  </head>
+  <body>
+    <div class="container" style="max-width: 620px;">
+      <header class="header">
+        <div class="brand">
+          <img class="logo" src="/Logo.png" onerror="this.onerror=null;this.src='/ufv-badge.svg'" alt="UFV" width="42" height="42" />
+          <div>
+            <h1>Acceso</h1>
+            <p class="subtitle">Necesitas iniciar sesión o registrarte para usar la app.</p>
+          </div>
+        </div>
+        <div class="row">
+          <a class="button" href="/">Landing</a>
+        </div>
+      </header>
+
+      <nav class="tabs">
+        <a class="button tab" data-active={mode === 'login'} href={`/auth?mode=login&next=${encodeURIComponent(next)}`}>Iniciar sesión</a>
+        <a class="button button--primary tab" data-active={mode === 'register'} href={`/auth?mode=register&next=${encodeURIComponent(next)}`}>Registrarse</a>
+      </nav>
+
+      <form id="auth-form" class="panel" style="box-shadow: var(--shadow);">
+        <div class="row" style="justify-content: space-between;">
+          <strong id="form-title">{mode === 'register' ? 'Crear cuenta' : 'Iniciar sesión'}</strong>
+          <span class="muted small">UFV Shares</span>
+        </div>
+
+        <label class="field">
+          Email
+          <input name="email" type="email" autocomplete="email" required />
+        </label>
+
+        <label class="field">
+          Contraseña
+          <input name="password" type="password" autocomplete={mode === 'register' ? 'new-password' : 'current-password'} required />
+        </label>
+
+        <button class="button button--primary" type="submit">Continuar</button>
+        <div id="error" class="error" aria-live="polite"></div>
+      </form>
+    </div>
+
+    <script type="module">
+      const API_BASE = 'http://localhost:8080/api';
+      const mode = new URLSearchParams(window.location.search).get('mode') || 'login';
+      const next = new URLSearchParams(window.location.search).get('next') || '/app';
+
+      const form = document.getElementById('auth-form');
+      const errorEl = document.getElementById('error');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorEl.textContent = '';
+
+        const formData = new FormData(form);
+        const payload = {
+          email: String(formData.get('email') || ''),
+          password: String(formData.get('password') || '')
+        };
+
+        try {
+          const res = await fetch(`${API_BASE}/auth/${mode === 'register' ? 'register' : 'login'}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const body = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            errorEl.textContent = body?.error || 'Error de autenticación';
+            return;
+          }
+
+          localStorage.setItem('ufvshares_token', body.token);
+          localStorage.setItem('ufvshares_email', body.email);
+          window.location.href = next;
+        } catch (err) {
+          errorEl.textContent = 'No se pudo conectar con el backend';
+        }
+      });
+    </script>
+  </body>
+</html>

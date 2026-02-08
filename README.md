@@ -97,8 +97,61 @@ Este proyecto implementa prácticas profesionales de desarrollo colaborativo, ap
 ## 📁 Estructura del Proyecto
 
 ```
-
+.
+├─ backend/    # Java + Maven (API)
+└─ frontend/   # Astro (UI)
 ```
+
+---
+
+## 🧑‍💻 Desarrollo local
+
+### Requisitos
+
+- **Java JDK 21** (el backend usa Spring Boot 3.x y el `pom.xml` define Java 21)
+- **Maven** (3.9+)
+- **Node.js LTS** (18/20+) y **npm**
+
+### Ejecutar en local (dos terminales)
+
+#### 1) Backend (Spring Boot)
+
+En una terminal:
+
+```bash
+cd backend
+mvn test
+mvn spring-boot:run
+```
+
+El backend levanta por defecto en `http://localhost:8080`.
+
+Endpoint de prueba:
+
+- `GET http://localhost:8080/api/hello`
+
+#### 2) Frontend (Astro)
+
+En otra terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Astro levanta por defecto en `http://localhost:4321`.
+
+El backend ya está configurado con CORS para aceptar peticiones desde `http://localhost:4321`.
+
+### Problemas típicos
+
+- **Puerto ocupado**:
+	- Backend: cambia `backend/src/main/resources/application.properties` (`server.port=8080`) o ejecuta `mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8081`.
+	- Frontend: ejecuta `npm run dev -- --port 4322`.
+- **Comandos no encontrados**:
+	- `mvn`: instala Maven y asegúrate de tenerlo en el `PATH`.
+	- `npm`: instala Node.js LTS (incluye npm).
 
 ---
 
