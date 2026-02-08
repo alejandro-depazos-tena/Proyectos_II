@@ -44,7 +44,11 @@
 
 ### 📖 Descripción
 
-**UFV Shares** es una aplicación web desarrollada con Java y Spring Boot que permite la gestión integral de...
+**UFV Shares** es una aplicación web desarrollada con Java y Spring Boot que permite a estudiantes universitarios organizar quedadas, compartir recursos y comparar precios de productos en Amazon. La plataforma integra:
+- **Sistema de localización** para coordinar encuentros en el campus
+- **Comparador de precios inteligente** con análisis histórico de Amazon
+- **Gestión de grupos** y eventos académicos
+- **Marketplace estudiantil** para compra/venta entre alumnos
 
 ### 🎯 Objetivos del Proyecto
 
