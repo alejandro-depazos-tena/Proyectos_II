@@ -1,0 +1,188 @@
+@startuml
+' UFV Shares - Modelo de Datos (UML)
+' Generado a partir de docs/03_modelo_de_datos.md
+
+hide methods
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+'====================
+' Entidades
+'====================
+class USUARIO {
+  id : int <<PK>>
+  email : string <<UK>>
+  password : string
+  nombre : string
+  apellidos : string
+  carrera : string
+  curso : int
+  foto_perfil : string
+  created_at : timestamp
+  last_login : timestamp
+  activo : boolean
+  valoracion_promedio : float
+}
+
+class QUEDADA {
+  id : int <<PK>>
+  creador_id : int <<FK>>
+  titulo : string
+  descripcion : text
+  fecha_hora : timestamp
+  ubicacion_id : int <<FK>>
+  publica : boolean
+  max_participantes : int
+  estado : string
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+class UBICACION {
+  id : int <<PK>>
+  nombre : string
+  descripcion : text
+  latitud : decimal
+  longitud : decimal
+  tipo : string
+  edificio : string
+  planta : string
+  activa : boolean
+}
+
+class ASISTENCIA {
+  id : int <<PK>>
+  usuario_id : int <<FK>>
+  quedada_id : int <<FK>>
+  estado : string
+  confirmado_at : timestamp
+  cancelado_at : timestamp
+  notificado : boolean
+}
+
+class PRODUCTO {
+  id : int <<PK>>
+  vendedor_id : int <<FK>>
+  titulo : string
+  descripcion : text
+  precio : decimal
+  categoria_id : int <<FK>>
+  estado_producto : string
+  estado_venta : string
+  ubicacion_id : int <<FK>>
+  vistas : int
+  created_at : timestamp
+  updated_at : timestamp
+  vendido_at : timestamp
+}
+
+class PRODUCTO_AMAZON {
+  id : int <<PK>>
+  asin : string <<UK>>
+  titulo : string
+  url : string
+  precio_actual : decimal
+  imagen_url : string
+  caracteristicas : text
+  rating : decimal
+  num_reviews : int
+  ultima_actualizacion : timestamp
+}
+
+class HISTORICO_PRECIO {
+  id : int <<PK>>
+  producto_amazon_id : int <<FK>>
+  precio : decimal
+  fecha : timestamp
+  fuente : string
+}
+
+class ALERTA_PRECIO {
+  id : int <<PK>>
+  usuario_id : int <<FK>>
+  producto_amazon_id : int <<FK>>
+  precio_objetivo : decimal
+  activa : boolean
+  created_at : timestamp
+  disparada_at : timestamp
+  expira_at : timestamp
+}
+
+class CATEGORIA {
+  id : int <<PK>>
+  nombre : string <<UK>>
+  descripcion : text
+  icono : string
+  orden : int
+  activa : boolean
+}
+
+class FOTO {
+  id : int <<PK>>
+  producto_id : int <<FK>>
+  url : string
+  orden : int
+  tipo_almacenamiento : string
+  uploaded_at : timestamp
+}
+
+class CONVERSACION {
+  id : int <<PK>>
+  usuario1_id : int <<FK>>
+  usuario2_id : int <<FK>>
+  producto_id : int <<FK>>
+  created_at : timestamp
+  updated_at : timestamp
+  archivada : boolean
+}
+
+class MENSAJE {
+  id : int <<PK>>
+  conversacion_id : int <<FK>>
+  emisor_id : int <<FK>>
+  contenido : text
+  enviado_at : timestamp
+  leido : boolean
+  leido_at : timestamp
+}
+
+class VALORACION {
+  id : int <<PK>>
+  valorador_id : int <<FK>>
+  valorado_id : int <<FK>>
+  puntuacion : int
+  comentario : text
+  producto_id : int <<FK>>
+  created_at : timestamp
+}
+
+'====================
+' Relaciones (multiplicidades)
+'====================
+USUARIO "1" -- "0..*" QUEDADA : crea
+USUARIO "1" -- "0..*" ASISTENCIA : participa
+USUARIO "1" -- "0..*" PRODUCTO : publica
+USUARIO "1" -- "0..*" ALERTA_PRECIO : configura
+USUARIO "1" -- "0..*" MENSAJE : envia
+
+USUARIO "1" -- "0..*" VALORACION : valorador
+USUARIO "1" -- "0..*" VALORACION : valorado
+
+QUEDADA "1" -- "0..*" ASISTENCIA : tiene
+UBICACION "1" -- "0..*" QUEDADA : se_realiza_en
+
+CATEGORIA "1" -- "0..*" PRODUCTO : clasifica
+UBICACION "0..*" -- "0..1" PRODUCTO : entrega_en
+PRODUCTO "1" -- "0..*" FOTO : contiene
+PRODUCTO "1" -- "0..*" CONVERSACION : genera
+PRODUCTO "1" -- "0..*" VALORACION : asociada
+
+CONVERSACION "1" -- "0..*" MENSAJE : contiene
+USUARIO "1" -- "0..*" CONVERSACION : participante1
+USUARIO "1" -- "0..*" CONVERSACION : participante2
+
+PRODUCTO_AMAZON "1" -- "0..*" HISTORICO_PRECIO : registra
+PRODUCTO_AMAZON "1" -- "0..*" ALERTA_PRECIO : monitorea
+USUARIO "1" -- "0..*" ALERTA_PRECIO : crea
+
+@enduml

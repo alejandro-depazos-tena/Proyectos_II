@@ -3,176 +3,182 @@
 ## Diagrama Entidad-Relación
 
 ```mermaid
-erDiagram
-    USUARIO ||--o{ QUEDADA : crea
-    USUARIO ||--o{ ASISTENCIA : participa
-    USUARIO ||--o{ PRODUCTO : publica
-    USUARIO ||--o{ ALERTA_PRECIO : configura
-    USUARIO ||--o{ MENSAJE : envia
-    USUARIO ||--o{ VALORACION : recibe
-    
-    QUEDADA ||--o{ ASISTENCIA : tiene
-    QUEDADA ||--|| UBICACION : "se realiza en"
-    
-    PRODUCTO ||--o{ FOTO : contiene
-    PRODUCTO ||--|| CATEGORIA : pertenece
-    PRODUCTO ||--o{1 UBICACION : "se entrega en"
-    PRODUCTO ||--o{ MENSAJE : genera
-    
-    PRODUCTO_AMAZON ||--o{ HISTORICO_PRECIO : registra
-    PRODUCTO_AMAZON ||--o{ ALERTA_PRECIO : monitorea
-    
-    CONVERSACION ||--o{ MENSAJE : contiene
-    CONVERSACION }o--|| PRODUCTO : trata_sobre
-    CONVERSACION }o--|| USUARIO : participa1
-    CONVERSACION }o--|| USUARIO : participa2
+classDiagram
+direction LR
 
-    USUARIO {
-        int id PK
-        string email UK
-        string password
-        string nombre
-        string apellidos
-        string carrera
-        int curso
-        string foto_perfil
-        timestamp created_at
-        timestamp last_login
-        boolean activo
-        float valoracion_promedio
-    }
+class USUARIO {
+    +int id (PK)
+    +string email (UK)
+    +string password
+    +string nombre
+    +string apellidos
+    +string carrera
+    +int curso
+    +string foto_perfil
+    +timestamp created_at
+    +timestamp last_login
+    +boolean activo
+    +decimal valoracion_promedio
+}
 
-    QUEDADA {
-        int id PK
-        int creador_id FK
-        string titulo
-        text descripcion
-        timestamp fecha_hora
-        int ubicacion_id FK
-        boolean publica
-        int max_participantes
-        string estado
-        timestamp created_at
-        timestamp updated_at
-    }
+class QUEDADA {
+    +int id (PK)
+    +int creador_id (FK)
+    +string titulo
+    +text descripcion
+    +timestamp fecha_hora
+    +int ubicacion_id (FK)
+    +boolean publica
+    +int max_participantes
+    +enum estado
+    +timestamp created_at
+    +timestamp updated_at
+}
 
-    UBICACION {
-        int id PK
-        string nombre
-        text descripcion
-        decimal latitud
-        decimal longitud
-        string tipo
-        string edificio
-        string planta
-        boolean activa
-    }
+class UBICACION {
+    +int id (PK)
+    +string nombre
+    +text descripcion
+    +decimal latitud
+    +decimal longitud
+    +enum tipo
+    +string edificio
+    +string planta
+    +boolean activa
+}
 
-    ASISTENCIA {
-        int id PK
-        int usuario_id FK
-        int quedada_id FK
-        string estado
-        timestamp confirmado_at
-        timestamp cancelado_at
-        boolean notificado
-    }
+class ASISTENCIA {
+    +int id (PK)
+    +int usuario_id (FK)
+    +int quedada_id (FK)
+    +enum estado
+    +timestamp confirmado_at
+    +timestamp cancelado_at
+    +boolean notificado
+}
 
-    PRODUCTO {
-        int id PK
-        int vendedor_id FK
-        string titulo
-        text descripcion
-        decimal precio
-        int categoria_id FK
-        string estado_producto
-        string estado_venta
-        int ubicacion_id FK
-        int vistas
-        timestamp created_at
-        timestamp updated_at
-        timestamp vendido_at
-    }
+class PRODUCTO {
+    +int id (PK)
+    +int vendedor_id (FK)
+    +string titulo
+    +text descripcion
+    +decimal precio
+    +int categoria_id (FK)
+    +enum estado_producto
+    +enum estado_venta
+    +int ubicacion_id (FK, nullable)
+    +int vistas
+    +timestamp created_at
+    +timestamp updated_at
+    +timestamp vendido_at
+}
 
-    PRODUCTO_AMAZON {
-        int id PK
-        string asin UK
-        string titulo
-        string url
-        decimal precio_actual
-        string imagen_url
-        text caracteristicas
-        decimal rating
-        int num_reviews
-        timestamp ultima_actualizacion
-    }
+class CATEGORIA {
+    +int id (PK)
+    +string nombre (UK)
+    +text descripcion
+    +string icono
+    +int orden
+    +boolean activa
+}
 
-    HISTORICO_PRECIO {
-        int id PK
-        int producto_amazon_id FK
-        decimal precio
-        timestamp fecha
-        string fuente
-    }
+class FOTO {
+    +int id (PK)
+    +int producto_id (FK)
+    +string url
+    +int orden
+    +string tipo_almacenamiento
+    +timestamp uploaded_at
+}
 
-    ALERTA_PRECIO {
-        int id PK
-        int usuario_id FK
-        int producto_amazon_id FK
-        decimal precio_objetivo
-        boolean activa
-        timestamp created_at
-        timestamp disparada_at
-        timestamp expira_at
-    }
+class CONVERSACION {
+    +int id (PK)
+    +int usuario1_id (FK)
+    +int usuario2_id (FK)
+    +int producto_id (FK)
+    +timestamp created_at
+    +timestamp updated_at
+    +boolean archivada
+}
 
-    CATEGORIA {
-        int id PK
-        string nombre UK
-        text descripcion
-        string icono
-        int orden
-        boolean activa
-    }
+class MENSAJE {
+    +int id (PK)
+    +int conversacion_id (FK)
+    +int emisor_id (FK)
+    +text contenido
+    +timestamp enviado_at
+    +boolean leido
+    +timestamp leido_at
+}
 
-    FOTO {
-        int id PK
-        int producto_id FK
-        string url
-        int orden
-        string tipo_almacenamiento
-        timestamp uploaded_at
-    }
+class VALORACION {
+    +int id (PK)
+    +int valorador_id (FK)
+    +int valorado_id (FK)
+    +int puntuacion
+    +text comentario
+    +int producto_id (FK)
+    +timestamp created_at
+}
 
-    CONVERSACION {
-        int id PK
-        int usuario1_id FK
-        int usuario2_id FK
-        int producto_id FK
-        timestamp created_at
-        timestamp updated_at
-        boolean archivada
-    }
+class PRODUCTO_AMAZON {
+    +int id (PK)
+    +string asin (UK)
+    +string titulo
+    +string url
+    +decimal precio_actual
+    +string imagen_url
+    +text caracteristicas
+    +decimal rating
+    +int num_reviews
+    +timestamp ultima_actualizacion
+}
 
-    MENSAJE {
-        int id PK
-        int conversacion_id FK
-        int emisor_id FK
-        text contenido
-        timestamp enviado_at
-        boolean leido
-        timestamp leido_at
-    }
+class HISTORICO_PRECIO {
+    +int id (PK)
+    +int producto_amazon_id (FK)
+    +decimal precio
+    +timestamp fecha
+    +string fuente
+}
 
-    VALORACION {
-        int id PK
-        int valorador_id FK
-        int valorado_id FK
-        int puntuacion
-        text comentario
-        int producto_id FK
-        timestamp created_at
-    }
+class ALERTA_PRECIO {
+    +int id (PK)
+    +int usuario_id (FK)
+    +int producto_amazon_id (FK)
+    +decimal precio_objetivo
+    +boolean activa
+    +timestamp created_at
+    +timestamp disparada_at
+    +timestamp expira_at
+}
+
+%% Relaciones
+USUARIO "1" o-- "0..*" QUEDADA : crea
+UBICACION "1" o-- "0..*" QUEDADA : se_realiza_en
+
+QUEDADA "1" *-- "0..*" ASISTENCIA : tiene
+USUARIO "1" o-- "0..*" ASISTENCIA : participa
+
+USUARIO "1" o-- "0..*" PRODUCTO : publica
+CATEGORIA "1" o-- "0..*" PRODUCTO : clasifica
+UBICACION "0..1" o-- "0..*" PRODUCTO : entrega_en
+PRODUCTO "1" *-- "0..*" FOTO : contiene
+
+PRODUCTO "1" o-- "0..*" CONVERSACION : genera
+CONVERSACION "1" *-- "0..*" MENSAJE : contiene
+USUARIO "1" o-- "0..*" MENSAJE : envia
+
+USUARIO "1" o-- "0..*" CONVERSACION : participa1
+USUARIO "1" o-- "0..*" CONVERSACION : participa2
+
+USUARIO "1" o-- "0..*" VALORACION : valorador
+USUARIO "1" o-- "0..*" VALORACION : valorado
+PRODUCTO "1" o-- "0..*" VALORACION : recibe
+
+PRODUCTO_AMAZON "1" *-- "0..*" HISTORICO_PRECIO : registra
+PRODUCTO_AMAZON "1" o-- "0..*" ALERTA_PRECIO : monitorea
+USUARIO "1" o-- "0..*" ALERTA_PRECIO : configura
 ```
 
 ---
