@@ -1,0 +1,226 @@
+ID,Work Item Type,Title,Description,Acceptance Criteria,Assigned To,State,Priority,Sprint,Epic,Story Points,Tags
+HU-001,User Story,Registro de usuario con correo universitario,"Como estudiante de la UFV
+Quiero registrarme usando mi correo universitario
+Para acceder a un entorno seguro de la comunidad","- Solo acepta correos @ufv.es o @alumnos.ufv.es
+- Valida contraseña (mín 8 chars, mayúscula, número, especial)
+- Envía email de verificación
+- Muestra mensaje de confirmación",Gonzalo de Lorenzo Vaquero,New,1,Sprint 1,Autenticación,8,MUST-BE
+HU-002,User Story,Verificación de correo electrónico,"Como usuario registrado
+Quiero verificar mi correo mediante un enlace
+Para activar mi cuenta","- Email con enlace único válido 24h
+- Al hacer clic activa la cuenta
+- Permite reenviar si expira
+- Redirige a login tras verificar",Gonzalo de Lorenzo Vaquero,New,1,Sprint 1,Autenticación,5,MUST-BE
+HU-003,User Story,Inicio de sesión,"Como usuario verificado
+Quiero iniciar sesión con correo y contraseña
+Para acceder a las funcionalidades","- Valida credenciales correctamente
+- Genera token de sesión
+- Bloquea tras 5 intentos fallidos (15 min)
+- Impide login sin verificar email",Gonzalo de Lorenzo Vaquero,New,1,Sprint 1,Autenticación,8,MUST-BE
+HU-004,User Story,Recuperación de contraseña,"Como usuario que olvidó su contraseña
+Quiero solicitar el restablecimiento
+Para recuperar el acceso","- Envía email con enlace temporal (30 min)
+- Nueva contraseña cumple requisitos
+- Actualiza contraseña exitosamente
+- Permite login con nueva contraseña",Gonzalo de Lorenzo Vaquero,New,2,Sprint 1,Autenticación,5,SHOULD
+HU-005,User Story,Ver y editar perfil,"Como usuario autenticado
+Quiero ver y editar mi información
+Para mantener mis datos actualizados","- Muestra: nombre, correo, teléfono, foto, estadísticas
+- Permite editar: nombre, teléfono, foto, biografía
+- Valida tamaño de foto (máx 5MB)
+- Guarda cambios correctamente",Alejandro de Pazos Tena,New,2,Sprint 1,Gestión Usuario,5,SHOULD
+HU-006,User Story,Cerrar sesión,"Como usuario autenticado
+Quiero cerrar sesión de forma segura
+Para proteger mi cuenta","- Invalida token de sesión
+- Redirige a página de login
+- Impide acceso a páginas protegidas tras cerrar",Gonzalo de Lorenzo Vaquero,New,1,Sprint 1,Autenticación,3,MUST-BE
+HU-009,User Story,Publicar un nuevo producto,"Como usuario autenticado
+Quiero publicar objetos para prestar/alquilar/vender
+Para ponerlos a disposición de otros estudiantes","- Formulario con: título, descripción, categoría, tipo, precio (opcional), estado, fotos (máx 5)
+- Valida campos obligatorios
+- Guarda con estado 'Disponible'
+- Muestra confirmación y redirige a detalle",Alejandro de Pazos Tena,New,1,Sprint 2,Gestión Productos,13,MUST-BE
+HU-010,User Story,Ver detalle de un producto,"Como usuario autenticado
+Quiero ver todos los detalles de un producto
+Para decidir si me interesa solicitarlo","- Muestra: galería fotos, título, descripción, categoría, tipo, precio, estado, info propietario
+- Muestra botón 'Solicitar' si está disponible
+- Si es mío: muestra 'Editar' y 'Eliminar'
+- Indica disponibilidad claramente",Alejandro de Pazos Tena,New,1,Sprint 2,Gestión Productos,8,MUST-BE
+HU-011,User Story,Editar producto publicado,"Como propietario de un producto
+Quiero editar la información
+Para actualizar detalles o cambiar disponibilidad","- Permite modificar todos los campos excepto tipo de transacción (si hay solicitudes)
+- Actualiza información inmediatamente
+- Permite agregar/eliminar fotos
+- Opción marcar 'Temporalmente no disponible'",Alejandro de Pazos Tena,New,2,Sprint 2,Gestión Productos,5,SHOULD
+HU-012,User Story,Eliminar producto publicado,"Como propietario de un producto
+Quiero eliminar mi publicación
+Para retirar el objeto de la plataforma","- Verifica que no hay transacciones activas
+- Muestra diálogo confirmación
+- Elimina permanentemente si confirma
+- Rechaza si hay transacción activa",Alejandro de Pazos Tena,New,2,Sprint 2,Gestión Productos,3,SHOULD
+HU-013,User Story,Ver mis productos publicados,"Como usuario que ha publicado objetos
+Quiero ver todos mis productos en un lugar
+Para gestionar mis publicaciones","- Organiza por estado: Disponibles, Prestados, No disponibles, Vendidos
+- Muestra miniatura, título, categoría, estado, solicitudes
+- Permite filtrar y ordenar
+- Acceso rápido a editar",Alejandro de Pazos Tena,New,2,Sprint 2,Gestión Productos,5,SHOULD
+HU-015,User Story,Categorización de productos,"Como usuario que publica productos
+Quiero asignar categorías a mis objetos
+Para que otros los encuentren fácilmente","- Lista predefinida: Electrónica, Libros, Material Académico, Deportes, Hogar, Ropa, Otros
+- Selección obligatoria al publicar
+- Permite cambiar al editar
+- Usa categorías para filtrado",Gonzalo de Lorenzo Vaquero,New,1,Sprint 2,Gestión Productos,3,MUST-BE
+HU-016,User Story,Buscar productos por texto,"Como usuario autenticado
+Quiero buscar productos mediante texto libre
+Para encontrar objetos específicos","- Barra búsqueda visible en página principal
+- Busca en título, descripción y categoría
+- Muestra resultados en cuadrícula con foto, título, tipo, precio
+- Mensaje claro si no hay resultados",Alejandro de Pazos Tena,New,1,Sprint 2,Búsqueda,8,MUST-BE
+HU-017,User Story,Filtrar productos por categoría y tipo,"Como usuario que busca productos
+Quiero aplicar filtros
+Para refinar mis resultados","- Panel lateral con filtros: Categorías (múltiples), Tipo transacción, Rango precio, Disponibilidad
+- Aplica filtros en tiempo real
+- Muestra número de resultados
+- Botón 'Limpiar filtros'",Alejandro de Pazos Tena,New,2,Sprint 2,Búsqueda,8,SHOULD
+HU-019,User Story,Solicitar un producto,"Como usuario interesado en un producto
+Quiero enviar una solicitud al propietario
+Para iniciar el proceso de préstamo/alquiler/compra","- Formulario con: fechas (si aplica), mensaje opcional (máx 300 chars)
+- Envía solicitud al propietario
+- Muestra confirmación
+- Aparece en 'Mis solicitudes' con estado 'Pendiente'",Gonzalo de Lorenzo Vaquero,New,1,Sprint 3,Transacciones,13,MUST-BE
+HU-020,User Story,Ver mis solicitudes enviadas,"Como usuario que ha enviado solicitudes
+Quiero ver el estado de todas
+Para hacer seguimiento","- Lista con: foto producto, título, propietario, fechas, estado, fecha solicitud
+- Filtra por estado
+- Permite cancelar pendientes
+- No permite cancelar aceptadas",Gonzalo de Lorenzo Vaquero,New,1,Sprint 3,Transacciones,5,MUST-BE
+HU-021,User Story,Gestionar solicitudes recibidas,"Como propietario de un producto
+Quiero revisar y gestionar solicitudes
+Para decidir a quién prestar/alquilar/vender","- Muestra contador en producto
+- Lista con: solicitante, fechas, mensaje
+- Permite ver perfil del solicitante
+- Opciones 'Aceptar' o 'Rechazar' con mensaje opcional
+- Rechaza automáticamente las demás al aceptar una",Gonzalo de Lorenzo Vaquero,New,1,Sprint 3,Transacciones,13,MUST-BE
+HU-022,User Story,Confirmar inicio de transacción,"Como usuario en una solicitud aceptada
+Quiero confirmar que se realizó la entrega
+Para registrar el inicio formal","- Estado inicial 'Pendiente de entrega'
+- Ambas partes deben confirmar entrega
+- Solo pasa a 'En curso' cuando ambos confirman
+- Opción 'Reportar problema' si no ocurre",Gonzalo de Lorenzo Vaquero,New,1,Sprint 3,Transacciones,8,MUST-BE
+HU-023,User Story,Confirmar finalización de transacción,"Como usuario en una transacción activa
+Quiero confirmar devolución/compra completada
+Para cerrar formalmente","- Recordatorio automático antes de vencimiento
+- Ambos confirman devolución (préstamo/alquiler)
+- Comprador confirma recepción (venta)
+- Producto vuelve a 'Disponible' o se marca 'Vendido'",Gonzalo de Lorenzo Vaquero,New,1,Sprint 3,Transacciones,8,MUST-BE
+HU-024,User Story,Ver mis transacciones activas,"Como usuario con transacciones en curso
+Quiero verlas todas
+Para hacer seguimiento","- Pestañas: 'Prestado a mí' y 'Prestado por mí'
+- Muestra: foto, título, otra persona, fechas, días restantes, estado
+- Botones: 'Contactar' y 'Confirmar devolución'
+- Opción 'Enviar recordatorio'",Gonzalo de Lorenzo Vaquero,New,2,Sprint 3,Transacciones,5,SHOULD
+HU-025,User Story,Enviar mensaje a propietario,"Como usuario interesado en un producto
+Quiero enviar mensaje al propietario
+Para hacer preguntas antes de solicitar","- Botón 'Contactar' en detalle de producto
+- Formulario simple (máx 500 chars)
+- Envía mensaje
+- Propietario recibe notificación",Alejandro de Pazos Tena,New,2,Sprint 3,Mensajería,5,SHOULD
+HU-026,User Story,Ver bandeja de mensajes,"Como usuario de la plataforma
+Quiero acceder a todos mis mensajes
+Para gestionar conversaciones","- Lista de conversaciones (por producto)
+- Badge numérico en no leídos
+- Muestra: foto producto, otro usuario, último mensaje, fecha
+- Marca como leído al abrir",Alejandro de Pazos Tena,New,2,Sprint 3,Mensajería,8,SHOULD
+HU-027,User Story,Notificaciones en la aplicación,"Como usuario
+Quiero recibir notificaciones de eventos importantes
+Para estar al tanto de solicitudes y mensajes","- Eventos: nueva solicitud, solicitud aceptada/rechazada, nuevo mensaje, recordatorio devolución
+- Icono campana con badge numérico
+- Lista de notificaciones con enlace a acción
+- Marca como leídas al hacer clic",Alejandro de Pazos Tena,New,2,Sprint 3,Mensajería,8,SHOULD
+HU-029,User Story,Ver historial completo de transacciones,"Como usuario
+Quiero acceder al historial de transacciones completadas
+Para llevar un registro","- Lista cronológica de transacciones completadas
+- Filtros: tipo, rango fechas, categoría
+- Muestra: producto, otra persona, fechas, tipo, resultado
+- Búsqueda en historial",Alejandro de Pazos Tena,New,2,Sprint 4,Historial,5,SHOULD
+HU-030,User Story,Ver estadísticas personales,"Como usuario activo
+Quiero ver estadísticas de mi participación
+Para visualizar mi contribución","- Métricas: objetos prestados, tomados prestados, vendidos, comprados, ahorro estimado
+- Presentación visual con gráficos
+- Desglose por categoría al hacer clic
+- Evolución temporal",Alejandro de Pazos Tena,New,3,Sprint 4,Historial,5,COULD
+HU-031,User Story,Reportar publicación inapropiada,"Como usuario que encuentra contenido inapropiado
+Quiero reportar una publicación
+Para mantener calidad y seguridad","- Opción 'Reportar' en detalle de producto
+- Motivos predefinidos: Contenido inapropiado, Spam, Info falsa, Precio abusivo, Objeto prohibido, Otro
+- Descripción adicional opcional
+- Previene reportes duplicados",Jesús de Andrés de las Heras,New,2,Sprint 4,Moderación,3,SHOULD
+HU-032,User Story,Reportar comportamiento de usuario,"Como usuario que experimenta mal comportamiento
+Quiero reportar conducta
+Para contribuir a entorno seguro","- Desde perfil o transacción: opción 'Reportar usuario'
+- Motivos: No devolvió, Hostigamiento, Lenguaje ofensivo, Suplantación, Otro
+- Vincula a transacción específica si aplica
+- Registra en sistema",Jesús de Andrés de las Heras,New,2,Sprint 4,Moderación,3,SHOULD
+HU-033,User Story,Navegación completa por teclado,"Como usuario que no puede usar ratón
+Quiero navegar solo con teclado
+Para acceder a todas las funcionalidades","- Todos los elementos accesibles con Tab
+- Orden lógico de tabulación
+- Indicador visual de foco claro
+- Atajos: Alt+B (buscar), Alt+P (publicar), Esc (cerrar)
+- Enter/Espacio activan elementos",Nicolás Sanchidrián Infante,New,1,Sprint 4,Accesibilidad,8,MUST-BE
+HU-034,User Story,Textos alternativos para imágenes,"Como usuario con lector de pantalla
+Quiero que imágenes tengan textos descriptivos
+Para comprender contenido visual","- Todas las imágenes tienen alt descriptivo
+- Auto-genera alt basándose en título/categoría
+- Imágenes decorativas: alt=''
+- Iconos con aria-label",Nicolás Sanchidrián Infante,New,1,Sprint 4,Accesibilidad,5,MUST-BE
+HU-035,User Story,Contraste de colores adecuado,"Como usuario con baja visión
+Quiero contraste suficiente en textos
+Para leer sin dificultad","- Ratio mínimo 4.5:1 para texto normal
+- Ratio mínimo 3:1 para texto grande
+- Estados (error, éxito) no solo con color
+- Botones con contraste suficiente",Nicolás Sanchidrián Infante,New,1,Sprint 4,Accesibilidad,5,MUST-BE
+HU-036,User Story,Etiquetas y roles ARIA apropiados,"Como usuario de tecnologías asistivas
+Quiero elementos con roles semánticos correctos
+Para entender estructura y función","- Elementos HTML semánticos (<button>, <nav>, <main>)
+- Roles ARIA en divs interactivos
+- Formularios con <label> asociados
+- Landmarks para navegación
+- Mensajes dinámicos con aria-live",Nicolás Sanchidrián Infante,New,2,Sprint 4,Accesibilidad,5,SHOULD
+HU-037,User Story,Tamaños de fuente y zoom responsive,"Como usuario con baja visión
+Quiero hacer zoom hasta 200%
+Para leer cómodamente","- Soporta zoom hasta 200% sin scroll horizontal
+- Unidades relativas (rem, em)
+- Tamaño base mínimo 16px
+- Controles táctiles mín 44x44px",Nicolás Sanchidrián Infante,New,2,Sprint 4,Accesibilidad,5,SHOULD
+T-001,Task,Inicializar proyecto Spring Boot con dependencias base,Configurar Spring Boot con Maven incluyendo: Spring Web; Spring Data JPA; H2 Database; Spring Security; Lombok; Validation,Proyecto compila y arranca correctamente en puerto 8080,Gonzalo de Lorenzo Vaquero,To Do,1,Sprint 1,Autenticación,,TECHNICAL
+T-002,Task,Configurar perfiles de entorno (dev/test),Crear application-dev.properties y application-test.properties con configuraciones específicas,Perfiles funcionan correctamente al activarlos,Gonzalo de Lorenzo Vaquero,To Do,1,Sprint 1,Autenticación,,TECHNICAL
+T-003,Task,Crear endpoint de health check,Implementar /api/health que retorne status 200 y timestamp,Endpoint responde correctamente,Gonzalo de Lorenzo Vaquero,To Do,1,Sprint 1,Autenticación,,TECHNICAL
+T-004,Task,Definir estructura de paquetes backend,Crear paquetes: auth; config; product; common (exceptions; dto; util),Estructura clara y consistente,Gonzalo de Lorenzo Vaquero,To Do,1,Sprint 1,Autenticación,,TECHNICAL
+T-005,Task,Crear entidad User con JPA,Atributos: id; email; password (hash); nombre; telefono; fotoPerfil; biografia; fechaRegistro; verificado,Entidad mapea correctamente a BD,Gonzalo de Lorenzo Vaquero,To Do,1,Sprint 1,Autenticación,,TECHNICAL
+T-006,Task,Implementar UserRepository con JPA,Métodos: findByEmail; existsByEmail; findByEmailAndVerificadoTrue,Repository funciona con BD H2,Gonzalo de Lorenzo Vaquero,To Do,1,Sprint 1,Autenticación,,TECHNICAL
+T-007,Task,Crear AuthService con lógica de registro,Métodos: registro; validarCorreoUFV; hashPassword; enviarEmailVerificacion,Registro funcional con validaciones,Gonzalo de Lorenzo Vaquero,To Do,1,Sprint 1,Autenticación,,TECHNICAL
+T-008,Task,Implementar AuthController endpoints registro y login,POST /api/auth/register; POST /api/auth/login; GET /api/auth/verify,Endpoints responden correctamente,Gonzalo de Lorenzo Vaquero,To Do,1,Sprint 1,Autenticación,,TECHNICAL
+T-009,Task,Configurar Spring Security con JWT,Generar y validar tokens JWT; Configurar filtros de seguridad,Autenticación con JWT funcional,Gonzalo de Lorenzo Vaquero,To Do,1,Sprint 1,Autenticación,,TECHNICAL
+T-010,Task,Implementar servicio de envío de emails,Usar JavaMailSender para emails de verificación y recuperación,Emails se envían correctamente,Gonzalo de Lorenzo Vaquero,To Do,1,Sprint 1,Autenticación,,TECHNICAL
+T-011,Task,Tests unitarios para UserService (TDD),Cubrir: registro válido/inválido; validación correo; hash password,Cobertura >80% en UserService,Jesús de Andrés de las Heras,To Do,1,Sprint 1,Autenticación,,TEST
+T-012,Task,Tests de integración para AuthController (MockMvc),Cubrir: registro exitoso; login; errores de validación,Tests pasan correctamente,Jesús de Andrés de las Heras,To Do,1,Sprint 1,Autenticación,,TEST
+T-013,Task,Inicializar proyecto Astro,npm create astro@latest; Configurar TypeScript; Instalar dependencias,Proyecto Astro arranca en desarrollo,Alejandro de Pazos Tena,To Do,1,Sprint 1,Frontend,,TECHNICAL
+T-014,Task,Crear layout principal (Layout.astro),Header con logo y navegación; Main content area; Footer,Layout reutilizable funcional,Alejandro de Pazos Tena,To Do,1,Sprint 1,Frontend,,TECHNICAL
+T-015,Task,Implementar página Home (index.astro),Hero section; Explicación de UFV Share; CTA registrarse,Página home atractiva y funcional,Alejandro de Pazos Tena,To Do,1,Sprint 1,Frontend,,TECHNICAL
+T-016,Task,Crear formulario de registro (auth.astro),Campos: correo; contraseña; confirmar contraseña; nombre; Validación frontend,Formulario valida antes de enviar,Alejandro de Pazos Tena,To Do,1,Sprint 1,Frontend,,TECHNICAL
+T-017,Task,Implementar página de login,Campos: correo; contraseña; Links: Olvidé contraseña; Registrarse,Login funcional con llamada a API,Alejandro de Pazos Tena,To Do,1,Sprint 1,Frontend,,TECHNICAL
+T-018,Task,Configurar estilos globales CSS,Paleta colores UFV; Tipografía; Estilos botones; Variables CSS,Branding consistente en toda la app,Alejandro de Pazos Tena,To Do,1,Sprint 1,Frontend,,TECHNICAL
+T-019,Task,Crear servicio API client (authService.ts),Métodos: register; login; verifyEmail; recoverPassword,Cliente API reutilizable,Alejandro de Pazos Tena,To Do,1,Sprint 1,Frontend,,TECHNICAL
+T-020,Task,Implementar gestión de tokens en frontend,Guardar JWT en localStorage; Interceptor para añadir token; Logout limpia token,Autenticación persistente funcional,Alejandro de Pazos Tena,To Do,1,Sprint 1,Frontend,,TECHNICAL
+T-021,Task,Configurar CORS en backend,Permitir origen del frontend Astro; Métodos: GET; POST; PUT; DELETE; Headers necesarios,Sin errores CORS en desarrollo,Gonzalo de Lorenzo Vaquero,To Do,1,Sprint 1,Autenticación,,TECHNICAL
+T-022,Task,Validación manual de navegación por teclado,Verificar Tab recorre todos los elementos; Focus visible; Enter activa botones,Navegación teclado funcional,Nicolás Sanchidrián Infante,To Do,1,Sprint 1,Accesibilidad,,TEST
+T-023,Task,Validación de contraste con herramienta,Usar WebAIM Contrast Checker en todos los textos y botones,Todos pasan ratio 4.5:1,Nicolás Sanchidrián Infante,To Do,1,Sprint 1,Accesibilidad,,TEST
+T-024,Task,Crear checklist de accesibilidad WCAG,Documento con criterios AA a cumplir por sprint,Checklist completa y compartida,Nicolás Sanchidrián Infante,To Do,1,Sprint 1,Accesibilidad,,DOCUMENTATION
+T-025,Task,Documentar arquitectura del sistema,Diagrama de capas; Tecnologías usadas; Estructura de paquetes,Documento en /docs/arquitectura.md,Jesús de Andrés de las Heras,To Do,1,Sprint 1,Documentación,,DOCUMENTATION
+T-026,Task,Documentar estrategia de testing,Enfoque TDD; Herramientas (JUnit; MockMvc); Cobertura objetivo,Documento en /docs/testing.md,Jesús de Andrés de las Heras,To Do,1,Sprint 1,Documentación,,DOCUMENTATION
+T-027,Task,Sprint Planning 1,"Estimar historias; Asignar tareas; Definir DoD del sprint",Planning completado y documentado,Mario Hernández Santos,To Do,1,Sprint 1,Gestión,,SCRUM
+T-028,Task,Daily Standups Sprint 1,Reuniones diarias 15min: qué hice; qué haré; impedimentos,Seguimiento diario realizado,Mario Hernández Santos,To Do,1,Sprint 1,Gestión,,SCRUM
+T-029,Task,Sprint Review 1,Demo de funcionalidades completadas; Feedback de stakeholders,Review completada,Mario Hernández Santos,To Do,1,Sprint 1,Gestión,,SCRUM
+T-030,Task,Sprint Retrospective 1,Analizar: qué fue bien; qué mejorar; acciones para Sprint 2,Retrospectiva documentada,Mario Hernández Santos,To Do,1,Sprint 1,Gestión,,SCRUM
+T-031,Task,Actualizar backlog en Azure DevOps,Refinar historias Sprint 2; Actualizar estados; Burndown chart,Backlog actualizado,Mario Hernández Santos,To Do,1,Sprint 1,Gestión,,SCRUM
