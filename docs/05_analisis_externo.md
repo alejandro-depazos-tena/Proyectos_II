@@ -222,6 +222,64 @@
 
 ---
 
+## Diagrama UML (Contexto Externo)
+
+Diagrama UML de **contexto externo**: muestra los actores principales (stakeholders) y cómo interactúan con el sistema **UFV Shares** y con APIs externas.
+
+```mermaid
+classDiagram
+direction LR
+
+class EstudianteUFV
+class ProfesorEvaluador
+class UniversidadUFV
+class AdministracionCampus
+class AmazonProductAdvertisingAPI
+class KeepaAPI
+class GoogleMapsAPI
+
+class UFVShares {
+  +Autenticación
+  +Marketplace (productos)
+  +Quedadas (eventos)
+  +Chat (mensajería)
+  +Comparador Amazon
+  +Alertas de precio
+  +Mapa del campus
+  +Reportes / Moderación
+}
+
+<<actor>> EstudianteUFV
+<<actor>> ProfesorEvaluador
+<<actor>> UniversidadUFV
+<<actor>> AdministracionCampus
+<<external>> AmazonProductAdvertisingAPI
+<<external>> KeepaAPI
+<<external>> GoogleMapsAPI
+<<system>> UFVShares
+
+%% Interacciones de usuario final
+EstudianteUFV --> UFVShares : registrarse / iniciar sesión
+EstudianteUFV --> UFVShares : publicar / gestionar productos
+EstudianteUFV --> UFVShares : crear / unirse a quedadas
+EstudianteUFV --> UFVShares : chatear por producto
+EstudianteUFV --> UFVShares : consultar comparador Amazon
+EstudianteUFV --> UFVShares : configurar alertas de precio
+EstudianteUFV --> UFVShares : ver ubicaciones en mapa
+
+%% Stakeholders institucionales
+ProfesorEvaluador --> UFVShares : revisar entregas / métricas / demos
+UniversidadUFV --> UFVShares : políticas RGPD / marca / normas
+AdministracionCampus --> UFVShares : restricciones de uso / incidencias
+
+%% Dependencias externas (APIs)
+UFVShares --> AmazonProductAdvertisingAPI : consulta de productos y precio
+UFVShares --> KeepaAPI : histórico de precios
+UFVShares --> GoogleMapsAPI : geocodificación / mapa
+```
+
+---
+
 ## Análisis de Competidores
 
 ### Competencia Directa
