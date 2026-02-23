@@ -77,3 +77,39 @@ CREATE TABLE transaccion (
         ON UPDATE CASCADE
 )
 
+-- 5) Tabla REPORTE
+CREATE TABLE reporte (
+    id_reporte           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    tipo_recurso         ENUM('USUARIO','PRODUCTO') NOT NULL,
+    id_usuario_reportante BIGINT UNSIGNED NOT NULL,
+    id_usuario_reportado  BIGINT UNSIGNED,
+    id_producto_reportado BIGINT UNSIGNED,
+    motivo               VARCHAR(100) NOT NULL,
+    comentario           TEXT,
+    fecha_reporte        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    estado_reporte       ENUM('ABIERTO','EN_REVISION','CERRADO') NOT NULL DEFAULT 'ABIERTO',
+
+    CONSTRAINT fk_reporte_reportante
+        FOREIGN KEY (id_usuario_reportante)
+        REFERENCES usuario(id_usuario)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_reporte_usuario
+        FOREIGN KEY (id_usuario_reportado)
+        REFERENCES usuario(id_usuario)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_reporte_producto
+        FOREIGN KEY (id_producto_reportado)
+        REFERENCES producto(id_producto)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+
+    INDEX idx_reporte_reportante (id_usuario_reportante),
+    INDEX idx_reporte_usuario (id_usuario_reportado),
+    INDEX idx_reporte_producto (id_producto_reportado)
+) 
+
+
