@@ -1,4 +1,4 @@
-package com.ufvshares.backend.reporteProducto;
+package com.ufvshares.backend.reporteproducto;
 
 import java.time.LocalDateTime;
 

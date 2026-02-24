@@ -36,8 +36,9 @@ import '../styles/site.css';
                 Filtrar
                 <select id="filter">
                   <option value="">Todos</option>
-                  <option value="sale">Venta</option>
-                  <option value="rent">Alquiler</option>
+                  <option value="VENTA">Venta</option>
+                  <option value="ALQUILER">Alquiler</option>
+                  <option value="PRESTAMO">Préstamo</option>
                 </select>
               </label>
               <button class="button" id="refresh">Actualizar</button>
@@ -89,7 +90,7 @@ import '../styles/site.css';
       const email = localStorage.getItem('ufvshares_email');
 
       if (!token) {
-        window.location.href = `/auth?mode=login&next=${encodeURIComponent('/app')}`;
+        window.location.href = `/login?next=${encodeURIComponent('/app')}`;
       }
 
       document.getElementById('whoami').textContent = email ? `Sesión: ${email}` : '';
@@ -99,7 +100,9 @@ import '../styles/site.css';
       const filterEl = document.getElementById('filter');
 
       function fmtType(t) {
-        return t === 'RENT' ? 'Alquiler' : 'Venta';
+        if (t === 'ALQUILER') return 'Alquiler';
+        if (t === 'PRESTAMO') return 'Préstamo';
+        return 'Venta';
       }
 
       function render(products) {
@@ -115,15 +118,15 @@ import '../styles/site.css';
           card.innerHTML = `
             <div class="meta">
               <div>
-                <div class="product-title"><strong>${p.title}</strong></div>
-                <div class="small muted">Publicado por ${p.ownerEmail}</div>
+                <div class="product-title"><strong>${p.titulo}</strong></div>
+                <div class="small muted">Publicado por usuario #${p.idPropietario}</div>
               </div>
               <div class="row">
-                <span class="chip">${fmtType(p.type)}</span>
-                <span class="chip">€${Number(p.price).toFixed(2)}</span>
+                <span class="chip">${fmtType(p.tipoTransaccion)}</span>
+                <span class="chip">${p.precio == null ? 'Sin precio' : `€${Number(p.precio).toFixed(2)}`}</span>
               </div>
             </div>
-            <div class="muted">${p.description}</div>
+            <div class="muted">${p.descripcion}</div>
           `;
           listEl.appendChild(card);
         }
@@ -131,9 +134,8 @@ import '../styles/site.css';
 
       async function load() {
         listErrorEl.textContent = '';
-        const type = filterEl.value;
-        const url = new URL(`${API_BASE}/products`);
-        if (type) url.searchParams.set('type', type);
+        const selectedType = filterEl.value;
+        const url = new URL(`${API_BASE}/productos`);
 
         try {
           const res = await fetch(url);
@@ -142,7 +144,9 @@ import '../styles/site.css';
             listErrorEl.textContent = 'No se pudieron cargar los productos';
             return;
           }
-          render(Array.isArray(body) ? body : []);
+          const products = Array.isArray(body) ? body : [];
+          const filtered = selectedType ? products.filter((product) => product.tipoTransaccion === selectedType) : products;
+          render(filtered);
         } catch (e) {
           listErrorEl.textContent = 'No se pudo conectar con el backend';
         }
@@ -187,7 +191,7 @@ import '../styles/site.css';
             if (body?.error === 'INVALID_TOKEN' || body?.error === 'MISSING_TOKEN') {
               localStorage.removeItem('ufvshares_token');
               localStorage.removeItem('ufvshares_email');
-              window.location.href = `/auth?mode=login&next=${encodeURIComponent('/app')}`;
+              window.location.href = `/login?next=${encodeURIComponent('/app')}`;
               return;
             }
             publishMsg.className = 'error';

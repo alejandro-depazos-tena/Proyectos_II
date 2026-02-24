@@ -1,0 +1,241 @@
+{
+  "usuario": [
+    {
+      "id_usuario": 1,
+      "nombre": "Lucia",
+      "apellidos": "Martinez Gomez",
+      "correo": "lucia.martinez@ufv.es",
+      "telefono": "600111001",
+      "dni": "00000001A",
+      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+    },
+    {
+      "id_usuario": 2,
+      "nombre": "Pablo",
+      "apellidos": "Sanchez Ruiz",
+      "correo": "pablo.sanchez@ufv.es",
+      "telefono": "600111002",
+      "dni": "00000002B",
+      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+    },
+    {
+      "id_usuario": 3,
+      "nombre": "Marta",
+      "apellidos": "Lopez Diaz",
+      "correo": "marta.lopez@ufv.es",
+      "telefono": "600111003",
+      "dni": "00000003C",
+      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+    },
+    {
+      "id_usuario": 4,
+      "nombre": "Carlos",
+      "apellidos": "Fernandez Gil",
+      "correo": "carlos.fernandez@ufv.es",
+      "telefono": "600111004",
+      "dni": "00000004D",
+      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+    },
+    {
+      "id_usuario": 5,
+      "nombre": "Elena",
+      "apellidos": "Navarro Perez",
+      "correo": "elena.navarro@ufv.es",
+      "telefono": "600111005",
+      "dni": "00000005E",
+      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+    },
+    {
+      "id_usuario": 6,
+      "nombre": "Javier",
+      "apellidos": "Moreno Torres",
+      "correo": "javier.moreno@ufv.es",
+      "telefono": "600111006",
+      "dni": "00000006F",
+      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+    },
+    {
+      "id_usuario": 7,
+      "nombre": "Andrea",
+      "apellidos": "Romero Vega",
+      "correo": "andrea.romero@ufv.es",
+      "telefono": "600111007",
+      "dni": "00000007G",
+      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+    },
+    {
+      "id_usuario": 8,
+      "nombre": "Diego",
+      "apellidos": "Hernandez Leon",
+      "correo": "diego.hernandez@ufv.es",
+      "telefono": "600111008",
+      "dni": "00000008H",
+      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+    },
+    {
+      "id_usuario": 9,
+      "nombre": "Nuria",
+      "apellidos": "Castro Molina",
+      "correo": "nuria.castro@ufv.es",
+      "telefono": "600111009",
+      "dni": "00000009J",
+      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+    },
+    {
+      "id_usuario": 10,
+      "nombre": "Alberto",
+      "apellidos": "Ortega Sanz",
+      "correo": "alberto.ortega@ufv.es",
+      "telefono": "600111010",
+      "dni": "00000010K",
+      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+    }
+  ],
+  "producto": [
+    {
+      "id_producto": 1,
+      "titulo": "Portatil Lenovo IdeaPad",
+      "descripcion": "Portatil de 15 pulgadas con cargador original.",
+      "categoria": "ELECTRONICA",
+      "tipo_transaccion": "ALQUILER",
+      "estado_producto": "DISPONIBLE",
+      "precio": 18.0,
+      "id_propietario": 1
+    },
+    {
+      "id_producto": 2,
+      "titulo": "Calculadora cientifica Casio",
+      "descripcion": "Ideal para ingenieria y matematicas.",
+      "categoria": "ELECTRONICA",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "DISPONIBLE",
+      "precio": 22.5,
+      "id_propietario": 1
+    },
+    {
+      "id_producto": 3,
+      "titulo": "Tabla de surf corta",
+      "descripcion": "Tabla en buen estado para nivel intermedio.",
+      "categoria": "DEPORTE",
+      "tipo_transaccion": "PRESTAMO",
+      "estado_producto": "NO_DISPONIBLE",
+      "precio": null,
+      "id_propietario": 1
+    },
+    {
+      "id_producto": 4,
+      "titulo": "Libro Fundamentos de Programacion",
+      "descripcion": "Manual universitario con apuntes.",
+      "categoria": "LIBROS",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "DISPONIBLE",
+      "precio": 12.0,
+      "id_propietario": 2
+    },
+    {
+      "id_producto": 5,
+      "titulo": "Raqueta de tenis Wilson",
+      "descripcion": "Incluye funda y overgrips nuevos.",
+      "categoria": "DEPORTE",
+      "tipo_transaccion": "ALQUILER",
+      "estado_producto": "DISPONIBLE",
+      "precio": 6.5,
+      "id_propietario": 2
+    },
+    {
+      "id_producto": 6,
+      "titulo": "Lampara de escritorio LED",
+      "descripcion": "Luz regulable y puerto USB.",
+      "categoria": "HOGAR",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "DISPONIBLE",
+      "precio": 15.0,
+      "id_propietario": 4
+    },
+    {
+      "id_producto": 7,
+      "titulo": "Monitor Samsung 24\"",
+      "descripcion": "Resolucion Full HD, HDMI incluido.",
+      "categoria": "ELECTRONICA",
+      "tipo_transaccion": "ALQUILER",
+      "estado_producto": "NO_DISPONIBLE",
+      "precio": 14.0,
+      "id_propietario": 6
+    },
+    {
+      "id_producto": 8,
+      "titulo": "Bicicleta urbana",
+      "descripcion": "Bicicleta talla M para desplazamientos cortos.",
+      "categoria": "DEPORTE",
+      "tipo_transaccion": "ALQUILER",
+      "estado_producto": "DISPONIBLE",
+      "precio": 9.0,
+      "id_propietario": 6
+    },
+    {
+      "id_producto": 9,
+      "titulo": "Pack 3 novelas clasicas",
+      "descripcion": "Coleccion de literatura en tapa blanda.",
+      "categoria": "LIBROS",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "DISPONIBLE",
+      "precio": 17.0,
+      "id_propietario": 6
+    },
+    {
+      "id_producto": 10,
+      "titulo": "Set de cocina basico",
+      "descripcion": "Sarten, olla y utensilios para piso de estudiantes.",
+      "categoria": "HOGAR",
+      "tipo_transaccion": "PRESTAMO",
+      "estado_producto": "DISPONIBLE",
+      "precio": null,
+      "id_propietario": 6
+    },
+    {
+      "id_producto": 11,
+      "titulo": "Aspiradora compacta",
+      "descripcion": "Ligera y facil de guardar.",
+      "categoria": "HOGAR",
+      "tipo_transaccion": "ALQUILER",
+      "estado_producto": "DISPONIBLE",
+      "precio": 7.0,
+      "id_propietario": 7
+    },
+    {
+      "id_producto": 12,
+      "titulo": "Mando PS5",
+      "descripcion": "Mando original con poco uso.",
+      "categoria": "ELECTRONICA",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "DISPONIBLE",
+      "precio": 45.0,
+      "id_propietario": 8
+    },
+    {
+      "id_producto": 13,
+      "titulo": "Patinete plegable",
+      "descripcion": "Patinete urbano con freno trasero.",
+      "categoria": "DEPORTE",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "NO_DISPONIBLE",
+      "precio": 55.0,
+      "id_propietario": 8
+    },
+    {
+      "id_producto": 14,
+      "titulo": "Otros: Kit de herramientas",
+      "descripcion": "Caja con herramientas basicas para bricolaje.",
+      "categoria": "OTROS",
+      "tipo_transaccion": "PRESTAMO",
+      "estado_producto": "DISPONIBLE",
+      "precio": null,
+      "id_propietario": 9
+    }
+  ],
+  "solicitud": [],
+  "transaccion": [],
+  "foto_producto": [],
+  "reporte_usuario": [],
+  "reporte_producto": []
+}

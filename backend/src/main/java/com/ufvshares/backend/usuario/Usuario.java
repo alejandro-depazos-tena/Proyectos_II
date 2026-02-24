@@ -43,6 +43,11 @@ public class Usuario {
   @Column(name = "dni", nullable = false, unique = true, length = 20)
   private String dni;
 
+  @NotBlank
+  @Size(max = 255)
+  @Column(name = "password", nullable = false, length = 255)
+  private String passwordHash;
+
   public Long getIdUsuario() {
     return idUsuario;
   }
@@ -89,5 +94,13 @@ public class Usuario {
 
   public void setDni(String dni) {
     this.dni = dni;
+  }
+
+  public String getPasswordHash() {
+    return passwordHash;
+  }
+
+  public void setPasswordHash(String passwordHash) {
+    this.passwordHash = passwordHash;
   }
 }

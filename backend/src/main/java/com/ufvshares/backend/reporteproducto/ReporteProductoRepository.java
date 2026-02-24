@@ -1,4 +1,4 @@
-package com.ufvshares.backend.reporteProducto;
+package com.ufvshares.backend.reporteproducto;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

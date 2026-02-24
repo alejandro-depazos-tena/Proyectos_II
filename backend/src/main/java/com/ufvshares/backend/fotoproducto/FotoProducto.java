@@ -1,4 +1,4 @@
-package com.ufvshares.backend.fotoProducto;
+package com.ufvshares.backend.fotoproducto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

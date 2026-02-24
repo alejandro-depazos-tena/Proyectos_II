@@ -1,7 +1,6 @@
-CREATE Database IF NOT EXISTS UFVshare;
+CREATE Database IF NOT EXISTS ufvshare;
 
-use UFVshare;   
-
+use ufvshare;   
 
 CREATE TABLE usuario (
     id_usuario           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -9,8 +8,9 @@ CREATE TABLE usuario (
     apellidos            VARCHAR(150) NOT NULL,
     correo               VARCHAR(150) NOT NULL UNIQUE,
     telefono             VARCHAR(20) NOT NULL UNIQUE,
-    dni                  VARCHAR(20) NOT NULL UNIQUE
-) 
+    dni                  VARCHAR(20) NOT NULL UNIQUE,
+    password             VARCHAR(255) NOT NULL
+);
 
 
 CREATE TABLE producto (
@@ -28,7 +28,7 @@ CREATE TABLE producto (
         REFERENCES usuario(id_usuario)
         ON DELETE RESTRICT
         ON UPDATE CASCADE
-)
+);
 
 
 CREATE TABLE solicitud (
@@ -58,7 +58,7 @@ CREATE TABLE solicitud (
     -- Un usuario no debería poder pedir su propio producto (regla en lógica de negocio)
     INDEX idx_solicitud_producto (id_producto),
     INDEX idx_solicitud_solicitante (id_solicitante)
-)
+);
 
 
 CREATE TABLE transaccion (
@@ -75,7 +75,7 @@ CREATE TABLE transaccion (
         REFERENCES solicitud(id_solicitud)
         ON DELETE RESTRICT
         ON UPDATE CASCADE
-)
+);
 
 CREATE TABLE foto_producto (
     id_foto         BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

@@ -1,21 +1,23 @@
-USE UFVshare;
+USE ufvshare;
 
 -- Limpieza mínima para poder re-ejecutar este script sin errores de UNIQUE/FK
 DELETE FROM producto;
 DELETE FROM usuario;
 
 -- 10 usuarios de prueba
-INSERT INTO usuario (id_usuario, nombre, apellidos, correo, telefono, dni) VALUES
-(1, 'Lucia', 'Martinez Gomez', 'lucia.martinez@ufv.es', '600111001', '00000001A'),
-(2, 'Pablo', 'Sanchez Ruiz', 'pablo.sanchez@ufv.es', '600111002', '00000002B'),
-(3, 'Marta', 'Lopez Diaz', 'marta.lopez@ufv.es', '600111003', '00000003C'),
-(4, 'Carlos', 'Fernandez Gil', 'carlos.fernandez@ufv.es', '600111004', '00000004D'),
-(5, 'Elena', 'Navarro Perez', 'elena.navarro@ufv.es', '600111005', '00000005E'),
-(6, 'Javier', 'Moreno Torres', 'javier.moreno@ufv.es', '600111006', '00000006F'),
-(7, 'Andrea', 'Romero Vega', 'andrea.romero@ufv.es', '600111007', '00000007G'),
-(8, 'Diego', 'Hernandez Leon', 'diego.hernandez@ufv.es', '600111008', '00000008H'),
-(9, 'Nuria', 'Castro Molina', 'nuria.castro@ufv.es', '600111009', '00000009J'),
-(10, 'Alberto', 'Ortega Sanz', 'alberto.ortega@ufv.es', '600111010', '00000010K');
+-- contraseña en claro para todos: 123456
+-- SHA-256(123456): 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+INSERT INTO usuario (id_usuario, nombre, apellidos, correo, telefono, dni, password) VALUES
+(1, 'Lucia', 'Martinez Gomez', 'lucia.martinez@ufv.es', '600111001', '00000001A', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92'),
+(2, 'Pablo', 'Sanchez Ruiz', 'pablo.sanchez@ufv.es', '600111002', '00000002B', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92'),
+(3, 'Marta', 'Lopez Diaz', 'marta.lopez@ufv.es', '600111003', '00000003C', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92'),
+(4, 'Carlos', 'Fernandez Gil', 'carlos.fernandez@ufv.es', '600111004', '00000004D', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92'),
+(5, 'Elena', 'Navarro Perez', 'elena.navarro@ufv.es', '600111005', '00000005E', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92'),
+(6, 'Javier', 'Moreno Torres', 'javier.moreno@ufv.es', '600111006', '00000006F', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92'),
+(7, 'Andrea', 'Romero Vega', 'andrea.romero@ufv.es', '600111007', '00000007G', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92'),
+(8, 'Diego', 'Hernandez Leon', 'diego.hernandez@ufv.es', '600111008', '00000008H', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92'),
+(9, 'Nuria', 'Castro Molina', 'nuria.castro@ufv.es', '600111009', '00000009J', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92'),
+(10, 'Alberto', 'Ortega Sanz', 'alberto.ortega@ufv.es', '600111010', '00000010K', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92');
 
 -- 14 productos de prueba
 -- Distribución de propietarios:
