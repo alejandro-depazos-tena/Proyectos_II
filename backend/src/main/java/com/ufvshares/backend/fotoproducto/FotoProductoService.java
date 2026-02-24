@@ -1,4 +1,4 @@
-package com.ufvshares.backend.fotoproducto;
+package com.ufvshares.backend.fotoProducto;
 
 import java.util.List;
 

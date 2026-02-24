@@ -1,4 +1,4 @@
-package com.ufvshares.backend.reporteusuario;
+package com.ufvshares.backend.reporteUsuario;
 
 import java.util.List;
 
