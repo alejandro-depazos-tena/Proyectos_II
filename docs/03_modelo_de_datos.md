@@ -3,152 +3,240 @@
 ## Diagrama Entidad-Relación
 
 ```mermaid
-classDiagram
-direction LR
+ # 🗂️ Modelo de Datos - UFV Shares (actualizado según SQL)
 
-class USUARIO {
-    +int id (PK)
-    +string email (UK)
-    +string password
-    +string nombre
-    +string apellidos
-    +string carrera
-    +int curso
-    +string foto_perfil
-    +timestamp created_at
-    +timestamp last_login
-    +boolean activo
-    +decimal valoracion_promedio
-}
+ Este documento refleja el modelo de datos real definido en `bbdd/tablas.sql`.
 
-class QUEDADA {
-    +int id (PK)
-    +int creador_id (FK)
-    +string titulo
-    +text descripcion
-    +timestamp fecha_hora
-    +int ubicacion_id (FK)
-    +boolean publica
-    +int max_participantes
-    +enum estado
-    +timestamp created_at
-    +timestamp updated_at
-}
+ ## Entidades actuales
 
-class UBICACION {
-    +int id (PK)
-    +string nombre
-    +text descripcion
-    +decimal latitud
-    +decimal longitud
-    +enum tipo
-    +string edificio
-    +string planta
-    +boolean activa
-}
+ - `usuario`
+ - `producto`
+ - `solicitud`
+ - `transaccion`
+ - `foto_producto`
+ - `reporte_usuario`
+ - `reporte_producto`
 
-class ASISTENCIA {
-    +int id (PK)
-    +int usuario_id (FK)
-    +int quedada_id (FK)
-    +enum estado
-    +timestamp confirmado_at
-    +timestamp cancelado_at
-    +boolean notificado
-}
+ ---
 
-class PRODUCTO {
-    +int id (PK)
-    +int vendedor_id (FK)
-    +string titulo
-    +text descripcion
-    +decimal precio
-    +int categoria_id (FK)
-    +enum estado_producto
-    +enum estado_venta
-    +int ubicacion_id (FK, nullable)
-    +int vistas
-    +timestamp created_at
-    +timestamp updated_at
-    +timestamp vendido_at
-}
+ ## Diagrama Entidad-Relación (según SQL)
 
-class CATEGORIA {
-    +int id (PK)
-    +string nombre (UK)
-    +text descripcion
-    +string icono
-    +int orden
-    +boolean activa
-}
+ ```mermaid
+ classDiagram
+ direction LR
 
-class FOTO {
-    +int id (PK)
-    +int producto_id (FK)
-    +string url
-    +int orden
-    +string tipo_almacenamiento
-    +timestamp uploaded_at
-}
+ class usuario {
+     +id_usuario PK
+ }
 
-class CONVERSACION {
-    +int id (PK)
-    +int usuario1_id (FK)
-    +int usuario2_id (FK)
-    +int producto_id (FK)
-    +timestamp created_at
-    +timestamp updated_at
-    +boolean archivada
-}
+ class producto {
+     +id_producto PK
+     +id_propietario FK
+ }
 
-class MENSAJE {
-    +int id (PK)
-    +int conversacion_id (FK)
-    +int emisor_id (FK)
-    +text contenido
-    +timestamp enviado_at
-    +boolean leido
-    +timestamp leido_at
-}
+ class solicitud {
+     +id_solicitud PK
+     +id_producto FK
+     +id_solicitante FK
+ }
 
-class VALORACION {
-    +int id (PK)
-    +int valorador_id (FK)
-    +int valorado_id (FK)
-    +int puntuacion
-    +text comentario
-    +int producto_id (FK)
-    +timestamp created_at
-}
+ class transaccion {
+     +id_transaccion PK
+     +id_solicitud FK UNIQUE
+ }
 
-class PRODUCTO_AMAZON {
-    +int id (PK)
-    +string asin (UK)
-    +string titulo
-    +string url
-    +decimal precio_actual
-    +string imagen_url
-    +text caracteristicas
-    +decimal rating
-    +int num_reviews
-    +timestamp ultima_actualizacion
-}
+ class foto_producto {
+     +id_foto PK
+     +id_producto FK
+ }
 
-class HISTORICO_PRECIO {
-    +int id (PK)
-    +int producto_amazon_id (FK)
-    +decimal precio
-    +timestamp fecha
-    +string fuente
-}
+ class reporte_usuario {
+     +id_reporte PK
+     +id_usuario_reportante FK
+     +id_usuario_reportado FK
+ }
 
-class ALERTA_PRECIO {
-    +int id (PK)
-    +int usuario_id (FK)
-    +int producto_amazon_id (FK)
-    +decimal precio_objetivo
-    +boolean activa
-    +timestamp created_at
+ class reporte_producto {
+     +id_reporte PK
+     +id_usuario_reportante FK
+     +id_producto_reportado FK
+ }
+
+ usuario "1" --> "N" producto : publica
+ producto "1" --> "N" solicitud : recibe
+ usuario "1" --> "N" solicitud : realiza
+ solicitud "1" --> "1" transaccion : genera
+ producto "1" --> "N" foto_producto : tiene
+ usuario "1" --> "N" reporte_usuario : reporta
+ usuario "1" --> "N" reporte_usuario : es_reportado
+ usuario "1" --> "N" reporte_producto : reporta
+ producto "1" --> "N" reporte_producto : es_reportado
+ ```
+
+ ---
+
+ ## 1) USUARIO — PRODUCTO
+
+ **Tipo:** 1 : N
+
+ **Descripción:**
+
+ Un usuario puede publicar varios productos, pero cada producto pertenece a un único usuario (su propietario).
+
+ **Clave foránea:**
+
+ `producto.id_propietario` → `usuario.id_usuario`
+
+ **Cardinalidad:**
+
+ `usuario (1) ───── (N) producto`
+
+ ---
+
+ ## 2) PRODUCTO — SOLICITUD
+
+ **Tipo:** 1 : N
+
+ **Descripción:**
+
+ Un producto puede recibir múltiples solicitudes, pero cada solicitud corresponde a un único producto.
+
+ **Clave foránea:**
+
+ `solicitud.id_producto` → `producto.id_producto`
+
+ **Cardinalidad:**
+
+ `producto (1) ───── (N) solicitud`
+
+ ---
+
+ ## 3) USUARIO — SOLICITUD
+
+ **Tipo:** 1 : N
+
+ **Descripción:**
+
+ Un usuario puede realizar múltiples solicitudes, pero cada solicitud la realiza un único usuario.
+
+ **Clave foránea:**
+
+ `solicitud.id_solicitante` → `usuario.id_usuario`
+
+ **Cardinalidad:**
+
+ `usuario (1) ───── (N) solicitud`
+
+ ---
+
+ ## 4) SOLICITUD — TRANSACCION
+
+ **Tipo:** 1 : 1
+
+ **Descripción:**
+
+ Una solicitud aceptada genera exactamente una transacción. Cada transacción está asociada a una única solicitud.
+
+ **Clave foránea (única):**
+
+ `transaccion.id_solicitud` → `solicitud.id_solicitud`
+
+ El `UNIQUE` en `id_solicitud` garantiza la relación 1:1.
+
+ **Cardinalidad:**
+
+ `solicitud (1) ───── (1) transaccion`
+
+ ---
+
+ ## 5) PRODUCTO — FOTO_PRODUCTO
+
+ **Tipo:** 1 : N
+
+ **Descripción:**
+
+ Un producto puede tener varias fotos, pero cada foto pertenece a un único producto.
+
+ Si se elimina el producto, se eliminan sus fotos (`ON DELETE CASCADE`).
+
+ **Clave foránea:**
+
+ `foto_producto.id_producto` → `producto.id_producto`
+
+ **Cardinalidad:**
+
+ `producto (1) ───── (N) foto_producto`
+
+ ---
+
+ ## 6) USUARIO — REPORTE_USUARIO (como reportante)
+
+ **Tipo:** 1 : N
+
+ Un usuario puede realizar varios reportes contra otros usuarios.
+
+ **Clave foránea:**
+
+ `reporte_usuario.id_usuario_reportante` → `usuario.id_usuario`
+
+ ---
+
+ ## 7) USUARIO — REPORTE_USUARIO (como reportado)
+
+ **Tipo:** 1 : N
+
+ Un usuario puede ser reportado múltiples veces.
+
+ **Clave foránea:**
+
+ `reporte_usuario.id_usuario_reportado` → `usuario.id_usuario`
+
+ **Relación conceptual:**
+
+ `usuario (1) ───── (N) reporte_usuario`
+
+ (en ambos roles: reportante y reportado)
+
+ ---
+
+ ## 8) USUARIO — REPORTE_PRODUCTO
+
+ **Tipo:** 1 : N
+
+ Un usuario puede reportar varios productos.
+
+ **Clave foránea:**
+
+ `reporte_producto.id_usuario_reportante` → `usuario.id_usuario`
+
+ ---
+
+ ## 9) PRODUCTO — REPORTE_PRODUCTO
+
+ **Tipo:** 1 : N
+
+ Un producto puede recibir múltiples reportes.
+
+ Si el producto se elimina, sus reportes se eliminan (`ON DELETE CASCADE`).
+
+ **Clave foránea:**
+
+ `reporte_producto.id_producto_reportado` → `producto.id_producto`
+
+ ---
+
+ ## 📊 Resumen general de cardinalidades
+
+ - `usuario 1 ─── N producto`
+ - `usuario 1 ─── N solicitud`
+ - `producto 1 ─── N solicitud`
+ - `solicitud 1 ─── 1 transaccion`
+ - `producto 1 ─── N foto_producto`
+ - `usuario 1 ─── N reporte_usuario (como reportante)`
+ - `usuario 1 ─── N reporte_usuario (como reportado)`
+ - `usuario 1 ─── N reporte_producto`
+ - `producto 1 ─── N reporte_producto`
+
     +timestamp disparada_at
     +timestamp expira_at
 }
