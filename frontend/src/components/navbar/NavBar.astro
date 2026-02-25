@@ -30,9 +30,8 @@ import Links from "./Links.astro";
 
             <!-- Middle Space -->
             <div class="navbar-center hidden lg:flex">
-                <div class="flex items-center gap-2">
-                    <a href="/app" class="btn btn-ghost btn-sm">App</a>
-                    <a href="/auth?mode=login&next=%2Fapp" class="btn btn-ghost btn-sm">Acceso</a>
+                <div class="flex items-center gap-2" id="nav-auth-links">
+                    <!-- filled by JS -->
                 </div>
             </div>
 
@@ -55,23 +54,16 @@ import Links from "./Links.astro";
                         >
                     </div>
                 </a>
-                <button
-                    id="cart-button"
+                <a
+                    href="/profile"
                     class="btn btn-ghost btn-circle hover:bg-primary/10 transition-colors"
-                    aria-label="Lista"
+                    aria-label="Perfil"
                 >
-                    <div class="indicator">
-                        <Icon
-                            name="lucide:list"
-                            class="w-6 h-6 hover:text-primary transition-colors"
-                        />
-                        <span
-                            id="nav-cart-count"
-                            class="badge badge-sm badge-primary indicator-item border-none hidden"
-                            >0</span
-                        >
-                    </div>
-                </button>
+                    <Icon
+                        name="lucide:user"
+                        class="w-6 h-6 hover:text-primary transition-colors"
+                    />
+                </a>
             </div>
         </nav>
     </div>
@@ -79,31 +71,34 @@ import Links from "./Links.astro";
 </div>
 
 <script>
-    import { toggleCart, totalItems } from "../../store/cartStore";
     import { totalFavorites } from "../../store/favoriteStore";
 
     let lastScrollY = window.scrollY;
     const navbar = document.getElementById("main-navbar");
-    const cartBtn = document.getElementById("cart-button");
-    const navCartCount = document.getElementById("nav-cart-count");
     const navFavCount = document.getElementById("nav-fav-count");
+    const navAuthLinks = document.getElementById("nav-auth-links");
 
-    // Handle cart toggle
-    cartBtn?.addEventListener("click", (e) => {
-        e.preventDefault();
-        toggleCart();
-    });
-
-    // Update cart count in navbar
-    totalItems.subscribe((count) => {
-        if (!navCartCount) return;
-        if (count > 0) {
-            navCartCount.classList.remove("hidden");
-            navCartCount.textContent = String(count);
-        } else {
-            navCartCount.classList.add("hidden");
-        }
-    });
+    // Auth-aware nav links
+    const token = localStorage.getItem("ufvshares_token");
+    const nombre = localStorage.getItem("ufvshares_nombre");
+    const email = localStorage.getItem("ufvshares_email");
+    if (token) {
+        navAuthLinks.innerHTML = `
+            <span class="text-sm opacity-60 hidden xl:inline">${nombre || email || ""}</span>
+            <button id="nav-logout" class="btn btn-ghost btn-sm">Cerrar sesi&oacute;n</button>
+        `;
+        document.getElementById("nav-logout")?.addEventListener("click", () => {
+            localStorage.removeItem("ufvshares_token");
+            localStorage.removeItem("ufvshares_email");
+            localStorage.removeItem("ufvshares_nombre");
+            window.location.href = "/auth";
+        });
+    } else {
+        navAuthLinks.innerHTML = `
+            <a href="/auth?mode=login&next=%2Fapp" class="btn btn-ghost btn-sm">Iniciar sesi&oacute;n</a>
+            <a href="/auth?mode=register&next=%2Fapp" class="btn btn-primary btn-sm rounded-full">Registrarse</a>
+        `;
+    }
 
     // Update favorites count in navbar
     totalFavorites.subscribe((count) => {

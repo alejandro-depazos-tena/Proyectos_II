@@ -1,0 +1,248 @@
+---
+import Layout from "../layouts/Layout.astro";
+const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
+---
+
+<Layout title="Mi perfil · UFV Shares">
+  <div class="max-w-4xl mx-auto px-4 py-10">
+
+    <!-- Perfil -->
+    <div id="profile-card" class="card bg-base-100 shadow-md border border-base-200 mb-10 hidden">
+      <div class="card-body">
+        <div class="flex items-center gap-5">
+          <div id="avatar-circle"
+            class="w-16 h-16 rounded-full bg-primary text-primary-content flex items-center justify-center text-2xl font-black shrink-0">
+          </div>
+          <div>
+            <h1 id="profile-name" class="text-2xl font-bold"></h1>
+            <p id="profile-email" class="text-base-content/60 text-sm"></p>
+          </div>
+        </div>
+        <div class="divider my-3"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+          <div>
+            <span class="font-semibold text-base-content/50 uppercase tracking-wider text-xs">Tel&eacute;fono</span>
+            <p id="profile-telefono" class="font-medium mt-0.5"></p>
+          </div>
+          <div>
+            <span class="font-semibold text-base-content/50 uppercase tracking-wider text-xs">DNI</span>
+            <p id="profile-dni" class="font-medium mt-0.5"></p>
+          </div>
+          <div>
+            <span class="font-semibold text-base-content/50 uppercase tracking-wider text-xs">Apellidos</span>
+            <p id="profile-apellidos" class="font-medium mt-0.5"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mis productos -->
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-black uppercase tracking-tighter">Mis productos</h2>
+      <button id="btn-toggle-form" class="btn btn-primary btn-sm rounded-full hidden">
+        + Publicar producto
+      </button>
+    </div>
+
+    <!-- Formulario publicar -->
+    <div id="publish-form-wrap" class="card bg-base-100 shadow-md border border-base-200 mb-8 hidden">
+      <div class="card-body">
+        <h3 class="font-bold text-lg mb-4">Nuevo anuncio</h3>
+        <form id="publish-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="sm:col-span-2">
+            <label class="label"><span class="label-text font-semibold">T&iacute;tulo</span></label>
+            <input name="titulo" type="text" required maxlength="150"
+              class="input input-bordered w-full" placeholder="Ej: Libro de &Aacute;lgebra 3ª ed." />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="label"><span class="label-text font-semibold">Descripci&oacute;n</span></label>
+            <textarea name="descripcion" required rows="3"
+              class="textarea textarea-bordered w-full" placeholder="Estado, detalles, forma de entrega..."></textarea>
+          </div>
+          <div>
+            <label class="label"><span class="label-text font-semibold">Categor&iacute;a</span></label>
+            <select name="categoria" required class="select select-bordered w-full">
+              <option value="">Elige una...</option>
+              <option value="LIBROS">Libros</option>
+              <option value="ELECTRONICA">Electr&oacute;nica</option>
+              <option value="DEPORTE">Deporte</option>
+              <option value="HOGAR">Hogar</option>
+              <option value="OTROS">Otros</option>
+            </select>
+          </div>
+          <div>
+            <label class="label"><span class="label-text font-semibold">Tipo</span></label>
+            <select name="tipoTransaccion" required class="select select-bordered w-full">
+              <option value="">Elige uno...</option>
+              <option value="VENTA">Venta</option>
+              <option value="ALQUILER">Alquiler</option>
+              <option value="PRESTAMO">Pr&eacute;stamo</option>
+            </select>
+          </div>
+          <div>
+            <label class="label"><span class="label-text font-semibold">Precio (&euro;)</span></label>
+            <input name="precio" type="number" min="0" step="0.01"
+              class="input input-bordered w-full" placeholder="0.00" />
+          </div>
+          <div class="sm:col-span-2 flex gap-3 justify-end pt-2">
+            <button type="button" id="btn-cancel-form" class="btn btn-ghost btn-sm">Cancelar</button>
+            <button type="submit" id="btn-submit" class="btn btn-primary btn-sm rounded-full">Publicar</button>
+          </div>
+          <p id="form-error" class="sm:col-span-2 text-error text-sm hidden"></p>
+        </form>
+      </div>
+    </div>
+
+    <!-- Grid de productos -->
+    <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+
+    <!-- Estado vacío -->
+    <div id="no-products" class="hidden text-center py-16">
+      <p class="text-base-content/50 mb-4">Todav&iacute;a no tienes productos publicados.</p>
+      <button id="btn-empty-publish" class="btn btn-primary rounded-full">Publicar mi primer producto</button>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="flex justify-center py-20">
+      <span class="loading loading-spinner loading-lg text-primary"></span>
+    </div>
+
+  </div>
+</Layout>
+
+<script define:vars={{ API_BASE }}>
+  const token = localStorage.getItem("ufvshares_token");
+  if (!token) {
+    window.location.href = "/auth?mode=login&next=" + encodeURIComponent("/profile");
+  }
+
+  const headers = { "Authorization": "Bearer " + token, "Content-Type": "application/json" };
+
+  const $ = id => document.getElementById(id);
+
+  async function loadProfile() {
+    try {
+      const [meRes, prodRes] = await Promise.all([
+        fetch(API_BASE + "/me", { headers }),
+        fetch(API_BASE + "/me/productos", { headers }),
+      ]);
+
+      if (!meRes.ok) { window.location.href = "/auth"; return; }
+
+      const me = await meRes.json();
+      const prods = await prodRes.json();
+
+      // Render profile
+      const initials = (me.nombre?.[0] ?? "") + (me.apellidos?.[0] ?? "");
+      $("avatar-circle").textContent = initials.toUpperCase();
+      $("profile-name").textContent = me.nombre + " " + me.apellidos;
+      $("profile-email").textContent = me.correo;
+      $("profile-telefono").textContent = me.telefono;
+      $("profile-dni").textContent = me.dni;
+      $("profile-apellidos").textContent = me.apellidos;
+      $("profile-card").classList.remove("hidden");
+
+      // Render products
+      $("loading").classList.add("hidden");
+      renderProducts(prods);
+    } catch (e) {
+      $("loading").classList.add("hidden");
+      console.error(e);
+    }
+  }
+
+  const tipoLabel = { VENTA: "Venta", ALQUILER: "Alquiler", PRESTAMO: "Préstamo" };
+  const categoriaLabel = { LIBROS: "Libros", ELECTRONICA: "Electrónica", DEPORTE: "Deporte", HOGAR: "Hogar", OTROS: "Otros" };
+
+  function renderProducts(prods) {
+    const grid = $("products-grid");
+    grid.innerHTML = "";
+    if (!prods.length) {
+      $("no-products").classList.remove("hidden");
+      $("btn-toggle-form").classList.add("hidden");
+      return;
+    }
+    $("no-products").classList.add("hidden");
+    $("btn-toggle-form").classList.remove("hidden");
+    prods.forEach(p => {
+      const badge = tipoLabel[p.tipoTransaccion] ?? p.tipoTransaccion;
+      const cat = categoriaLabel[p.categoria] ?? p.categoria;
+      const precio = p.precio != null ? parseFloat(p.precio).toFixed(2) + " €" : "Gratis";
+      grid.insertAdjacentHTML("beforeend", `
+        <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow">
+          <div class="card-body p-5">
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="font-bold leading-tight">${p.titulo}</h3>
+              <span class="badge badge-primary shrink-0">${badge}</span>
+            </div>
+            <p class="text-sm text-base-content/60 line-clamp-2 mt-1">${p.descripcion}</p>
+            <div class="flex items-center justify-between mt-3">
+              <span class="text-xs bg-base-200 px-2 py-1 rounded-full">${cat}</span>
+              <span class="font-bold text-primary">${precio}</span>
+            </div>
+          </div>
+        </div>
+      `);
+    });
+  }
+
+  function showForm() {
+    $("publish-form-wrap").classList.remove("hidden");
+    $("publish-form-wrap").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function hideForm() {
+    $("publish-form-wrap").classList.add("hidden");
+    $("publish-form").reset();
+    $("form-error").classList.add("hidden");
+  }
+
+  $("btn-toggle-form")?.addEventListener("click", showForm);
+  $("btn-empty-publish")?.addEventListener("click", showForm);
+  $("btn-cancel-form")?.addEventListener("click", hideForm);
+
+  $("publish-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = $("btn-submit");
+    const errEl = $("form-error");
+    btn.disabled = true;
+    btn.textContent = "Publicando...";
+    errEl.classList.add("hidden");
+
+    const fd = new FormData(e.target);
+    const body = {
+      titulo: fd.get("titulo"),
+      descripcion: fd.get("descripcion"),
+      categoria: fd.get("categoria"),
+      tipoTransaccion: fd.get("tipoTransaccion"),
+      estadoProducto: "DISPONIBLE",
+    };
+    const precio = fd.get("precio");
+    if (precio) body.precio = parseFloat(precio);
+
+    try {
+      const res = await fetch(API_BASE + "/me/productos", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        errEl.textContent = err.message ?? "Error al publicar";
+        errEl.classList.remove("hidden");
+        return;
+      }
+      hideForm();
+      // Reload products
+      const prodRes = await fetch(API_BASE + "/me/productos", { headers });
+      renderProducts(await prodRes.json());
+    } catch {
+      errEl.textContent = "No se pudo conectar con el backend";
+      errEl.classList.remove("hidden");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Publicar";
+    }
+  });
+
+  loadProfile();
+</script>

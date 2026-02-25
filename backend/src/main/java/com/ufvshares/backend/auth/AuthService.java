@@ -20,26 +20,31 @@ public class AuthService {
     this.sessions = sessions;
   }
 
-  public AuthResponse register(String email, String password) {
-    var normalized = normalize(email);
+  public AuthResponse register(RegisterRequest req) {
+    var normalized = normalize(req.email());
+
     if (usuarios.findByCorreoIgnoreCase(normalized).isPresent()) {
       throw new IllegalArgumentException("EMAIL_ALREADY_EXISTS");
     }
+    if (usuarios.findByDniIgnoreCase(req.dni().trim()).isPresent()) {
+      throw new IllegalArgumentException("DNI_ALREADY_EXISTS");
+    }
+    if (usuarios.findByTelefono(req.telefono().trim()).isPresent()) {
+      throw new IllegalArgumentException("TELEFONO_ALREADY_EXISTS");
+    }
 
     Usuario usuario = new Usuario();
-    usuario.setNombre("Nuevo");
-    usuario.setApellidos("Usuario");
+    usuario.setNombre(req.nombre().trim());
+    usuario.setApellidos(req.apellidos().trim());
     usuario.setCorreo(normalized);
-
-    String suffix = UUID.randomUUID().toString().replace("-", "");
-    usuario.setTelefono("tmp" + suffix.substring(0, 9));
-    usuario.setDni("tmp" + suffix.substring(9, 18));
-    usuario.setPasswordHash(hashSha256(password));
+    usuario.setTelefono(req.telefono().trim());
+    usuario.setDni(req.dni().trim().toUpperCase());
+    usuario.setPasswordHash(hashSha256(req.password()));
     usuarios.save(usuario);
 
     var token = UUID.randomUUID().toString();
     sessions.put(token, normalized);
-    return new AuthResponse(token, normalized);
+    return new AuthResponse(token, normalized, req.nombre().trim());
   }
 
   public AuthResponse login(String email, String password) {
@@ -54,7 +59,7 @@ public class AuthService {
 
     var token = UUID.randomUUID().toString();
     sessions.put(token, normalized);
-    return new AuthResponse(token, normalized);
+    return new AuthResponse(token, normalized, usuario.getNombre());
   }
 
   private String hashSha256(String rawValue) {

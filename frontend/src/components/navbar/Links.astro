@@ -2,8 +2,7 @@
 import { Icon } from "astro-icon/components";
 
 const categories = [
-    { name: "Inicio", href: "/" },
-    { name: "App", href: "/app" },
+    { name: "Inicio", href: "/app" },
     { name: "Libros", href: "/category/libros" },
     { name: "Apuntes", href: "/category/apuntes" },
     { name: "Material", href: "/category/material" },
@@ -17,21 +16,18 @@ const categories = [
     <div
         class="max-w-7xl mx-auto flex justify-between items-center text-xs sm:text-sm font-medium h-10"
     >
-        <!-- Mobile: Categories Button -->
+        <!-- Mobile: Heart + Contact -->
         <div
             class="flex sm:hidden w-full items-center justify-between h-full px-4"
         >
-            <button
-                id="mobile-links-toggle"
-                class="flex items-center gap-2 h-full px-2 hover:bg-white/10 transition-colors cursor-pointer"
+            <a
+                href="/favorites"
+                class="flex items-center gap-2 h-full px-2 hover:bg-white/10 transition-colors"
+                aria-label="Favoritos"
             >
-                <span>Categorías</span>
-                <Icon
-                    name="lucide:chevron-down"
-                    id="chevron-icon"
-                    class="w-4 h-4 transition-transform duration-300"
-                />
-            </button>
+                <Icon name="lucide:heart" class="w-5 h-5" />
+                <span>Favoritos</span>
+            </a>
 
             <div class="flex h-full items-center">
                 <a
@@ -107,83 +103,4 @@ const categories = [
         </div>
     </div>
 
-    <!-- Mobile Dropdown Menu -->
-    <div
-        id="mobile-links-menu"
-        class="sm:hidden grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out bg-primary overflow-hidden brightness-95"
-    >
-        <div class="min-h-0 flex flex-col border-t border-white/10">
-            {
-                categories.map((cat) => (
-                    <>
-                        <a
-                            href={cat.href}
-                            class="py-3 px-6 hover:bg-white/10 border-b border-white/5 transition-colors flex justify-between items-center group"
-                        >
-                            {cat.name}
-                            {cat.subcategories && (
-                                <span class="text-[10px] opacity-40 uppercase font-bold italic">
-                                    Ver
-                                </span>
-                            )}
-                        </a>
-                        {cat.subcategories && (
-                            <div class="bg-primary/30 flex flex-col">
-                                {cat.subcategories.map((sub) => (
-                                    <a
-                                        href={sub.href}
-                                        class="py-2.5 pl-12 pr-6 hover:bg-white/10 border-b border-white/5 text-xs text-white/80 transition-colors"
-                                    >
-                                        {sub.name}
-                                    </a>
-                                ))}
-                            </div>
-                        )}
-                    </>
-                ))
-            }
-            <div
-                class="bg-primary/50 py-2 px-6 text-white/60 uppercase text-[10px] tracking-widest font-bold"
-            >
-                Más info
-            </div>
-            <a
-                href="/about"
-                class="py-3 px-6 hover:bg-white/10 border-b border-white/5 transition-colors"
-                >Sobre UFV Shares</a
-            >
-            <a
-                href="/blog"
-                class="py-3 px-6 hover:bg-white/10 border-b border-white/5 transition-colors"
-                >Blog</a
-            >
-        </div>
-    </div>
 </div>
-
-<script>
-    const setupToggle = () => {
-        const toggleBtn = document.getElementById("mobile-links-toggle");
-        const menu = document.getElementById("mobile-links-menu");
-        const chevron = document.getElementById("chevron-icon");
-
-        if (toggleBtn && menu && chevron) {
-            toggleBtn.addEventListener("click", () => {
-                const isOpen = menu.classList.contains("grid-rows-[1fr]");
-
-                if (isOpen) {
-                    menu.classList.remove("grid-rows-[1fr]");
-                    menu.classList.add("grid-rows-[0fr]");
-                    chevron.classList.remove("rotate-180");
-                } else {
-                    menu.classList.remove("grid-rows-[0fr]");
-                    menu.classList.add("grid-rows-[1fr]");
-                    chevron.classList.add("rotate-180");
-                }
-            });
-        }
-    };
-
-    setupToggle();
-    document.addEventListener("astro:after-swap", setupToggle);
-</script>

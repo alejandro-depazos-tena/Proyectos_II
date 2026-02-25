@@ -20,8 +20,8 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  public AuthResponse register(@Valid @RequestBody AuthRequest request) {
-    return auth.register(request.email(), request.password());
+  public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
+    return auth.register(request);
   }
 
   @PostMapping("/login")
@@ -32,7 +32,9 @@ public class AuthController {
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<?> handleIllegalArg(IllegalArgumentException ex) {
     var code = ex.getMessage();
-    if ("EMAIL_ALREADY_EXISTS".equals(code)) {
+    if ("EMAIL_ALREADY_EXISTS".equals(code) ||
+        "DNI_ALREADY_EXISTS".equals(code) ||
+        "TELEFONO_ALREADY_EXISTS".equals(code)) {
       return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(code));
     }
     if ("INVALID_CREDENTIALS".equals(code)) {

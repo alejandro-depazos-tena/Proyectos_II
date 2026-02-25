@@ -1,93 +1,214 @@
----
-import Layout from "../layouts/Layout.astro";
-
-const mode = Astro.url.searchParams.get("mode") ?? "login";
-const next = Astro.url.searchParams.get("next") ?? "/app";
+﻿---
+import "../styles/global.css";
+const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
 ---
 
-<Layout title="UFV Shares · Acceso">
-  <div class="max-w-md mx-auto px-4 py-10">
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body">
-        <div class="flex items-center gap-3">
-          <img src="/Logo.png" alt="UFV" width="40" height="40" class="rounded-xl" />
-          <div>
-            <h1 class="text-2xl font-extrabold">Acceso</h1>
-            <p class="text-sm opacity-70">Inicia sesión o crea una cuenta para usar la app.</p>
+<!doctype html>
+<html lang="es" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>UFV Shares &middot; Acceso</title>
+    <script>if(localStorage.getItem('ufvshares_token')){var _n=new URLSearchParams(location.search).get('next')||'/app';location.replace(_n);}</script>
+  </head>
+  <body class="bg-base-200 min-h-screen flex items-center justify-center px-4 py-12">
+
+    <div class="w-full max-w-md">
+      <!-- Logo -->
+      <div class="text-center mb-8">
+        <a href="/" class="inline-flex flex-col items-center gap-2">
+          <div class="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-primary-content" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
           </div>
+          <span class="text-2xl font-extrabold tracking-tight text-primary">UFV<span class="text-base-content"> Shares</span></span>
+        </a>
+        <p class="text-base-content/60 mt-2 text-sm">Marketplace universitario</p>
+      </div>
+
+      <!-- Card -->
+      <div class="card bg-base-100 shadow-2xl">
+        <div class="card-body gap-6">
+          <div>
+            <h1 id="card-title" class="text-2xl font-extrabold text-center">Bienvenido de vuelta</h1>
+            <p id="card-subtitle" class="text-center text-sm text-base-content/60 mt-1">Inicia sesión para acceder a la app.</p>
+          </div>
+
+          <!-- Tabs -->
+          <div class="tabs tabs-boxed w-full">
+            <button id="tab-login" class="tab flex-1 tab-active" type="button">Iniciar sesión</button>
+            <button id="tab-register" class="tab flex-1" type="button">Registrarse</button>
+          </div>
+
+          <!-- Form -->
+          <form id="auth-form" class="grid gap-4" novalidate>
+
+            <!-- Solo registro -->
+            <div id="register-fields" class="hidden grid gap-4">
+              <div class="grid grid-cols-2 gap-4">
+                <label class="form-control w-full">
+                  <div class="label"><span class="label-text font-medium">Nombre</span></div>
+                  <input id="f-nombre" name="nombre" type="text" autocomplete="given-name" placeholder="Ana" class="input input-bordered w-full" />
+                </label>
+                <label class="form-control w-full">
+                  <div class="label"><span class="label-text font-medium">Apellidos</span></div>
+                  <input id="f-apellidos" name="apellidos" type="text" autocomplete="family-name" placeholder="García López" class="input input-bordered w-full" />
+                </label>
+              </div>
+            </div>
+
+            <!-- Correo siempre -->
+            <label class="form-control w-full">
+              <div class="label"><span class="label-text font-medium">Correo electrónico</span></div>
+              <input id="f-email" name="email" type="email" autocomplete="email" required placeholder="tu@ufv.es" class="input input-bordered w-full" />
+            </label>
+
+            <!-- Solo registro -->
+            <div id="register-fields-2" class="hidden grid gap-4">
+              <div class="grid grid-cols-2 gap-4">
+                <label class="form-control w-full">
+                  <div class="label"><span class="label-text font-medium">Teléfono</span></div>
+                  <input id="f-telefono" name="telefono" type="tel" autocomplete="tel" placeholder="612345678" class="input input-bordered w-full" />
+                </label>
+                <label class="form-control w-full">
+                  <div class="label"><span class="label-text font-medium">DNI / NIE</span></div>
+                  <input id="f-dni" name="dni" type="text" placeholder="12345678A" class="input input-bordered w-full" />
+                </label>
+              </div>
+            </div>
+
+            <!-- Contraseña siempre -->
+            <label class="form-control w-full">
+              <div class="label"><span class="label-text font-medium">Contraseña</span></div>
+              <input id="f-password" name="password" type="password" autocomplete="current-password" required placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" class="input input-bordered w-full" />
+            </label>
+
+            <button id="submit-btn" class="btn btn-primary w-full mt-2" type="submit">Entrar</button>
+            <div id="error" class="text-error text-sm text-center" aria-live="polite"></div>
+          </form>
+
+          <div class="divider text-xs text-base-content/40">o</div>
+
+          <a class="btn btn-ghost btn-sm w-full" href="/">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            Volver al inicio
+          </a>
         </div>
-
-        <div class="tabs tabs-boxed mt-6">
-          <a class={`tab ${mode === "login" ? "tab-active" : ""}`} href={`/auth?mode=login&next=${encodeURIComponent(next)}`}>Iniciar sesión</a>
-          <a class={`tab ${mode === "register" ? "tab-active" : ""}`} href={`/auth?mode=register&next=${encodeURIComponent(next)}`}>Registrarse</a>
-        </div>
-
-        <form id="auth-form" class="mt-6 grid gap-4">
-          <label class="form-control w-full">
-            <div class="label"><span class="label-text">Correo electr\u00f3nico</span></div>
-            <input name="email" type="email" autocomplete="email" required class="input input-bordered w-full" />
-          </label>
-
-          <label class="form-control w-full">
-            <div class="label"><span class="label-text">Contraseña</span></div>
-            <input
-              name="password"
-              type="password"
-              autocomplete={mode === "register" ? "new-password" : "current-password"}
-              required
-              class="input input-bordered w-full"
-            />
-          </label>
-
-          <button class="btn btn-primary" type="submit">Continuar</button>
-          <div id="error" class="text-error text-sm" aria-live="polite"></div>
-        </form>
-
-        <div class="divider"></div>
-
-        <a class="btn btn-ghost" href="/">Volver al inicio</a>
       </div>
     </div>
-  </div>
 
-  <script type="module">
-    import { API_BASE } from "../lib/env";
+    <script define:vars={{ API_BASE }}>
+      const params = new URLSearchParams(window.location.search);
+      let mode = params.get("mode") === "register" ? "register" : "login";
+      const next = params.get("next") || "/app";
 
-    const mode = new URLSearchParams(window.location.search).get("mode") || "login";
-    const next = new URLSearchParams(window.location.search).get("next") || "/app";
+      if (localStorage.getItem("ufvshares_token")) {
+        window.location.href = next;
+      }
 
-    const form = document.getElementById("auth-form");
-    const errorEl = document.getElementById("error");
+      const tabLogin     = document.getElementById("tab-login");
+      const tabRegister  = document.getElementById("tab-register");
+      const regFields    = document.getElementById("register-fields");
+      const regFields2   = document.getElementById("register-fields-2");
+      const cardTitle    = document.getElementById("card-title");
+      const cardSubtitle = document.getElementById("card-subtitle");
+      const submitBtn    = document.getElementById("submit-btn");
+      const errorEl      = document.getElementById("error");
+      const fNombre      = document.getElementById("f-nombre");
+      const fApellidos   = document.getElementById("f-apellidos");
+      const fTelefono    = document.getElementById("f-telefono");
+      const fDni         = document.getElementById("f-dni");
+      const fPassword    = document.getElementById("f-password");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      errorEl.textContent = "";
+      function setMode(m) {
+        mode = m;
+        const isReg = m === "register";
 
-      const formData = new FormData(form);
-      const payload = {
-        email: String(formData.get("email") || ""),
-        password: String(formData.get("password") || ""),
-      };
+        tabLogin.classList.toggle("tab-active", !isReg);
+        tabRegister.classList.toggle("tab-active", isReg);
 
-      try {
-        const res = await fetch(`${API_BASE}/auth/${mode === "register" ? "register" : "login"}` , {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        regFields.style.display  = isReg ? "grid" : "none";
+        regFields2.style.display = isReg ? "grid" : "none";
 
-        const body = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          errorEl.textContent = body?.error || "Error de autenticación";
-          return;
+        fNombre.required    = isReg;
+        fApellidos.required = isReg;
+        fTelefono.required  = isReg;
+        fDni.required       = isReg;
+        fPassword.autocomplete = isReg ? "new-password" : "current-password";
+
+        cardTitle.textContent    = isReg ? "Crear cuenta" : "Bienvenido de vuelta";
+        cardSubtitle.textContent = isReg ? "Rellena los datos para registrarte." : "Inicia sesión para acceder a la app.";
+        submitBtn.textContent    = isReg ? "Crear cuenta" : "Entrar";
+
+        const url = new URL(window.location.href);
+        url.searchParams.set("mode", m);
+        history.replaceState(null, "", url.toString());
+        errorEl.textContent = "";
+      }
+
+      tabLogin.addEventListener("click", () => setMode("login"));
+      tabRegister.addEventListener("click", () => setMode("register"));
+      setMode(mode);
+
+      document.getElementById("auth-form").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        errorEl.textContent = "";
+
+        const formData = new FormData(e.currentTarget);
+        let payload;
+
+        if (mode === "register") {
+          payload = {
+            email:     (formData.get("email")     || "").trim(),
+            password:  (formData.get("password")  || ""),
+            nombre:    (formData.get("nombre")    || "").trim(),
+            apellidos: (formData.get("apellidos") || "").trim(),
+            telefono:  (formData.get("telefono")  || "").trim(),
+            dni:       (formData.get("dni")       || "").trim().toUpperCase(),
+          };
+        } else {
+          payload = {
+            email:    (formData.get("email")    || "").trim(),
+            password: (formData.get("password") || ""),
+          };
         }
 
-        localStorage.setItem("ufvshares_token", body.token);
-        localStorage.setItem("ufvshares_email", body.email);
-        window.location.href = next;
-      } catch {
-        errorEl.textContent = "No se pudo conectar con el backend";
-      }
-    });
-  </script>
-</Layout>
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Cargando...";
+
+        try {
+          const endpoint = mode === "register" ? "register" : "login";
+          const res = await fetch(API_BASE + "/auth/" + endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          const body = await res.json().catch(function() { return {}; });
+          if (!res.ok) {
+            const msgs = {
+              EMAIL_ALREADY_EXISTS:    "Este correo ya está registrado.",
+              DNI_ALREADY_EXISTS:      "Este DNI/NIE ya está registrado.",
+              TELEFONO_ALREADY_EXISTS: "Este teléfono ya está registrado.",
+              INVALID_CREDENTIALS:     "Email o contraseña incorrectos.",
+            };
+            errorEl.textContent = msgs[body && body.error] || "Error de autenticación";
+            return;
+          }
+
+          localStorage.setItem("ufvshares_token", body.token);
+          localStorage.setItem("ufvshares_email", body.email);
+          if (body.nombre) localStorage.setItem("ufvshares_nombre", body.nombre);
+          window.location.href = next;
+        } catch(err) {
+          errorEl.textContent = "No se pudo conectar con el backend";
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = mode === "register" ? "Crear cuenta" : "Entrar";
+        }
+      });
+    </script>
+  </body>
+</html>
