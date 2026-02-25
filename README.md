@@ -110,6 +110,18 @@ Este proyecto implementa prácticas profesionales de desarrollo colaborativo, ap
 
 ## 🧑‍💻 Desarrollo local
 
+### Arranque rápido (Windows)
+
+- Opción 1 (VS Code): Ejecuta la tarea `dev:fullstack`.
+	- Menú: `Terminal` → `Run Task...` → `dev:fullstack`
+- Opción 2 (PowerShell):
+
+```powershell
+./run-dev.ps1
+```
+
+Abre la app en `http://localhost:4321`.
+
 ### Requisitos
 
 - **Java JDK 21** (el backend usa Spring Boot 3.x y el `pom.xml` define Java 21)

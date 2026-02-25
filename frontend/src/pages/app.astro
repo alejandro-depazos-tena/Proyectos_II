@@ -1,216 +1,218 @@
 ---
-import '../styles/site.css';
+import Layout from "../layouts/Layout.astro";
 ---
 
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>UFV Shares · Inicio</title>
-  </head>
-  <body>
-    <div class="container">
-      <header class="header">
-        <div class="brand">
-          <img class="logo" src="/Logo.png" onerror="this.onerror=null;this.src='/ufv-badge.svg'" alt="UFV" width="42" height="42" />
-          <div>
-            <h1>Inicio</h1>
-            <div class="subtitle" id="whoami"></div>
-          </div>
-        </div>
-        <div class="row">
-          <a class="button" href="/">Landing</a>
-          <button class="button" id="logout">Cerrar sesión</button>
-        </div>
-      </header>
-
-      <div class="grid">
-        <section class="panel" aria-label="Listado de productos">
-          <div class="row" style="justify-content: space-between; align-items: flex-end;">
-            <div>
-              <strong>Productos</strong>
-              <div class="muted small" style="margin-top: 4px;">Explora, filtra y encuentra lo que necesitas.</div>
-            </div>
-            <div class="row">
-              <label class="field" style="min-width: 180px;">
-                Filtrar
-                <select id="filter">
-                  <option value="">Todos</option>
-                  <option value="sale">Venta</option>
-                  <option value="rent">Alquiler</option>
-                </select>
-              </label>
-              <button class="button" id="refresh">Actualizar</button>
-            </div>
-          </div>
-
-          <div id="list" class="products"></div>
-          <div id="list-error" class="error" aria-live="polite"></div>
-        </section>
-
-        <section id="publicar" class="panel" aria-label="Publicar producto">
-          <strong>Publicar un producto</strong>
-          <p class="muted small">Crea un anuncio para otros universitarios.</p>
-
-          <form id="publish-form">
-            <label class="field">
-              Título
-              <input name="title" required />
-            </label>
-
-            <label class="field">
-              Descripción
-              <textarea name="description" required></textarea>
-            </label>
-
-            <label class="field">
-              Tipo
-              <select name="type" required>
-                <option value="SALE">Venta</option>
-                <option value="RENT">Alquiler</option>
-              </select>
-            </label>
-
-            <label class="field">
-              Precio (€)
-              <input name="price" type="number" min="0" step="0.01" required />
-            </label>
-
-            <button class="button button--primary" type="submit">Publicar</button>
-            <div id="publish-msg" aria-live="polite"></div>
-          </form>
-        </section>
+<Layout title="UFV Shares · App">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+      <div>
+        <h1 class="text-3xl font-extrabold">App</h1>
+        <p class="text-sm opacity-70" id="whoami"></p>
+      </div>
+      <div class="flex gap-2">
+        <a class="btn btn-ghost" href="/">Inicio</a>
+        <button class="btn" id="logout" type="button">Cerrar sesión</button>
       </div>
     </div>
 
-    <script type="module">
-      const API_BASE = 'http://localhost:8080/api';
-      const token = localStorage.getItem('ufvshares_token');
-      const email = localStorage.getItem('ufvshares_email');
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+      <section class="lg:col-span-2">
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <div class="flex items-end justify-between gap-4 flex-wrap">
+              <div>
+                <h2 class="card-title">Anuncios</h2>
+                <p class="text-sm opacity-70">Explora, filtra y encuentra lo que necesitas.</p>
+              </div>
+              <div class="flex items-end gap-3">
+                <label class="form-control">
+                  <div class="label"><span class="label-text">Filtrar</span></div>
+                  <select id="filter" class="select select-bordered">
+                    <option value="">Todos</option>
+                    <option value="sale">Venta</option>
+                    <option value="rent">Alquiler</option>
+                  </select>
+                </label>
+                <button class="btn" id="refresh" type="button">Actualizar</button>
+              </div>
+            </div>
 
-      if (!token) {
-        window.location.href = `/auth?mode=login&next=${encodeURIComponent('/app')}`;
+            <div id="list" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6"></div>
+            <div id="list-error" class="text-error text-sm mt-3" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="publicar" class="lg:col-span-1">
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <h2 class="card-title">Publicar</h2>
+            <p class="text-sm opacity-70">Crea un anuncio para otros universitarios.</p>
+
+            <form id="publish-form" class="grid gap-3 mt-4">
+              <label class="form-control w-full">
+                <div class="label"><span class="label-text">Título</span></div>
+                <input name="title" required class="input input-bordered w-full" />
+              </label>
+
+              <label class="form-control w-full">
+                <div class="label"><span class="label-text">Descripción</span></div>
+                <textarea name="description" required class="textarea textarea-bordered w-full" rows="4"></textarea>
+              </label>
+
+              <label class="form-control w-full">
+                <div class="label"><span class="label-text">Tipo</span></div>
+                <select name="type" required class="select select-bordered w-full">
+                  <option value="SALE">Venta</option>
+                  <option value="RENT">Alquiler</option>
+                </select>
+              </label>
+
+              <label class="form-control w-full">
+                <div class="label"><span class="label-text">Precio (€)</span></div>
+                <input name="price" type="number" min="0" step="0.01" required class="input input-bordered w-full" />
+              </label>
+
+              <button class="btn btn-primary" type="submit">Publicar</button>
+              <div id="publish-msg" class="text-sm" aria-live="polite"></div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module">
+    import { API_BASE } from "../lib/env";
+
+    const token = localStorage.getItem("ufvshares_token");
+    const email = localStorage.getItem("ufvshares_email");
+
+    if (!token) {
+      window.location.href = `/auth?mode=login&next=${encodeURIComponent("/app")}`;
+    }
+
+    const whoamiEl = document.getElementById("whoami");
+    whoamiEl.textContent = email ? `Sesión: ${email}` : "";
+
+    const listEl = document.getElementById("list");
+    const listErrorEl = document.getElementById("list-error");
+    const filterEl = document.getElementById("filter");
+
+    function fmtType(t) {
+      return t === "RENT" ? "Alquiler" : "Venta";
+    }
+
+    function render(products) {
+      listEl.innerHTML = "";
+      if (!products.length) {
+        listEl.innerHTML = '<div class="opacity-70">No hay anuncios para este filtro.</div>';
+        return;
       }
 
-      document.getElementById('whoami').textContent = email ? `Sesión: ${email}` : '';
-
-      const listEl = document.getElementById('list');
-      const listErrorEl = document.getElementById('list-error');
-      const filterEl = document.getElementById('filter');
-
-      function fmtType(t) {
-        return t === 'RENT' ? 'Alquiler' : 'Venta';
+      for (const p of products) {
+        const card = document.createElement("div");
+        card.className = "card bg-base-100 border border-base-200";
+        card.innerHTML = `
+          <div class="card-body">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="font-bold leading-tight">${p.title}</h3>
+                <div class="text-sm opacity-70">Publicado por ${p.ownerEmail}</div>
+              </div>
+              <div class="text-right">
+                <div class="font-extrabold">€${Number(p.price).toFixed(2)}</div>
+                <div class="badge badge-primary badge-outline mt-2">${fmtType(p.type)}</div>
+              </div>
+            </div>
+            <p class="text-sm opacity-80">${p.description}</p>
+          </div>
+        `;
+        listEl.appendChild(card);
       }
+    }
 
-      function render(products) {
-        listEl.innerHTML = '';
-        if (!products.length) {
-          listEl.innerHTML = '<div class="muted">No hay productos para este filtro.</div>';
+    async function load() {
+      listErrorEl.textContent = "";
+      const type = filterEl.value;
+      const url = new URL(`${API_BASE}/products`);
+      if (type) url.searchParams.set("type", type);
+
+      try {
+        const res = await fetch(url);
+        const body = await res.json().catch(() => ([]));
+        if (!res.ok) {
+          listErrorEl.textContent = "No se pudieron cargar los anuncios";
+          return;
+        }
+        render(Array.isArray(body) ? body : []);
+      } catch {
+        listErrorEl.textContent = "No se pudo conectar con el backend";
+      }
+    }
+
+    document.getElementById("refresh").addEventListener("click", load);
+    filterEl.addEventListener("change", load);
+
+    document.getElementById("logout").addEventListener("click", () => {
+      localStorage.removeItem("ufvshares_token");
+      localStorage.removeItem("ufvshares_email");
+      window.location.href = "/";
+    });
+
+    const publishForm = document.getElementById("publish-form");
+    const publishMsg = document.getElementById("publish-msg");
+
+    publishForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      publishMsg.textContent = "";
+      publishMsg.className = "text-sm";
+
+      const formData = new FormData(publishForm);
+      const payload = {
+        title: String(formData.get("title") || ""),
+        description: String(formData.get("description") || ""),
+        type: String(formData.get("type") || "SALE"),
+        price: Number(formData.get("price") || 0),
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/products`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (body?.error === "INVALID_TOKEN" || body?.error === "MISSING_TOKEN") {
+            localStorage.removeItem("ufvshares_token");
+            localStorage.removeItem("ufvshares_email");
+            window.location.href = `/auth?mode=login&next=${encodeURIComponent("/app")}`;
+            return;
+          }
+          publishMsg.className = "text-error text-sm";
+          publishMsg.textContent = body?.error || "No se pudo publicar";
           return;
         }
 
-        for (const p of products) {
-          const card = document.createElement('div');
-          card.className = 'card product-card';
-          card.innerHTML = `
-            <div class="meta">
-              <div>
-                <div class="product-title"><strong>${p.title}</strong></div>
-                <div class="small muted">Publicado por ${p.ownerEmail}</div>
-              </div>
-              <div class="row">
-                <span class="chip">${fmtType(p.type)}</span>
-                <span class="chip">€${Number(p.price).toFixed(2)}</span>
-              </div>
-            </div>
-            <div class="muted">${p.description}</div>
-          `;
-          listEl.appendChild(card);
-        }
+        publishMsg.className = "text-success text-sm";
+        publishMsg.textContent = "Publicado correctamente";
+        publishForm.reset();
+        await load();
+      } catch {
+        publishMsg.className = "text-error text-sm";
+        publishMsg.textContent = "No se pudo conectar con el backend";
       }
+    });
 
-      async function load() {
-        listErrorEl.textContent = '';
-        const type = filterEl.value;
-        const url = new URL(`${API_BASE}/products`);
-        if (type) url.searchParams.set('type', type);
+    load();
 
-        try {
-          const res = await fetch(url);
-          const body = await res.json().catch(() => ([]));
-          if (!res.ok) {
-            listErrorEl.textContent = 'No se pudieron cargar los productos';
-            return;
-          }
-          render(Array.isArray(body) ? body : []);
-        } catch (e) {
-          listErrorEl.textContent = 'No se pudo conectar con el backend';
-        }
-      }
-
-      document.getElementById('refresh').addEventListener('click', load);
-      filterEl.addEventListener('change', load);
-
-      document.getElementById('logout').addEventListener('click', () => {
-        localStorage.removeItem('ufvshares_token');
-        localStorage.removeItem('ufvshares_email');
-        window.location.href = '/';
-      });
-
-      const publishForm = document.getElementById('publish-form');
-      const publishMsg = document.getElementById('publish-msg');
-
-      publishForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        publishMsg.textContent = '';
-
-        const formData = new FormData(publishForm);
-        const payload = {
-          title: String(formData.get('title') || ''),
-          description: String(formData.get('description') || ''),
-          type: String(formData.get('type') || 'SALE'),
-          price: Number(formData.get('price') || 0)
-        };
-
-        try {
-          const res = await fetch(`${API_BASE}/products`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(payload)
-          });
-
-          const body = await res.json().catch(() => ({}));
-          if (!res.ok) {
-            if (body?.error === 'INVALID_TOKEN' || body?.error === 'MISSING_TOKEN') {
-              localStorage.removeItem('ufvshares_token');
-              localStorage.removeItem('ufvshares_email');
-              window.location.href = `/auth?mode=login&next=${encodeURIComponent('/app')}`;
-              return;
-            }
-            publishMsg.className = 'error';
-            publishMsg.textContent = body?.error || 'No se pudo publicar';
-            return;
-          }
-
-          publishMsg.className = 'ok';
-          publishMsg.textContent = 'Publicado correctamente';
-          publishForm.reset();
-          await load();
-        } catch (e) {
-          publishMsg.className = 'error';
-          publishMsg.textContent = 'No se pudo conectar con el backend';
-        }
-      });
-
-      load();
-
-      // Si vienes de la landing con ancla
-      if (window.location.hash === '#publicar') {
-        document.getElementById('publicar')?.scrollIntoView({ behavior: 'smooth' });
-      }
-    </script>
-  </body>
-</html>
+    if (window.location.hash === "#publicar") {
+      document.getElementById("publicar")?.scrollIntoView({ behavior: "smooth" });
+    }
+  </script>
+</Layout>

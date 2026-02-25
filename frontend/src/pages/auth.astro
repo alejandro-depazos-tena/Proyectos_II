@@ -1,94 +1,93 @@
 ---
-import '../styles/site.css';
-const mode = Astro.url.searchParams.get('mode') ?? 'login';
-const next = Astro.url.searchParams.get('next') ?? '/app';
+import Layout from "../layouts/Layout.astro";
+
+const mode = Astro.url.searchParams.get("mode") ?? "login";
+const next = Astro.url.searchParams.get("next") ?? "/app";
 ---
 
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>UFV Shares · Acceso</title>
-  </head>
-  <body>
-    <div class="container" style="max-width: 620px;">
-      <header class="header">
-        <div class="brand">
-          <img class="logo" src="/Logo.png" onerror="this.onerror=null;this.src='/ufv-badge.svg'" alt="UFV" width="42" height="42" />
+<Layout title="UFV Shares · Acceso">
+  <div class="max-w-md mx-auto px-4 py-10">
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <div class="flex items-center gap-3">
+          <img src="/Logo.png" alt="UFV" width="40" height="40" class="rounded-xl" />
           <div>
-            <h1>Acceso</h1>
-            <p class="subtitle">Necesitas iniciar sesión o registrarte para usar la app.</p>
+            <h1 class="text-2xl font-extrabold">Acceso</h1>
+            <p class="text-sm opacity-70">Inicia sesión o crea una cuenta para usar la app.</p>
           </div>
         </div>
-        <div class="row">
-          <a class="button" href="/">Landing</a>
-        </div>
-      </header>
 
-      <nav class="tabs">
-        <a class="button tab" data-active={mode === 'login'} href={`/auth?mode=login&next=${encodeURIComponent(next)}`}>Iniciar sesión</a>
-        <a class="button button--primary tab" data-active={mode === 'register'} href={`/auth?mode=register&next=${encodeURIComponent(next)}`}>Registrarse</a>
-      </nav>
-
-      <form id="auth-form" class="panel" style="box-shadow: var(--shadow);">
-        <div class="row" style="justify-content: space-between;">
-          <strong id="form-title">{mode === 'register' ? 'Crear cuenta' : 'Iniciar sesión'}</strong>
-          <span class="muted small">UFV Shares</span>
+        <div class="tabs tabs-boxed mt-6">
+          <a class={`tab ${mode === "login" ? "tab-active" : ""}`} href={`/auth?mode=login&next=${encodeURIComponent(next)}`}>Iniciar sesión</a>
+          <a class={`tab ${mode === "register" ? "tab-active" : ""}`} href={`/auth?mode=register&next=${encodeURIComponent(next)}`}>Registrarse</a>
         </div>
 
-        <label class="field">
-          Email
-          <input name="email" type="email" autocomplete="email" required />
-        </label>
+        <form id="auth-form" class="mt-6 grid gap-4">
+          <label class="form-control w-full">
+            <div class="label"><span class="label-text">Correo electr\u00f3nico</span></div>
+            <input name="email" type="email" autocomplete="email" required class="input input-bordered w-full" />
+          </label>
 
-        <label class="field">
-          Contraseña
-          <input name="password" type="password" autocomplete={mode === 'register' ? 'new-password' : 'current-password'} required />
-        </label>
+          <label class="form-control w-full">
+            <div class="label"><span class="label-text">Contraseña</span></div>
+            <input
+              name="password"
+              type="password"
+              autocomplete={mode === "register" ? "new-password" : "current-password"}
+              required
+              class="input input-bordered w-full"
+            />
+          </label>
 
-        <button class="button button--primary" type="submit">Continuar</button>
-        <div id="error" class="error" aria-live="polite"></div>
-      </form>
+          <button class="btn btn-primary" type="submit">Continuar</button>
+          <div id="error" class="text-error text-sm" aria-live="polite"></div>
+        </form>
+
+        <div class="divider"></div>
+
+        <a class="btn btn-ghost" href="/">Volver al inicio</a>
+      </div>
     </div>
+  </div>
 
-    <script type="module">
-      const API_BASE = 'http://localhost:8080/api';
-      const mode = new URLSearchParams(window.location.search).get('mode') || 'login';
-      const next = new URLSearchParams(window.location.search).get('next') || '/app';
+  <script type="module">
+    import { API_BASE } from "../lib/env";
 
-      const form = document.getElementById('auth-form');
-      const errorEl = document.getElementById('error');
+    const mode = new URLSearchParams(window.location.search).get("mode") || "login";
+    const next = new URLSearchParams(window.location.search).get("next") || "/app";
 
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        errorEl.textContent = '';
+    const form = document.getElementById("auth-form");
+    const errorEl = document.getElementById("error");
 
-        const formData = new FormData(form);
-        const payload = {
-          email: String(formData.get('email') || ''),
-          password: String(formData.get('password') || '')
-        };
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorEl.textContent = "";
 
-        try {
-          const res = await fetch(`${API_BASE}/auth/${mode === 'register' ? 'register' : 'login'}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
+      const formData = new FormData(form);
+      const payload = {
+        email: String(formData.get("email") || ""),
+        password: String(formData.get("password") || ""),
+      };
 
-          const body = await res.json().catch(() => ({}));
-          if (!res.ok) {
-            errorEl.textContent = body?.error || 'Error de autenticación';
-            return;
-          }
+      try {
+        const res = await fetch(`${API_BASE}/auth/${mode === "register" ? "register" : "login"}` , {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
 
-          localStorage.setItem('ufvshares_token', body.token);
-          localStorage.setItem('ufvshares_email', body.email);
-          window.location.href = next;
-        } catch (err) {
-          errorEl.textContent = 'No se pudo conectar con el backend';
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          errorEl.textContent = body?.error || "Error de autenticación";
+          return;
         }
-      });
-    </script>
-  </body>
-</html>
+
+        localStorage.setItem("ufvshares_token", body.token);
+        localStorage.setItem("ufvshares_email", body.email);
+        window.location.href = next;
+      } catch {
+        errorEl.textContent = "No se pudo conectar con el backend";
+      }
+    });
+  </script>
+</Layout>

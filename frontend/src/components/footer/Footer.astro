@@ -1,0 +1,175 @@
+---
+import { Icon } from "astro-icon/components";
+---
+
+<footer class="bg-base-300 text-base-content pt-16 pb-8 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12"
+        >
+            <!-- Brand Section -->
+            <div class="col-span-1 lg:col-span-1">
+                <a href="/" class="flex items-center gap-2 mb-6 group">
+                    <div
+                        class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform shadow-lg"
+                    >
+                        <Icon
+                            name="lucide:graduation-cap"
+                            class="w-6 h-6 text-primary-content"
+                        />
+                    </div>
+                    <span
+                        class="text-2xl font-bold tracking-tighter gradient-text"
+                    >
+                        UFV Shares
+                    </span>
+                </a>
+                <p class="text-base-content/70 mb-6 leading-relaxed">
+                    Marketplace universitario para comprar, vender y alquilar entre estudiantes.
+                </p>
+                <!-- Socials -->
+                <div class="flex gap-4">
+                    <a
+                        href="#"
+                        class="btn btn-circle btn-sm btn-ghost hover:bg-primary/20 hover:text-primary transition-colors"
+                        aria-label="Twitter"
+                    >
+                        <Icon name="lucide:twitter" class="w-5 h-5" />
+                    </a>
+                    <a
+                        href="#"
+                        class="btn btn-circle btn-sm btn-ghost hover:bg-primary/20 hover:text-primary transition-colors"
+                        aria-label="Instagram"
+                    >
+                        <Icon name="lucide:instagram" class="w-5 h-5" />
+                    </a>
+                    <a
+                        href="#"
+                        class="btn btn-circle btn-sm btn-ghost hover:bg-primary/20 hover:text-primary transition-colors"
+                        aria-label="Github"
+                    >
+                        <Icon name="lucide:github" class="w-5 h-5" />
+                    </a>
+                </div>
+            </div>
+
+            <!-- Links Column 1 -->
+            <div>
+                <h3 class="font-bold text-lg mb-6 text-base-content/90">Plataforma</h3>
+                <ul class="space-y-4">
+                    <li>
+                        <a
+                            href="/app"
+                            class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
+                            >Entrar a la app</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            href="/favorites"
+                            class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
+                            >Favoritos</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            href="/auth?mode=login&next=%2Fapp"
+                            class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
+                            >Iniciar sesión</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            href="/auth?mode=register&next=%2Fapp"
+                            class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
+                            >Crear cuenta</a
+                        >
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Links Column 2 -->
+            <div>
+                <h3 class="font-bold text-lg mb-6 text-base-content/90">Ayuda</h3>
+                <ul class="space-y-4">
+                    <li>
+                        <a
+                            href="/contact"
+                            class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
+                            >Contacto</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            href="/about"
+                            class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
+                            >Sobre el proyecto</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            href="/blog"
+                            class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
+                            >Blog</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            href="/"
+                            class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
+                            >Inicio</a
+                        >
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Newsletter -->
+            <div>
+                <h3 class="font-bold text-lg mb-6 text-base-content/90">Mantente al día</h3>
+                <p class="text-base-content/70 mb-4 text-sm">Demo: este formulario no envía emails.</p>
+                <div class="form-control w-full">
+                    <div class="relative">
+                        <input
+                            type="text"
+                            placeholder="Tu email"
+                            class="input input-bordered w-full pr-12 focus:outline-hidden focus:border-primary"
+                        />
+                        <button
+                            class="absolute top-0 right-0 rounded-l-none btn btn-primary px-3"
+                            aria-label="Suscribirse"
+                        >
+                            <Icon name="lucide:arrow-right" class="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="border-t border-base-content/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-base-content/50"
+        >
+            <p>&copy; {new Date().getFullYear()} UFV Shares (demo)</p>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-base-content transition-colors"
+                    >Privacidad</a
+                >
+                <a href="#" class="hover:text-base-content transition-colors"
+                    >Términos</a
+                >
+            </div>
+        </div>
+    </div>
+</footer>
+
+<style>
+    .gradient-text {
+        background: linear-gradient(
+            135deg,
+            var(--color-primary) 0%,
+            #6366f1 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+</style>

@@ -1,2 +1,17 @@
+com\ufvshares\backend\auth\AuthService.class
+com\ufvshares\backend\product\ProductCreateRequest.class
+com\ufvshares\backend\config\CorsConfig.class
+com\ufvshares\backend\product\ProductRepository.class
+com\ufvshares\backend\product\ProductController.class
+com\ufvshares\backend\product\Product.class
+com\ufvshares\backend\auth\UserRepository.class
+com\ufvshares\backend\auth\AuthController.class
+com\ufvshares\backend\auth\AuthResponse.class
+com\ufvshares\backend\auth\SessionRepository.class
 com\ufvshares\backend\BackendApplication.class
 com\ufvshares\backend\HelloController.class
+com\ufvshares\backend\product\ProductType.class
+com\ufvshares\backend\auth\User.class
+com\ufvshares\backend\auth\AuthRequest.class
+com\ufvshares\backend\auth\AuthController$ErrorResponse.class
+com\ufvshares\backend\product\ProductController$ErrorResponse.class

@@ -1,0 +1,44 @@
+---
+import AboutCard from "./AboutCard.astro";
+
+const values = [
+    {
+        title: "Calidad sin concesiones",
+        description:
+            "Solo trabajamos con marcas que cumplen nuestros est\u00e1ndares de rendimiento, durabilidad y dise\u00f1o.",
+        icon: "lucide:award",
+    },
+    {
+        title: "Env\u00edo r\u00e1pido",
+        description:
+            "Log\u00edstica de primer nivel para que tu tecnolog\u00eda llegue r\u00e1pido y segura.",
+        icon: "lucide:truck",
+    },
+    {
+        title: "Soporte experto",
+        description:
+            "Nuestro equipo est\u00e1 disponible para ayudarte a encontrar el dispositivo perfecto.",
+        icon: "lucide:headset",
+    },
+];
+---
+
+<section class="py-20 bg-slate-50 px-4">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center max-w-2xl mx-auto mb-16">
+            <span
+                class="text-primary font-bold uppercase tracking-widest text-sm mb-4 block"
+                >Nuestros valores</span
+            >
+            <h2
+                class="text-3xl md:text-5xl font-black text-slate-900 uppercase"
+            >
+                Lo que nos impulsa
+            </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {values.map((value) => <AboutCard {...value} />)}
+        </div>
+    </div>
+</section>
