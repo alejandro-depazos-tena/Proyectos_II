@@ -1,6 +1,4 @@
----
 import Layout from "../layouts/Layout.astro";
----
 
 <Layout title="UFV Shares · App">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -21,7 +19,7 @@ import Layout from "../layouts/Layout.astro";
           <div class="card-body">
             <div class="flex items-end justify-between gap-4 flex-wrap">
               <div>
-                <h2 class="card-title">Anuncios</h2>
+                <h2 class="card-title">Productos</h2>
                 <p class="text-sm opacity-70">Explora, filtra y encuentra lo que necesitas.</p>
               </div>
               <div class="flex items-end gap-3">
@@ -29,8 +27,9 @@ import Layout from "../layouts/Layout.astro";
                   <div class="label"><span class="label-text">Filtrar</span></div>
                   <select id="filter" class="select select-bordered">
                     <option value="">Todos</option>
-                    <option value="sale">Venta</option>
-                    <option value="rent">Alquiler</option>
+                    <option value="VENTA">Venta</option>
+                    <option value="ALQUILER">Alquiler</option>
+                    <option value="PRESTAMO">Préstamo</option>
                   </select>
                 </label>
                 <button class="btn" id="refresh" type="button">Actualizar</button>
@@ -47,30 +46,47 @@ import Layout from "../layouts/Layout.astro";
         <div class="card bg-base-100 shadow-xl">
           <div class="card-body">
             <h2 class="card-title">Publicar</h2>
-            <p class="text-sm opacity-70">Crea un anuncio para otros universitarios.</p>
+            <p class="text-sm opacity-70">Crea un producto para otros universitarios.</p>
 
             <form id="publish-form" class="grid gap-3 mt-4">
               <label class="form-control w-full">
                 <div class="label"><span class="label-text">Título</span></div>
-                <input name="title" required class="input input-bordered w-full" />
+                <input name="titulo" required class="input input-bordered w-full" />
               </label>
 
               <label class="form-control w-full">
                 <div class="label"><span class="label-text">Descripción</span></div>
-                <textarea name="description" required class="textarea textarea-bordered w-full" rows="4"></textarea>
+                <textarea name="descripcion" required class="textarea textarea-bordered w-full" rows="4"></textarea>
+              </label>
+
+              <label class="form-control w-full">
+                <div class="label"><span class="label-text">Categoría</span></div>
+                <select name="categoria" required class="select select-bordered w-full">
+                  <option value="ELECTRONICA">Electrónica</option>
+                  <option value="LIBROS">Libros</option>
+                  <option value="DEPORTE">Deporte</option>
+                  <option value="HOGAR">Hogar</option>
+                  <option value="OTROS">Otros</option>
+                </select>
               </label>
 
               <label class="form-control w-full">
                 <div class="label"><span class="label-text">Tipo</span></div>
-                <select name="type" required class="select select-bordered w-full">
-                  <option value="SALE">Venta</option>
-                  <option value="RENT">Alquiler</option>
+                <select name="tipoTransaccion" required class="select select-bordered w-full">
+                  <option value="VENTA">Venta</option>
+                  <option value="ALQUILER">Alquiler</option>
+                  <option value="PRESTAMO">Préstamo</option>
                 </select>
               </label>
 
               <label class="form-control w-full">
                 <div class="label"><span class="label-text">Precio (€)</span></div>
-                <input name="price" type="number" min="0" step="0.01" required class="input input-bordered w-full" />
+                <input name="precio" type="number" min="0" step="0.01" class="input input-bordered w-full" />
+              </label>
+
+              <label class="form-control w-full">
+                <div class="label"><span class="label-text">ID propietario</span></div>
+                <input name="idPropietario" type="number" min="1" step="1" value="1" required class="input input-bordered w-full" />
               </label>
 
               <button class="btn btn-primary" type="submit">Publicar</button>
@@ -99,33 +115,46 @@ import Layout from "../layouts/Layout.astro";
     const listErrorEl = document.getElementById("list-error");
     const filterEl = document.getElementById("filter");
 
-    function fmtType(t) {
-      return t === "RENT" ? "Alquiler" : "Venta";
+    function fmtTipo(t) {
+      if (t === "ALQUILER") return "Alquiler";
+      if (t === "PRESTAMO") return "Préstamo";
+      return "Venta";
+    }
+
+    function fmtCategoria(c) {
+      if (c === "ELECTRONICA") return "Electrónica";
+      if (c === "LIBROS") return "Libros";
+      if (c === "DEPORTE") return "Deporte";
+      if (c === "HOGAR") return "Hogar";
+      return "Otros";
     }
 
     function render(products) {
       listEl.innerHTML = "";
       if (!products.length) {
-        listEl.innerHTML = '<div class="opacity-70">No hay anuncios para este filtro.</div>';
+        listEl.innerHTML = '<div class="opacity-70">No hay productos para este filtro.</div>';
         return;
       }
 
       for (const p of products) {
         const card = document.createElement("div");
         card.className = "card bg-base-100 border border-base-200";
+
+        const price = p.precio == null ? "—" : `€${Number(p.precio).toFixed(2)}`;
         card.innerHTML = `
           <div class="card-body">
             <div class="flex items-start justify-between gap-3">
               <div>
-                <h3 class="font-bold leading-tight">${p.title}</h3>
-                <div class="text-sm opacity-70">Publicado por ${p.ownerEmail}</div>
+                <h3 class="font-bold leading-tight">${p.titulo}</h3>
+                <div class="text-sm opacity-70">Propietario #${p.idPropietario}</div>
               </div>
               <div class="text-right">
-                <div class="font-extrabold">€${Number(p.price).toFixed(2)}</div>
-                <div class="badge badge-primary badge-outline mt-2">${fmtType(p.type)}</div>
+                <div class="font-extrabold">${price}</div>
+                <div class="badge badge-primary badge-outline mt-2">${fmtTipo(p.tipoTransaccion)}</div>
               </div>
             </div>
-            <p class="text-sm opacity-80">${p.description}</p>
+            <p class="text-sm opacity-80">${p.descripcion}</p>
+            <div class="text-xs opacity-70">${fmtCategoria(p.categoria)}</div>
           </div>
         `;
         listEl.appendChild(card);
@@ -134,18 +163,20 @@ import Layout from "../layouts/Layout.astro";
 
     async function load() {
       listErrorEl.textContent = "";
-      const type = filterEl.value;
-      const url = new URL(`${API_BASE}/products`);
-      if (type) url.searchParams.set("type", type);
 
       try {
-        const res = await fetch(url);
+        const res = await fetch(`${API_BASE}/productos`);
         const body = await res.json().catch(() => ([]));
+
         if (!res.ok) {
-          listErrorEl.textContent = "No se pudieron cargar los anuncios";
+          listErrorEl.textContent = "No se pudieron cargar los productos";
           return;
         }
-        render(Array.isArray(body) ? body : []);
+
+        const products = Array.isArray(body) ? body : [];
+        const selectedType = String(filterEl.value || "").trim();
+        const filtered = selectedType ? products.filter((x) => x.tipoTransaccion === selectedType) : products;
+        render(filtered);
       } catch {
         listErrorEl.textContent = "No se pudo conectar con el backend";
       }
@@ -169,31 +200,27 @@ import Layout from "../layouts/Layout.astro";
       publishMsg.className = "text-sm";
 
       const formData = new FormData(publishForm);
+      const precioRaw = String(formData.get("precio") || "").trim();
+
       const payload = {
-        title: String(formData.get("title") || ""),
-        description: String(formData.get("description") || ""),
-        type: String(formData.get("type") || "SALE"),
-        price: Number(formData.get("price") || 0),
+        titulo: String(formData.get("titulo") || "").trim(),
+        descripcion: String(formData.get("descripcion") || "").trim(),
+        categoria: String(formData.get("categoria") || "OTROS"),
+        tipoTransaccion: String(formData.get("tipoTransaccion") || "VENTA"),
+        estadoProducto: "DISPONIBLE",
+        precio: precioRaw ? Number(precioRaw) : null,
+        idPropietario: Number(formData.get("idPropietario") || 1)
       };
 
       try {
-        const res = await fetch(`${API_BASE}/products`, {
+        const res = await fetch(`${API_BASE}/productos`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
         });
 
         const body = await res.json().catch(() => ({}));
         if (!res.ok) {
-          if (body?.error === "INVALID_TOKEN" || body?.error === "MISSING_TOKEN") {
-            localStorage.removeItem("ufvshares_token");
-            localStorage.removeItem("ufvshares_email");
-            window.location.href = `/auth?mode=login&next=${encodeURIComponent("/app")}`;
-            return;
-          }
           publishMsg.className = "text-error text-sm";
           publishMsg.textContent = body?.error || "No se pudo publicar";
           return;

@@ -1,0 +1,95 @@
+---
+import '../styles/site.css';
+const next = Astro.url.searchParams.get('next') ?? '/app';
+---
+
+<html lang="es">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>UFV Shares · Iniciar sesión</title>
+	</head>
+	<body>
+		<div class="container" style="max-width: 540px;">
+			<header class="header">
+				<div class="brand">
+					<img class="logo" src="/Logo.png" onerror="this.onerror=null;this.src='/ufv-badge.svg'" alt="UFV" width="42" height="42" />
+					<div>
+						<h1>Iniciar sesión</h1>
+						<p class="subtitle">Accede para publicar y gestionar productos.</p>
+					</div>
+				</div>
+				<div class="row">
+					<a class="button" href="/">Volver</a>
+				</div>
+			</header>
+
+			<form id="login-form" class="panel" style="box-shadow: var(--shadow);">
+				<label class="field">
+					Email
+					<input name="email" type="email" autocomplete="email" required />
+				</label>
+
+				<label class="field">
+					Contraseña
+					<input name="password" type="password" autocomplete="current-password" required />
+				</label>
+
+				<button class="button button--primary" type="submit">Entrar</button>
+				<div id="error" class="error" aria-live="polite"></div>
+				<p class="muted small" style="margin: 0;">
+					¿No tienes cuenta?
+					<a class="link" href={`/auth?mode=register&next=${encodeURIComponent(next)}`}>Regístrate</a>
+				</p>
+			</form>
+		</div>
+
+		<script type="module">
+			const API_BASE = 'http://localhost:8080/api';
+			const next = new URLSearchParams(window.location.search).get('next') || '/app';
+
+			const token = localStorage.getItem('ufvshares_token');
+			if (token) {
+				window.location.href = next;
+			}
+
+			const form = document.getElementById('login-form');
+			const errorEl = document.getElementById('error');
+
+			form.addEventListener('submit', async (event) => {
+				event.preventDefault();
+				errorEl.textContent = '';
+
+				const formData = new FormData(form);
+				const payload = {
+					email: String(formData.get('email') || '').trim(),
+					password: String(formData.get('password') || '')
+				};
+
+				try {
+					const response = await fetch(`${API_BASE}/auth/login`, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(payload)
+					});
+
+					const body = await response.json().catch(() => ({}));
+					if (!response.ok) {
+						if (body?.error === 'INVALID_CREDENTIALS') {
+							errorEl.textContent = 'Email o contraseña incorrectos';
+							return;
+						}
+						errorEl.textContent = body?.error || 'No se pudo iniciar sesión';
+						return;
+					}
+
+					localStorage.setItem('ufvshares_token', body.token);
+					localStorage.setItem('ufvshares_email', body.email);
+					window.location.href = next;
+				} catch {
+					errorEl.textContent = 'No se pudo conectar con el backend';
+				}
+			});
+		</script>
+	</body>
+</html>

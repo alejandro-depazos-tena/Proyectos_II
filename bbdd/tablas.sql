@@ -1,7 +1,6 @@
-CREATE Database IF NOT EXISTS UFVshare;
+CREATE Database IF NOT EXISTS ufvshare;
 
-use UFVshare;   
-
+use ufvshare;   
 
 CREATE TABLE usuario (
     id_usuario           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -9,15 +8,16 @@ CREATE TABLE usuario (
     apellidos            VARCHAR(150) NOT NULL,
     correo               VARCHAR(150) NOT NULL UNIQUE,
     telefono             VARCHAR(20) NOT NULL UNIQUE,
-    dni                  VARCHAR(20) NOT NULL UNIQUE
-) 
+    dni                  VARCHAR(20) NOT NULL UNIQUE,
+    password             VARCHAR(255) NOT NULL
+);
 
 
 CREATE TABLE producto (
     id_producto          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     titulo               VARCHAR(150)     NOT NULL,
     descripcion          TEXT             NOT NULL,
-    categoria            VARCHAR(100)     NOT NULL,
+    categoria ENUM('ELECTRONICA','LIBROS','DEPORTE','HOGAR','OTROS') NOT NULL,
     tipo_transaccion     ENUM('PRESTAMO','ALQUILER','VENTA') NOT NULL,
     estado_producto      ENUM('DISPONIBLE','NO_DISPONIBLE') NOT NULL DEFAULT 'DISPONIBLE',
     precio               DECIMAL(10,2),
@@ -28,7 +28,7 @@ CREATE TABLE producto (
         REFERENCES usuario(id_usuario)
         ON DELETE RESTRICT
         ON UPDATE CASCADE
-)
+);
 
 
 CREATE TABLE solicitud (
@@ -58,7 +58,7 @@ CREATE TABLE solicitud (
     -- Un usuario no debería poder pedir su propio producto (regla en lógica de negocio)
     INDEX idx_solicitud_producto (id_producto),
     INDEX idx_solicitud_solicitante (id_solicitante)
-)
+);
 
 
 CREATE TABLE transaccion (
@@ -75,41 +75,64 @@ CREATE TABLE transaccion (
         REFERENCES solicitud(id_solicitud)
         ON DELETE RESTRICT
         ON UPDATE CASCADE
-)
+);
 
--- 5) Tabla REPORTE
-CREATE TABLE reporte (
-    id_reporte           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    tipo_recurso         ENUM('USUARIO','PRODUCTO') NOT NULL,
-    id_usuario_reportante BIGINT UNSIGNED NOT NULL,
-    id_usuario_reportado  BIGINT UNSIGNED,
-    id_producto_reportado BIGINT UNSIGNED,
-    motivo               VARCHAR(100) NOT NULL,
-    comentario           TEXT,
-    fecha_reporte        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    estado_reporte       ENUM('ABIERTO','EN_REVISION','CERRADO') NOT NULL DEFAULT 'ABIERTO',
+CREATE TABLE foto_producto (
+    id_foto         BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_producto     BIGINT UNSIGNED NOT NULL,
+    url_foto        VARCHAR(500) NOT NULL,
+    es_principal    BOOLEAN NOT NULL DEFAULT FALSE,
 
-    CONSTRAINT fk_reporte_reportante
+    CONSTRAINT fk_foto_producto
+        FOREIGN KEY (id_producto)
+        REFERENCES producto(id_producto)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE reporte_usuario (
+    id_reporte              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_usuario_reportante   BIGINT UNSIGNED NOT NULL,
+    id_usuario_reportado    BIGINT UNSIGNED NOT NULL,
+    motivo              VARCHAR(100) NOT NULL,
+    comentario          TEXT,
+    fecha_reporte       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    estado_reporte      ENUM('ABIERTO','EN_REVISION','CERRADO')
+                        NOT NULL DEFAULT 'ABIERTO',
+
+    CONSTRAINT fk_rep_user_reportante
         FOREIGN KEY (id_usuario_reportante)
         REFERENCES usuario(id_usuario)
         ON DELETE RESTRICT
         ON UPDATE CASCADE,
 
-    CONSTRAINT fk_reporte_usuario
+    CONSTRAINT fk_rep_user_reportado
         FOREIGN KEY (id_usuario_reportado)
         REFERENCES usuario(id_usuario)
-        ON DELETE SET NULL
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE reporte_producto (
+    id_reporte              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_usuario_reportante   BIGINT UNSIGNED NOT NULL,
+    id_producto_reportado   BIGINT UNSIGNED NOT NULL,
+    motivo              VARCHAR(100) NOT NULL,
+    comentario          TEXT,
+    fecha_reporte       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    estado_reporte      ENUM('ABIERTO','EN_REVISION','CERRADO')
+                        NOT NULL DEFAULT 'ABIERTO',
+
+    CONSTRAINT fk_rep_prod_reportante
+        FOREIGN KEY (id_usuario_reportante)
+        REFERENCES usuario(id_usuario)
+        ON DELETE RESTRICT
         ON UPDATE CASCADE,
 
-    CONSTRAINT fk_reporte_producto
+    CONSTRAINT fk_rep_prod_producto
         FOREIGN KEY (id_producto_reportado)
         REFERENCES producto(id_producto)
-        ON DELETE SET NULL
-        ON UPDATE CASCADE,
-
-    INDEX idx_reporte_reportante (id_usuario_reportante),
-    INDEX idx_reporte_usuario (id_usuario_reportado),
-    INDEX idx_reporte_producto (id_producto_reportado)
-) 
-
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
 
