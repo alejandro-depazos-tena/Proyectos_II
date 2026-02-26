@@ -5,11 +5,6 @@ export const categories = [
     path: "/category/libros",
   },
   {
-    name: "Apuntes",
-    image: "/campus.webp",
-    path: "/category/apuntes",
-  },
-  {
     name: "Material",
     image: "/foto.webp",
     path: "/category/material",
@@ -69,13 +64,6 @@ export const featuredProducts = [
     stock: 3,
     images: ["/campus.webp"],
     slug: "calculadora-cientifica",
-  },
-  {
-    title: "Apuntes de Programación (PDF + impresos)",
-    price: 8,
-    stock: 10,
-    images: ["/foto.webp"],
-    slug: "apuntes-programacion",
   },
   {
     title: "Bata de laboratorio (alquiler)",

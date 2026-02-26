@@ -51,10 +51,12 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                 <label class="form-control w-full">
                   <div class="label"><span class="label-text font-medium">Nombre</span></div>
                   <input id="f-nombre" name="nombre" type="text" autocomplete="given-name" placeholder="Ana" class="input input-bordered w-full" />
+                  <p id="err-nombre" class="text-error text-xs mt-1 min-h-[1rem]"></p>
                 </label>
                 <label class="form-control w-full">
                   <div class="label"><span class="label-text font-medium">Apellidos</span></div>
                   <input id="f-apellidos" name="apellidos" type="text" autocomplete="family-name" placeholder="García López" class="input input-bordered w-full" />
+                  <p id="err-apellidos" class="text-error text-xs mt-1 min-h-[1rem]"></p>
                 </label>
               </div>
             </div>
@@ -63,6 +65,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             <label class="form-control w-full">
               <div class="label"><span class="label-text font-medium">Correo electrónico</span></div>
               <input id="f-email" name="email" type="email" autocomplete="email" required placeholder="tu@ufv.es" class="input input-bordered w-full" />
+              <p id="err-email" class="text-error text-xs mt-1 min-h-[1rem]"></p>
             </label>
 
             <!-- Solo registro -->
@@ -71,19 +74,35 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                 <label class="form-control w-full">
                   <div class="label"><span class="label-text font-medium">Teléfono</span></div>
                   <input id="f-telefono" name="telefono" type="tel" autocomplete="tel" placeholder="612345678" class="input input-bordered w-full" />
+                  <p id="err-telefono" class="text-error text-xs mt-1 min-h-[1rem]"></p>
                 </label>
                 <label class="form-control w-full">
                   <div class="label"><span class="label-text font-medium">DNI / NIE</span></div>
                   <input id="f-dni" name="dni" type="text" placeholder="12345678A" class="input input-bordered w-full" />
+                  <p id="err-dni" class="text-error text-xs mt-1 min-h-[1rem]"></p>
                 </label>
               </div>
             </div>
 
             <!-- Contraseña siempre -->
-            <label class="form-control w-full">
+            <div class="form-control w-full">
               <div class="label"><span class="label-text font-medium">Contraseña</span></div>
-              <input id="f-password" name="password" type="password" autocomplete="current-password" required placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" class="input input-bordered w-full" />
-            </label>
+              <div class="relative">
+                <input id="f-password" name="password" type="password" autocomplete="current-password" required placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" class="input input-bordered w-full pr-12" />
+                <button id="toggle-password" type="button" aria-label="Mostrar contraseña" class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content transition-colors">
+                  <!-- ojo abierto -->
+                  <svg id="icon-eye" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                  <!-- ojo cerrado -->
+                  <svg id="icon-eye-off" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.223-3.592M6.938 6.938A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.962 9.962 0 01-4.48 5.587M3 3l18 18"/>
+                  </svg>
+                </button>
+              </div>
+              <p id="err-password" class="text-error text-xs mt-1 min-h-[1rem]"></p>
+            </div>
 
             <button id="submit-btn" class="btn btn-primary w-full mt-2" type="submit">Entrar</button>
             <div id="error" class="text-error text-sm text-center" aria-live="polite"></div>
@@ -122,6 +141,40 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
       const fDni         = document.getElementById("f-dni");
       const fPassword    = document.getElementById("f-password");
 
+      // ── Toggle contraseña ─────────────────────────────────────
+      document.getElementById("toggle-password").addEventListener("click", function() {
+        const visible = fPassword.type === "text";
+        fPassword.type = visible ? "password" : "text";
+        document.getElementById("icon-eye").classList.toggle("hidden", !visible);
+        document.getElementById("icon-eye-off").classList.toggle("hidden", visible);
+        this.setAttribute("aria-label", visible ? "Mostrar contraseña" : "Ocultar contraseña");
+      });
+      // ─────────────────────────────────────────────────────────
+
+      // ── Validación ─────────────────────────────────────────────
+      function setFieldError(field, msg) {
+        const errEl = document.getElementById("err-" + field);
+        const input = document.getElementById("f-" + field);
+        if (errEl) errEl.textContent = msg || "";
+        if (input) input.classList.toggle("input-error", !!msg);
+      }
+      function clearErrors() {
+        ["nombre","apellidos","email","telefono","dni","password"].forEach(f => setFieldError(f, ""));
+      }
+      function validateRegister(p) {
+        const e = {};
+        if (!p.nombre    || p.nombre.length    < 2) e.nombre    = "El nombre debe tener al menos 2 caracteres.";
+        if (!p.apellidos || p.apellidos.length < 2) e.apellidos = "Los apellidos deben tener al menos 2 caracteres.";
+        if (!p.email     || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email)) e.email = "Introduce un correo electrónico válido.";
+        if (!p.telefono  || !/^[6789]\d{8}$/.test(p.telefono))           e.telefono = "Teléfono: 9 dígitos empezando por 6, 7, 8 o 9.";
+        if (!p.dni       || !/^(\d{8}[A-Z]|[XYZ]\d{7}[A-Z])$/.test(p.dni.toUpperCase())) e.dni = "DNI: 12345678A · NIE: X1234567B.";
+        if (!p.password  || p.password.length < 8)  e.password = "Mínimo 8 caracteres.";
+        else if (!/[A-Z]/.test(p.password))         e.password = "Debe incluir al menos una mayúscula.";
+        else if (!/[0-9]/.test(p.password))         e.password = "Debe incluir al menos un número.";
+        return e;
+      }
+      // ───────────────────────────────────────────────────────────
+
       function setMode(m) {
         mode = m;
         const isReg = m === "register";
@@ -146,6 +199,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         url.searchParams.set("mode", m);
         history.replaceState(null, "", url.toString());
         errorEl.textContent = "";
+        clearErrors();
       }
 
       tabLogin.addEventListener("click", () => setMode("login"));
@@ -155,6 +209,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
       document.getElementById("auth-form").addEventListener("submit", async function(e) {
         e.preventDefault();
         errorEl.textContent = "";
+        clearErrors();
 
         const formData = new FormData(e.currentTarget);
         let payload;
@@ -168,6 +223,11 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             telefono:  (formData.get("telefono")  || "").trim(),
             dni:       (formData.get("dni")       || "").trim().toUpperCase(),
           };
+          const errors = validateRegister(payload);
+          if (Object.keys(errors).length > 0) {
+            Object.entries(errors).forEach(([field, msg]) => setFieldError(field, msg));
+            return;
+          }
         } else {
           payload = {
             email:    (formData.get("email")    || "").trim(),
