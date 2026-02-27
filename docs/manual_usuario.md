@@ -19,7 +19,7 @@
 7. [Ver detalles de un producto](#ver-detalles-de-un-producto)
 8. [Publicar un artículo](#publicar-un-artículo)
 9. [Gestionar favoritos](#gestionar-favoritos)
-10. [Proceso de compra/alquiler](#proceso-de-compra-alquiler)
+10. [Proceso de interés, contacto y entrega](#proceso-de-interés-contacto-y-entrega)
 11. [Perfil de usuario](#perfil-de-usuario)
 12. [Preguntas frecuentes](#preguntas-frecuentes)
 
@@ -31,8 +31,8 @@
 
 **UFV Share** es la plataforma oficial de intercambio de material entre estudiantes de la Universidad Francisco de Vitoria. Permite:
 
-- 📚 **Comprar** libros, apuntes y material académico de segunda mano
-- 💻 **Adquirir** tecnología, equipamiento y dispositivos electrónicos
+- 📚 **Conseguir** libros, apuntes y material académico de segunda mano
+- 💻 **Encontrar** tecnología, equipamiento y dispositivos electrónicos
 - 🎵 **Rentar** instrumentos musicales, equipos audiovisuales y herramientas
 - 🤝 **Conectar** con otros estudiantes de tu campus
 
@@ -53,7 +53,7 @@
 | Filtrado por categoría | ✅ Implementado | Venta o alquiler |
 | Publicar artículos | ✅ Implementado | Subir productos propios |
 | Gestión de favoritos | ✅ Implementado | Guardar artículos de interés |
-| Sistema de pago | 🔄 Próximamente | APIs externas pendientes |
+| Contacto comprador-vendedor | ✅ Implementado | Solicitud de interés y coordinación privada |
 | Mensajería interna | 🔄 Sprint 2 | Chat entre usuarios |
 | Sistema de valoraciones | 🔄 Sprint 3 | Reputación y reviews |
 
@@ -189,7 +189,6 @@ Una vez hayas iniciado sesión, accederás al dashboard principal que muestra:
    - Logo UFV Share (volver al inicio)
    - Buscador de productos
    - Icono de favoritos
-   - Icono de carrito
    - Avatar de perfil
 
 2. **Filtros laterales** (panel izquierdo)
@@ -407,7 +406,7 @@ _[ESPACIO PARA CAPTURA: Card del vendedor]_
 | Botón | Función | Estado actual |
 |-------|---------|---------------|
 | 💚 **Añadir a favoritos** | Guardar en lista personal | ✅ Funcional |
-| 🛒 **Añadir al carrito** | Iniciar proceso de compra | ✅ Funcional |
+| 🙋 **Me interesa** | Solicitar contacto con el vendedor | ✅ Funcional |
 | 💬 **Contactar vendedor** | Enviar mensaje directo | 🔄 Sprint 2 |
 | 📤 **Compartir** | Compartir en redes sociales | 🔄 Sprint 2 |
 | 🚩 **Reportar** | Indicar contenido inapropiado | 🔄 Sprint 3 |
@@ -570,7 +569,7 @@ _[ESPACIO PARA CAPTURA: Botón de favoritos en hover y activado]_
 
 **Ubicaciones del botón:**
 - Card de producto en el catálogo (esquina superior derecha)
-- Página de detalle del producto (junto a "Añadir al carrito")
+- Página de detalle del producto (junto a "Me interesa")
 
 ### Ver lista de favoritos
 
@@ -591,13 +590,13 @@ _[ESPACIO PARA CAPTURA: Navbar con icono de favoritos]_
 ┌─────────────────────────────────────────┐
 │  [Imagen] MacBook Air M1                │
 │  750€ · Venta · Javier Romero           │
-│  [Ver] [Eliminar] [Añadir al carrito]   │
+│  [Ver] [Eliminar] [Me interesa]         │
 └─────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────┐
 │  [Imagen] Guitarra Alhambra             │
 │  180€ · Venta · Isabel Prieto           │
-│  [Ver] [Eliminar] [Añadir al carrito]   │
+│  [Ver] [Eliminar] [Me interesa]         │
 └─────────────────────────────────────────┘
 ```
 
@@ -608,7 +607,7 @@ _[ESPACIO PARA CAPTURA: Lista completa de favoritos]_
 - **Ordenar:** Por precio, fecha añadido
 - **Eliminar:** Quitar de favoritos individualmente
 - **Eliminar todos:** Vaciar lista completa
-- **Añadir varios al carrito:** Selección múltiple (🔄 Sprint 2)
+- **Gestionar interesados:** Marcar productos prioritarios para contactar
 
 ### Notificaciones de favoritos
 
@@ -622,154 +621,56 @@ _[ESPACIO PARA CAPTURA: Notificación de cambio en favorito]_
 
 ---
 
-## 🛒 Proceso de compra/alquiler
+## 🤝 Proceso de interés, contacto y entrega
 
-> **⚠️ IMPORTANTE:** El sistema de pago completo con pasarelas externas está planificado para **Sprint 2**. Actualmente puedes añadir productos al carrito y contactar directamente con el vendedor.
+> **⚠️ IMPORTANTE:** UFV Share **no integra pasarelas de pago** ni procesa cobros.
+> La entrega y el pago se acuerdan entre estudiantes (normalmente en persona por Bizum o efectivo).
 
-### Paso 1: Añadir al carrito
+### Paso 1: Marcar interés
 
 **Desde la página del producto:**
-1. Haz clic en **"Añadir al carrito"** 🛒
-2. Aparece notificación de confirmación
-3. El contador del carrito se actualiza
+1. Haz clic en **"Me interesa"**.
+2. El vendedor recibe tu solicitud.
+3. Queda registrada como interés pendiente.
 
-_[ESPACIO PARA CAPTURA: Botón "Añadir al carrito" y notificación]_
+_[ESPACIO PARA CAPTURA: Botón "Me interesa" y confirmación]_
 
-**Información añadida al carrito:**
-- Producto seleccionado
-- Precio actual
-- Tipo de transacción (venta/alquiler)
-- Datos del vendedor
+### Paso 2: Respuesta del vendedor
 
-### Paso 2: Ver carrito
+El vendedor puede:
+- ✅ Aceptar interés
+- ❌ Rechazar interés
+- ⏳ Mantenerlo pendiente
 
-**Acceder al carrito:**
-1. Click en icono 🛒 en navbar
-2. O navega a `/cart`
-3. Se muestra resumen de productos
+### Paso 3: Contacto privado con control de privacidad
 
-_[ESPACIO PARA CAPTURA: Vista del carrito con productos]_
+- El teléfono del vendedor está **oculto por defecto**.
+- La persona interesada puede **compartir su número** para facilitar contacto.
+- El vendedor decide si contacta al interesado.
+- Solo con aprobación del vendedor se comparte su teléfono.
 
-**Información mostrada:**
+_[ESPACIO PARA CAPTURA: Solicitud de interés y autorización de contacto]_
 
-```
-🛒 Carrito de Compras (3 productos)
+### Paso 4: Acuerdo entre estudiantes
 
-┌─────────────────────────────────────────┐
-│  VENTA                                   │
-│  [IMG] MacBook Air M1 2020               │
-│  Vendedor: Javier Romero                 │
-│  Precio: 750,00€                         │
-│  [Eliminar] [Ver detalles]               │
-└─────────────────────────────────────────┘
+Por privado acuerdan:
+- Punto de encuentro (recomendado: campus UFV o lugar público)
+- Fecha y hora
+- Método de pago (Bizum, efectivo u otro acordado)
+- Condiciones de envío, si aplica
 
-┌─────────────────────────────────────────┐
-│  ALQUILER (1 semana)                     │
-│  [IMG] Cámara Canon EOS M50              │
-│  Vendedor: Laura Sánchez                 │
-│  Precio: 50,00€                          │
-│  [Eliminar] [Ver detalles]               │
-└─────────────────────────────────────────┘
+### Paso 5: Entrega y cierre
 
-───────────────────────────────────────────
-Subtotal venta:     750,00€
-Subtotal alquiler:   50,00€
-───────────────────────────────────────────
-TOTAL:              800,00€
-```
+- Se entrega el producto.
+- Se realiza el pago acordado fuera de la plataforma.
+- El vendedor marca el producto como vendido/alquilado/no disponible.
 
-### Paso 3: Revisar resumen
+### Envío (opcional)
 
-**Resumen del pedido:**
-- Lista de productos a adquirir
-- Detalles de cada vendedor
-- Precios individuales y totales
-- Tipo de transacción (venta/alquiler)
-- Condiciones especiales
-
-_[ESPACIO PARA CAPTURA: Resumen completo del carrito]_
-
-### Paso 4: Contactar con vendedores
-
-**Actualmente (Sprint 1):**
-
-Cada producto muestra:
-- 📧 Email del vendedor
-- 📞 Teléfono (si está disponible)
-- 💬 Botón "Contactar al vendedor"
-
-**Al hacer clic en "Contactar al vendedor":**
-1. Se abre tu cliente de email predeterminado
-2. Destinatario: email del vendedor
-3. Asunto: "Interesado en [Nombre del producto]"
-4. Redacta tu mensaje personalmente
-
-_[ESPACIO PARA CAPTURA: Botón de contacto y email generado]_
-
-**Plantilla sugerida para el mensaje:**
-
-```
-Asunto: Interesado en MacBook Air M1 2020
-
-Hola Javier,
-
-Me interesa tu MacBook Air M1 que vi en UFV Share.
-
-Quisiera saber:
-- ¿Sigue disponible?
-- ¿Dónde podemos quedar para verlo?
-- ¿Aceptas algún método de pago en particular?
-
-Gracias,
-[Tu nombre]
-```
-
-### Paso 5: Proceso de pago (🔄 Próximamente - Sprint 2)
-
-**Funcionalidades planificadas:**
-
-#### Métodos de pago integrados:
-- 💳 **Tarjeta de crédito/débito** (Stripe)
-- 🏦 **Transferencia bancaria** (confirmación automática)
-- 📱 **Bizum** (integración API)
-- 💰 **PayPal** (checkout directo)
-- 🤝 **Efectivo en persona** (opción con confirmación)
-
-_[ESPACIO RESERVADO: Mockup de selección de método de pago]_
-
-#### Pasarela de pago segura:
-1. Selección de método de pago
-2. Ingreso de datos de pago (encriptados)
-3. Confirmación de transacción
-4. Notificación a vendedor y comprador
-5. Sistema de garantía (retención temporal)
-
-_[ESPACIO RESERVADO: Mockup de pasarela de pago]_
-
-#### Sistema de garantías:
-- El dinero se retiene hasta confirmar entrega
-- Protección comprador y vendedor
-- Resolución de disputas automatizada
-- Rating obligatorio post-transacción
-
-### Paso 6: Confirmación de compra/alquiler
-
-**Una vez completada la transacción:**
-
-**Comprador recibe:**
-- ✅ Email de confirmación
-- 📄 Recibo digital descargable
-- 📊 Tracking del proceso
-- 💬 Chat activado con vendedor
-- 📍 Punto de encuentro sugerido (si aplica)
-
-**Vendedor recibe:**
-- 🔔 Notificación de venta
-- 📧 Datos del comprador
-- 💰 Confirmación de pago
-- 📋 Instrucciones de entrega
-
-_[ESPACIO PARA CAPTURA: Email de confirmación de compra]_
+Si prefieren envío:
+- Se gestiona de forma privada entre las dos partes.
+- UFV Share solo facilita el contacto autorizado.
+- La plataforma no intermedia en cobros ni logística.
 
 ### Caso especial: Alquileres
 
@@ -798,8 +699,8 @@ _[ESPACIO PARA CAPTURA: Formulario específico de alquiler]_
 - Vendedor aprueba o rechaza
 - Propone alternativas si no está disponible
 
-3️⃣ **Pago y reserva**
-- Se paga el alquiler + fianza
+3️⃣ **Reserva acordada por privado**
+- Se acuerdan precio y, si aplica, fianza
 - Producto queda reservado
 
 4️⃣ **Recogida**
@@ -878,27 +779,26 @@ _[ESPACIO PARA CAPTURA: Grid de publicaciones propias]_
 - 📅 Fecha de publicación
 - 📊 Interacciones (mensajes recibidos)
 
-#### 3. Mis compras
+#### 3. Mis intercambios
 
-**Historial de transacciones:**
-- Productos comprados
-- Productos alquilados
-- Fecha de transacción
-- Estado (completado, pendiente, en disputa)
-- Valoración dada
+**Historial de actividad:**
+- Productos en los que mostraste interés
+- Productos vendidos/alquilados
+- Fecha del acuerdo
+- Estado (pendiente, acordado, completado)
+- Valoración (cuando esté disponible)
 
-_[ESPACIO PARA CAPTURA: Lista de compras históricas]_
+_[ESPACIO PARA CAPTURA: Lista de intercambios]_
 
-#### 4. Mis ventas
+#### 4. Mis ventas/alquileres
 
-**Productos vendidos/alquilados:**
-- Fecha de venta
-- Comprador
-- Precio final
+**Productos con acuerdo cerrado:**
+- Fecha de cierre
+- Persona interesada
 - Estado de entrega
 - Valoración recibida
 
-_[ESPACIO PARA CAPTURA: Lista de ventas]_
+_[ESPACIO PARA CAPTURA: Lista de ventas y alquileres]_
 
 #### 5. Mis favoritos
 
@@ -950,8 +850,8 @@ _[ESPACIO RESERVADO: Sistema de valoraciones]_
 
 ### Seguridad y confianza
 
-**¿Es seguro comprar a través de UFV Share?**
-> Sí. Todos los usuarios están verificados con su email institucional UFV. Además, implementaremos un sistema de valoraciones y garantías de pago en Sprint 2 para mayor seguridad.
+**¿Es seguro usar UFV Share?**
+> Sí. Todos los usuarios están verificados con su email institucional UFV. Recomendamos encuentros en lugares públicos y mantener la comunicación por canales autorizados.
 
 **¿Qué hago si hay un problema con una transacción?**
 > En Sprint 3 implementaremos un sistema de resolución de disputas. Actualmente, puedes contactar con soporte a través de `soporte@ufvshares.es` para mediar en conflictos.
@@ -973,24 +873,32 @@ _[ESPACIO RESERVADO: Sistema de valoraciones]_
 **¿Debo incluir fotos reales del producto?**
 > Sí, es obligatorio usar fotos reales del producto que vendes. No se permiten imágenes de internet. Esto genera confianza y evita malentendidos.
 
-### Pagos y transacciones
+### Pagos y acuerdos
 
 **¿Cómo funciona el pago?**
-> **Actualmente (Sprint 1):** Contactas directamente con el vendedor por email y acordáis el método de pago (efectivo, Bizum, transferencia).
-> 
-> **Próximamente (Sprint 2):** Integraremos pasarelas de pago seguras (Stripe, PayPal, Bizum) directamente en la plataforma con sistema de garantías.
+> UFV Share no integra pagos dentro de la plataforma. Comprador y vendedor acuerdan el pago directamente (normalmente Bizum o efectivo).
 
 **¿Qué métodos de pago se aceptan?**
-> Los vendedores pueden especificar sus métodos preferidos. Los más comunes son:
+> Los que acuerden ambas partes por privado. Los más comunes son:
 > - 💵 Efectivo en mano
 > - 📱 Bizum
-> - 🏦 Transferencia bancaria
-> - 💳 Tarjeta (a través de la plataforma en Sprint 2)
+
+**¿Hay pasarela de pago en UFV Share?**
+> No.
 
 **¿Hay comisiones por vender?**
-> **Actualmente:** No, UFV Share es 100% gratuito sin comisiones.
-> 
-> **Futuro:** Se evaluará una pequeña comisión (2-3%) solo para transacciones con pago integrado para cubrir costes de pasarela de pago.
+> No. UFV Share es gratuito y no cobra comisiones por transacciones entre usuarios.
+
+### Contacto y privacidad
+
+**¿Se muestra mi teléfono públicamente?**
+> No. El teléfono está oculto por defecto.
+
+**¿Cómo se comparte el teléfono?**
+> Solo cuando hay interés real y el vendedor acepta. El interesado puede compartir primero su número para que el vendedor le contacte.
+
+**¿Se puede acordar envío?**
+> Sí, pero se gestiona por privado entre ambas partes. UFV Share no interviene en logística ni cobros del envío.
 
 ### Alquileres
 
@@ -1010,7 +918,7 @@ _[ESPACIO RESERVADO: Sistema de valoraciones]_
 
 **¿Recibiré notificaciones por email?**
 > Sí. Puedes configurar qué notificaciones deseas recibir en "Perfil" → "Configuración" → "Notificaciones". Por defecto recibirás:
-> - Confirmaciones de compra/venta
+> - Solicitudes de interés y respuestas
 > - Mensajes de otros usuarios (Sprint 2)
 > - Cambios en favoritos (Sprint 2)
 
@@ -1089,10 +997,10 @@ Nos encantaría escucharte:
 | Funcionalidad | Descripción | Estado |
 |---------------|-------------|--------|
 | 💬 **Mensajería interna** | Chat en tiempo real entre usuarios | 🔄 |
-| 💳 **Pasarela de pago** | Stripe, PayPal, Bizum integrados | 🔄 |
 | 🔔 **Sistema de notificaciones** | Push, email y SMS | 🔄 |
 | 📊 **Dashboard de estadísticas** | Analytics de tus publicaciones | 🔄 |
 | 🔍 **Búsqueda avanzada** | Filtros complejos y guardados | 🔄 |
+| 📞 **Gestión de contacto privado** | Solicitudes de interés y visibilidad de teléfono | 🔄 |
 
 ### Sprint 3 (Planificado)
 
@@ -1100,7 +1008,6 @@ Nos encantaría escucharte:
 |---------------|-------------|--------|
 | ⭐ **Sistema de valoraciones** | Rating y reviews de usuarios | 📅 |
 | 🏆 **Gamificación** | Insignias y niveles de usuario | 📅 |
-| 🤝 **Sistema de garantías** | Protección comprador/vendedor | 📅 |
 | 🚩 **Reportes y moderación** | Denunciar contenido inapropiado | 📅 |
 | 🔐 **Autenticación 2FA** | Seguridad adicional | 📅 |
 
@@ -1138,11 +1045,11 @@ Nos encantaría escucharte:
 **Términos de transacciones:**
 
 - **Alquiler:** Renta temporal de un producto
-- **Comprador:** Usuario que adquiere un producto
+- **Comprador:** Usuario interesado en un producto
 - **Fianza:** Depósito de seguridad para alquileres
-- **Pasarela de pago:** Sistema seguro para procesar pagos
 - **Vendedor/Propietario:** Usuario que publica un producto
 - **Venta:** Transferencia definitiva de propiedad
+- **Contacto autorizado:** Intercambio de teléfono tras aprobación del vendedor
 
 **Términos técnicos:**
 
@@ -1187,11 +1094,11 @@ No está permitido publicar:
 
 ### Responsabilidad
 
-- UFV Share es un intermediario, no parte de las transacciones
+- UFV Share es un intermediario de contacto, no parte de las transacciones económicas
 - Los usuarios son responsables de sus publicaciones
 - Verificamos identidad pero no garantizamos honestidad
 - Recomendamos encuentros en lugares públicos del campus
-- No nos hacemos responsables de disputas entre usuarios
+- Si acuerdan envío, condiciones y riesgos se gestionan por privado
 
 ---
 
@@ -1258,10 +1165,10 @@ No está permitido publicar:
 
 🔄 **Pendiente para Sprint 2:**
 - Mensajería interna entre usuarios
-- Pasarelas de pago (Stripe, PayPal, Bizum)
 - Sistema de notificaciones
 - Estadísticas de publicaciones
 - Búsqueda avanzada
+- Gestión de contacto privado y privacidad de teléfono
 
 ---
 
