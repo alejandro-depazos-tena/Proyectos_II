@@ -46,7 +46,6 @@ import "../styles/global.css";
       <!-- Content -->
       <div class="relative z-10 text-center text-white max-w-4xl mx-auto px-6 py-20">
         <div class="badge badge-warning badge-lg mb-6 font-semibold tracking-widest uppercase text-xs px-4 py-3 gap-2 shadow">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3l14 9-14 9V3z"/></svg>
           Solo para estudiantes UFV
         </div>
 
@@ -152,9 +151,6 @@ import "../styles/global.css";
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-10 relative">
-          <!-- Connecting line (desktop only) -->
-          <div class="hidden md:block absolute top-10 left-[calc(33%+1rem)] right-[calc(33%+1rem)] h-0.5 bg-gradient-to-r from-primary to-primary/30"></div>
-
           <!-- Step 1 -->
           <div class="flex flex-col items-center text-center gap-4">
             <div class="relative">
@@ -196,21 +192,65 @@ import "../styles/global.css";
           <p class="text-base-content/60">Encuentra exactamente lo que buscas.</p>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-          {[
-            { icon: "💻", label: "Electrónica" },
-            { icon: "📚", label: "Libros" },
-            { icon: "🏋️", label: "Deporte" },
-            { icon: "🏠", label: "Hogar" },
-            { icon: "📦", label: "Otros" },
-          ].map(({ icon, label }) => (
-            <a href="/auth?mode=register&next=%2Fapp"
-              class="card bg-base-100 shadow hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer border border-base-200">
-              <div class="card-body items-center text-center py-8 gap-3">
-                <span class="text-4xl">{icon}</span>
-                <span class="font-semibold text-sm">{label}</span>
-              </div>
-            </a>
-          ))}
+          <a href="/auth?mode=register&next=%2Fapp"
+            class="card bg-base-100 shadow hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer border border-base-200">
+            <div class="card-body items-center text-center py-8 gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 5h14a1 1 0 011 1v7H4V6a1 1 0 011-1z"/>
+              </svg>
+              <span class="font-semibold text-sm">Electrónica</span>
+            </div>
+          </a>
+
+          <a href="/auth?mode=register&next=%2Fapp"
+            class="card bg-base-100 shadow hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer border border-base-200">
+            <div class="card-body items-center text-center py-8 gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v13"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 7c-1.8-1.2-4.2-1.7-7-1.7v11c2.8 0 5.2.5 7 1.7"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 7c1.8-1.2 4.2-1.7 7-1.7v11c-2.8 0-5.2.5-7 1.7"/>
+              </svg>
+              <span class="font-semibold text-sm">Libros</span>
+            </div>
+          </a>
+
+          <a href="/auth?mode=register&next=%2Fapp"
+            class="card bg-base-100 shadow hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer border border-base-200">
+            <div class="card-body items-center text-center py-8 gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10v4"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 8v8"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h4"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8v8"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 10v4"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 12h4"/>
+              </svg>
+              <span class="font-semibold text-sm">Deporte</span>
+            </div>
+          </a>
+
+          <a href="/auth?mode=register&next=%2Fapp"
+            class="card bg-base-100 shadow hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer border border-base-200">
+            <div class="card-body items-center text-center py-8 gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 11l9-7 9 7"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 10v10h14V10"/>
+              </svg>
+              <span class="font-semibold text-sm">Hogar</span>
+            </div>
+          </a>
+
+          <a href="/auth?mode=register&next=%2Fapp"
+            class="card bg-base-100 shadow hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer border border-base-200">
+            <div class="card-body items-center text-center py-8 gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8 4-8-4 8-4 8 4z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10l8 4 8-4V7"/>
+              </svg>
+              <span class="font-semibold text-sm">Otros</span>
+            </div>
+          </a>
         </div>
       </div>
     </section>
