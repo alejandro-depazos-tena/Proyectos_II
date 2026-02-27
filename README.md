@@ -1,4 +1,4 @@
-# 🚀 UFV Shares - Sistema de Gestión 
+# 🎓 UFV Shares - Sistema de Gestión 
 
 <div align="center">
 
@@ -60,25 +60,7 @@ Este proyecto implementa prácticas profesionales de desarrollo colaborativo, ap
 - ✅ **Entrega Continua (CD)** con despliegue automático a Azure
 - ✅ **Control de Versiones** con Git Flow y Pull Requests revisados
 - ✅ **Gestión de Proyecto** con Features, PBIs y criterios QAS
-
----
-
-## 🚀 Funcionalidades Principales
-
-### 📦 Paquetes de Trabajo (PTs) Implementados
-
-#### **PT1: ** 📧
-
-
-#### **PT2: ** 🖼️
-
-
-#### **PT3: ** ⭐
-- 
-
-
-#### **PT4: ** 📊
-- 
+ 
 ---
 
 ## 🛠️ Stack Tecnológico
@@ -102,8 +84,23 @@ Este proyecto implementa prácticas profesionales de desarrollo colaborativo, ap
 
 ```
 .
-├─ backend/    # Java + Maven (API)
-└─ frontend/   # Astro (UI)
+├─ backend/                  # Java + Maven (API REST)
+│  ├─ src/main/java/com/ufvshares/backend/
+│  │  ├─ auth/               # Login, registro, sesión
+│  │  ├─ producto/           # Gestión de productos
+│  │  ├─ solicitud/          # Solicitudes de alquiler/compra
+│  │  ├─ transaccion/        # Ciclo de transacciones
+│  │  ├─ reporteusuario/     # Reportes de usuarios
+│  │  └─ reporteproducto/    # Reportes de productos
+│  └─ src/main/resources/
+├─ frontend/                 # Astro (UI)
+│  ├─ src/pages/             # Rutas y pantallas
+│  ├─ src/components/        # Componentes reutilizables
+│  ├─ src/store/             # Estado cliente (carrito/favoritos)
+│  └─ src/styles/            # Estilos globales
+├─ docs/                     # Memoria y documentación técnica
+├─ bbdd/                     # Scripts SQL (tablas y datos)
+└─ run-dev.ps1               # Arranque local rápido
 ```
 
 ---
@@ -223,6 +220,26 @@ La aplicación está desplegada en ****:
 ## 📈 Gestión del Proyecto
 
 ### Backlog Jerarquizado
+
+- **Épicas**: Autenticación, Gestión de Productos, Solicitudes/Transacciones, Reportes y Accesibilidad.
+- **Historias de Usuario**: redactadas en formato _Como/Quiero/Para_ con criterios verificables.
+- **Tareas técnicas**: desglosadas por backend, frontend, testing y documentación.
+
+### 🗓️ Plan de trabajo
+
+- **Metodología**: SCRUM (4 sprints) + TDD + Git Flow.
+- **Sprint 1**: base técnica (auth, perfil, productos iniciales y modelo de datos).
+- **Sprint 2**: consolidación de gestión de productos y búsqueda/filtros.
+- **Sprint 3**: flujo de solicitudes y transacciones end-to-end.
+- **Sprint 4**: reportes, accesibilidad, estabilización y cierre.
+
+### Estructura de cada sprint
+
+1. **Sprint Planning**: selección de historias y estimación.
+2. **Desarrollo**: implementación incremental con Pull Requests.
+3. **Testing continuo**: validación funcional y técnica durante el sprint.
+4. **Sprint Review**: demostración del incremento y feedback.
+5. **Retrospective**: mejoras del proceso para la siguiente iteración.
 
 
 ### Criterios de Aceptación (QAS)
