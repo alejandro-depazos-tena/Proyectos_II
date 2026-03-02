@@ -3,17 +3,9 @@ import Layout from "../../layouts/Layout.astro";
 import { blogPosts } from "../../data/blogData";
 import BlogCard from "../../components/blog/BlogCard.astro";
 import Breadcrumbs from "../../components/ui/Breadcrumbs.astro";
-import Pagination from "../../components/ui/Pagination.astro";
-
-const url = new URL(Astro.request.url);
-const currentPage = parseInt(url.searchParams.get("page") || "1", 10);
 
 const postsPerPage = 6;
 const totalPages = Math.ceil(blogPosts.length / postsPerPage);
-
-const start = (currentPage - 1) * postsPerPage;
-const end = start + postsPerPage;
-const currentPosts = blogPosts.slice(start, end);
 ---
 
 <Layout>
@@ -37,16 +29,89 @@ const currentPosts = blogPosts.slice(start, end);
       </p>
     </div>
 
-    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-      {currentPosts.map((post) => <BlogCard post={post} />)}
+    <!-- Todos los posts renderizados, con atributo data-page para filtrar en cliente -->
+    <div id="blog-grid" class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      {
+        blogPosts.map((post, i) => {
+          const page = Math.floor(i / postsPerPage) + 1;
+          return (
+            <div data-page={page} class="blog-post-item">
+              <BlogCard post={post} />
+            </div>
+          );
+        })
+      }
     </div>
 
-    <div class="flex justify-center mt-12">
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        baseUrl="/blog"
-      />
+    <!-- Paginación controlada por JS -->
+    <div id="pagination-container" class="flex justify-center mt-12">
+      <div class="join" id="pagination-controls"></div>
     </div>
   </section>
 </Layout>
+
+<script define:vars={{ totalPages, postsPerPage }}>
+  function getCurrentPage() {
+    const params = new URLSearchParams(window.location.search);
+    return parseInt(params.get("page") || "1", 10);
+  }
+
+  function showPage(page) {
+    const items = document.querySelectorAll(".blog-post-item");
+    items.forEach((item) => {
+      item.style.display =
+        parseInt(item.dataset.page) === page ? "" : "none";
+    });
+    renderPagination(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function renderPagination(currentPage) {
+    const container = document.getElementById("pagination-controls");
+    if (!container) return;
+    container.innerHTML = "";
+
+    // Botón anterior
+    const prev = document.createElement("button");
+    prev.className = `join-item btn ${currentPage === 1 ? "btn-disabled" : ""}`;
+    prev.textContent = "«";
+    prev.disabled = currentPage === 1;
+    prev.addEventListener("click", () => navigateTo(currentPage - 1));
+    container.appendChild(prev);
+
+    // Botones de página
+    for (let p = 1; p <= totalPages; p++) {
+      const btn = document.createElement("button");
+      btn.className = `join-item btn ${currentPage === p ? "btn-active" : ""}`;
+      btn.textContent = p;
+      btn.addEventListener("click", () => navigateTo(p));
+      container.appendChild(btn);
+    }
+
+    // Botón siguiente
+    const next = document.createElement("button");
+    next.className = `join-item btn ${currentPage === totalPages ? "btn-disabled" : ""}`;
+    next.textContent = "»";
+    next.disabled = currentPage === totalPages;
+    next.addEventListener("click", () => navigateTo(currentPage + 1));
+    container.appendChild(next);
+  }
+
+  function navigateTo(page) {
+    if (page < 1 || page > totalPages) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("page", page);
+    history.pushState({}, "", url);
+    showPage(page);
+  }
+
+  // Inicializar con la página actual (de la URL si existe)
+  document.addEventListener("DOMContentLoaded", () => {
+    showPage(getCurrentPage());
+  });
+
+  // Soporte para botón atrás / adelante del navegador
+  window.addEventListener("popstate", () => {
+    showPage(getCurrentPage());
+  });
+</script>

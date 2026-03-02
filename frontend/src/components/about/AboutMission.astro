@@ -4,58 +4,42 @@
 
 <section class="py-20 px-4">
     <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <!-- Quiénes somos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-24">
             <div class="order-2 md:order-1">
                 <span
                     class="text-primary font-bold uppercase tracking-widest text-sm mb-4 block"
-                    >Nuestra misión</span
+                    >Quiénes somos</span
                 >
                 <h2
                     class="text-3xl md:text-5xl font-black text-slate-900 uppercase mb-6 leading-tight"
                 >
-                    Redefiniendo el acceso <br /> a tecnología premium
+                    Un proyecto nacido <br /> en la universidad
                 </h2>
                 <div
                     class="space-y-4 text-slate-600 leading-relaxed font-medium"
                 >
                     <p>
-                        Fundada en 2024, nuestra plataforma nació de una idea
-                        simple: hacer accesible la tecnología de alta gama a
-                        quienes valoran la calidad y el rendimiento.
+                        Somos un grupo de cinco estudiantes de
+                        <strong class="text-slate-800">Ingeniería Informática</strong>
+                        de la
+                        <strong class="text-slate-800"
+                            >Universidad Francisco de Vitoria (UFV)</strong
+                        >, unidos por la pasión por la tecnología y el desarrollo
+                        de software.
                     </p>
                     <p>
-                        Creemos que la tecnología no debería ser solo una
-                        herramienta, sino una extensión de tu creatividad y tu
-                        vida profesional. Por eso cuidamos cada producto del
-                        catálogo, desde los últimos portátiles hasta los
-                        móviles más avanzados.
+                        UFVShares nació como proyecto académico de la asignatura
+                        de <em>Proyectos II</em>, con el objetivo de construir
+                        una plataforma de comercio electrónico completa, desde
+                        el diseño hasta el despliegue, aplicando todo lo
+                        aprendido durante la carrera.
                     </p>
                     <p>
-                        Nuestro compromiso va más allá de vender: queremos
-                        construir una comunidad de entusiastas que exigen lo
-                        mejor.
+                        La idea fue crear una tienda de tecnología que no solo
+                        funcionara bien, sino que también tuviera un diseño
+                        moderno y una experiencia de usuario cuidada al detalle.
                     </p>
-                </div>
-                <div class="mt-8 flex gap-6">
-                    <div>
-                        <span class="block text-3xl font-black text-primary"
-                            >10k+</span
-                        >
-                        <span
-                            class="text-xs uppercase font-bold text-slate-400 tracking-wider"
-                            >Clientes satisfechos</span
-                        >
-                    </div>
-                    <div class="w-px h-12 bg-slate-200"></div>
-                    <div>
-                        <span class="block text-3xl font-black text-primary"
-                            >500+</span
-                        >
-                        <span
-                            class="text-xs uppercase font-bold text-slate-400 tracking-wider"
-                            >Productos premium</span
-                        >
-                    </div>
                 </div>
             </div>
             <div class="order-1 md:order-2 relative">
@@ -68,12 +52,326 @@
                         class="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                     />
                 </div>
-                <!-- Decorative element -->
                 <div
                     class="absolute -bottom-6 -right-6 w-32 h-32 bg-primary/10 rounded-full -z-10 blur-2xl"
                 >
                 </div>
             </div>
         </div>
+
+        <!-- Cómo está hecha la aplicación -->
+        <div class="bg-slate-50 rounded-3xl p-10 md:p-16">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span
+                    class="text-primary font-bold uppercase tracking-widest text-sm mb-4 block"
+                    >Stack tecnológico</span
+                >
+                <h2
+                    class="text-3xl md:text-4xl font-black text-slate-900 uppercase"
+                >
+                    Cómo está construida la aplicación
+                </h2>
+                <p class="text-slate-500 mt-4 font-medium">
+                    Arquitectura moderna de tipo cliente-servidor con tecnologías
+                    de nivel profesional.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Frontend -->
+                <div
+                    class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100"
+                >
+                    <div
+                        class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-5"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-6 h-6 text-primary"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                            ></path>
+                        </svg>
+                    </div>
+                    <h3
+                        class="text-lg font-black text-slate-900 uppercase tracking-tight mb-3"
+                    >
+                        Frontend
+                    </h3>
+                    <ul class="space-y-2 text-slate-500 font-medium text-sm">
+                        <li>
+                            <span class="font-bold text-slate-700">Astro</span> — Framework principal para SSR y páginas estáticas
+                        </li>
+                        <li>
+                            <span class="font-bold text-slate-700">React</span> — Componentes interactivos (carrito, favoritos)
+                        </li>
+                        <li>
+                            <span class="font-bold text-slate-700">Tailwind CSS</span> — Sistema de estilos utilitario
+                        </li>
+                        <li>
+                            <span class="font-bold text-slate-700">DaisyUI</span> — Componentes UI sobre Tailwind
+                        </li>
+                        <li>
+                            <span class="font-bold text-slate-700">Nanostores</span> — Estado global reactivo
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Backend -->
+                <div
+                    class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100"
+                >
+                    <div
+                        class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-5"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-6 h-6 text-primary"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"
+                            ></path>
+                        </svg>
+                    </div>
+                    <h3
+                        class="text-lg font-black text-slate-900 uppercase tracking-tight mb-3"
+                    >
+                        Backend
+                    </h3>
+                    <ul class="space-y-2 text-slate-500 font-medium text-sm">
+                        <li>
+                            <span class="font-bold text-slate-700">Java 21</span> — Lenguaje principal del servidor
+                        </li>
+                        <li>
+                            <span class="font-bold text-slate-700">Spring Boot 3</span> — Framework REST API
+                        </li>
+                        <li>
+                            <span class="font-bold text-slate-700">Spring Security</span> — Autenticación y autorización con JWT
+                        </li>
+                        <li>
+                            <span class="font-bold text-slate-700">JPA / Hibernate</span> — ORM para persistencia de datos
+                        </li>
+                        <li>
+                            <span class="font-bold text-slate-700">Maven</span> — Gestión de dependencias y builds
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Base de datos e infraestructura -->
+                <div
+                    class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100"
+                >
+                    <div
+                        class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-5"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-6 h-6 text-primary"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
+                            ></path>
+                        </svg>
+                    </div>
+                    <h3
+                        class="text-lg font-black text-slate-900 uppercase tracking-tight mb-3"
+                    >
+                        Datos e infra
+                    </h3>
+                    <ul class="space-y-2 text-slate-500 font-medium text-sm">
+                        <li>
+                            <span class="font-bold text-slate-700">H2</span> — Base de datos en memoria para desarrollo
+                        </li>
+                        <li>
+                            <span class="font-bold text-slate-700">MySQL</span> — Base de datos relacional en producción
+                        </li>
+                        <li>
+                            <span class="font-bold text-slate-700">REST API</span> — Comunicación frontend ↔ backend
+                        </li>
+                        <li>
+                            <span class="font-bold text-slate-700">Azure DevOps</span> — Gestión de proyecto y sprints
+                        </li>
+                        <li>
+                            <span class="font-bold text-slate-700">Git / GitHub</span> — Control de versiones y colaboración
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metodología Scrum -->
+        <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div class="relative">
+                <div class="bg-primary/5 rounded-3xl p-10 border border-primary/10">
+                    <!-- Sprint cycle visual -->
+                    <div class="flex items-center justify-center gap-3 flex-wrap">
+                        {["Product Backlog", "Sprint Planning", "Sprint (2 sem.)", "Sprint Review", "Retrospectiva"].map((item, i) => (
+                            <div class="flex items-center gap-2">
+                                <div class="bg-primary text-white text-xs font-bold rounded-full w-7 h-7 flex items-center justify-center shrink-0">
+                                    {i + 1}
+                                </div>
+                                <span class="text-slate-700 font-semibold text-sm">{item}</span>
+                                {i < 4 && <span class="text-primary font-bold text-lg">→</span>}
+                            </div>
+                        ))}
+                    </div>
+                    <div class="mt-8 grid grid-cols-3 gap-4 text-center">
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <p class="text-2xl font-black text-primary">4</p>
+                            <p class="text-xs font-semibold text-slate-500 mt-1">Sprints</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <p class="text-2xl font-black text-primary">2</p>
+                            <p class="text-xs font-semibold text-slate-500 mt-1">Semanas/sprint</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <p class="text-2xl font-black text-primary">5</p>
+                            <p class="text-xs font-semibold text-slate-500 mt-1">Miembros</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <span class="text-primary font-bold uppercase tracking-widest text-sm mb-4 block">
+                    Metodología de trabajo
+                </span>
+                <h2 class="text-3xl md:text-4xl font-black text-slate-900 uppercase mb-6 leading-tight">
+                    Desarrollado con Scrum
+                </h2>
+                <div class="space-y-4 text-slate-600 leading-relaxed font-medium">
+                    <p>
+                        Todo el proyecto ha sido gestionado siguiendo la metodología ágil
+                        <strong class="text-slate-800">Scrum</strong>, organizando el trabajo
+                        en sprints de dos semanas con entregas incrementales y revisiones
+                        continuas.
+                    </p>
+                    <p>
+                        El equipo adoptó los roles clásicos de Scrum: un
+                        <strong class="text-slate-800">Product Owner</strong> responsable del
+                        backlog y las prioridades, un
+                        <strong class="text-slate-800">Scrum Master</strong> que facilitó los
+                        procesos y eliminó impedimentos, y el
+                        <strong class="text-slate-800">Development Team</strong> encargado de
+                        la implementación.
+                    </p>
+                    <ul class="space-y-2 mt-4">
+                        <li class="flex items-start gap-3">
+                            <span class="w-2 h-2 rounded-full bg-primary mt-2 shrink-0"></span>
+                            <span><strong class="text-slate-800">Daily Standups</strong> para sincronizar el trabajo diario y detectar bloqueos.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="w-2 h-2 rounded-full bg-primary mt-2 shrink-0"></span>
+                            <span><strong class="text-slate-800">Sprint Planning</strong> con estimación de tareas en story points.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="w-2 h-2 rounded-full bg-primary mt-2 shrink-0"></span>
+                            <span><strong class="text-slate-800">Azure DevOps</strong> como tablero Kanban, gestión de backlog y seguimiento de sprints.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="w-2 h-2 rounded-full bg-primary mt-2 shrink-0"></span>
+                            <span><strong class="text-slate-800">Retrospectivas</strong> al final de cada sprint para mejorar el proceso continuamente.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Asignaturas implicadas -->
+        <div class="mt-16 bg-slate-900 rounded-3xl p-10 md:p-14">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span class="text-primary font-bold uppercase tracking-widest text-sm mb-4 block">
+                    Contexto académico
+                </span>
+                <h2 class="text-3xl md:text-4xl font-black text-white uppercase">
+                    Asignaturas implicadas
+                </h2>
+                <p class="text-slate-400 mt-4 font-medium">
+                    UFVShares integra conocimientos de cuatro asignaturas clave del
+                    Grado en Ingeniería Informática de la UFV.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- IPO -->
+                <div class="bg-slate-800 rounded-2xl p-7 border border-slate-700 hover:border-primary/50 transition-colors">
+                    <div class="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mb-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-black text-sm uppercase tracking-tight mb-3">
+                        Interacción Persona-Ordenador
+                    </h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Diseño de interfaces centrado en el usuario, usabilidad, accesibilidad y experiencia de usuario (UX/UI) aplicados al frontend.
+                    </p>
+                </div>
+
+                <!-- DIS -->
+                <div class="bg-slate-800 rounded-2xl p-7 border border-slate-700 hover:border-primary/50 transition-colors">
+                    <div class="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mb-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-black text-sm uppercase tracking-tight mb-3">
+                        Desarrollo e Integración de Software
+                    </h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Integración de sistemas heterogéneos, APIs REST, arquitecturas cliente-servidor y prácticas de CI/CD.
+                    </p>
+                </div>
+
+                <!-- IS2 -->
+                <div class="bg-slate-800 rounded-2xl p-7 border border-slate-700 hover:border-primary/50 transition-colors">
+                    <div class="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mb-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-black text-sm uppercase tracking-tight mb-3">
+                        Ingeniería de Software II
+                    </h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Metodologías ágiles (Scrum), gestión de proyectos software, análisis de requisitos, casos de uso y documentación técnica.
+                    </p>
+                </div>
+
+                <!-- POO -->
+                <div class="bg-slate-800 rounded-2xl p-7 border border-slate-700 hover:border-primary/50 transition-colors">
+                    <div class="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mb-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-black text-sm uppercase tracking-tight mb-3">
+                        Programación Orientada a Objetos
+                    </h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Diseño de clases, herencia, polimorfismo y patrones de diseño aplicados al backend en Java con Spring Boot.
+                    </p>
+                </div>
+            </div>
+        </div>
+
     </div>
 </section>

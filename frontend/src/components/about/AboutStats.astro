@@ -1,0 +1,226 @@
+---
+const stats = [
+    {
+        value: 5, suffix: "", label: "Desarrolladores",
+        sublabel: "Ingeniería Informática · UFV",
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>`
+    },
+    {
+        value: 4, suffix: "", label: "Sprints ágiles",
+        sublabel: "Metodología Scrum",
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>`
+    },
+    {
+        value: 4, suffix: "", label: "Asignaturas",
+        sublabel: "Del grado implicadas",
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" /></svg>`
+    },
+    {
+        value: 8, suffix: " sem", label: "De desarrollo",
+        sublabel: "Con entregables por sprint",
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>`
+    },
+];
+
+const timeline = [
+    {
+        sprint: "Sprint 1",
+        title: "Análisis, Diseño & Base",
+        desc: "Definición de requisitos, modelo de datos y wireframes. Primera versión entregable con estructura de proyecto, configuración de Spring Boot, rutas Astro básicas y diseño del sistema.",
+        color: "bg-blue-500",
+        textColor: "text-blue-500",
+    },
+    {
+        sprint: "Sprint 2",
+        title: "Catálogo & API de Productos",
+        desc: "Versión entregable con API REST de productos funcional (Spring Boot + JPA + H2) y frontend del catálogo conectado: listado de productos, detalle y categorías con datos reales del backend.",
+        color: "bg-violet-500",
+        textColor: "text-violet-500",
+    },
+    {
+        sprint: "Sprint 3",
+        title: "Usuarios, Carrito & Checkout",
+        desc: "Entregable con autenticación JWT end-to-end, perfil de usuario, carrito de compra reactivo (Nanostores) y flujo de checkout completo integrado con el backend.",
+        color: "bg-emerald-500",
+        textColor: "text-emerald-500",
+    },
+    {
+        sprint: "Sprint 4",
+        title: "Pulido, Blog & Entrega Final",
+        desc: "Versión final entregable: favoritos, blog con paginación, página Sobre Nosotros, testing, corrección de bugs, optimización de rendimiento y documentación completa.",
+        color: "bg-amber-500",
+        textColor: "text-amber-500",
+    },
+];
+---
+
+<!-- STATS ANIMADOS -->
+<section class="py-20 px-4 bg-white overflow-hidden">
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Contadores -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-slate-200 rounded-2xl overflow-hidden mb-24 shadow-sm">
+            {stats.map((s) => (
+                <div class="stat-card group relative bg-white hover:bg-slate-50 transition-colors duration-300 p-8 md:p-10 flex flex-col gap-4 cursor-default">
+                    <!-- Icono SVG -->
+                    <div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                        <Fragment set:html={s.svg} />
+                    </div>
+
+                    <!-- Número -->
+                    <div class="flex items-baseline gap-1">
+                        <span
+                            class="stat-number text-4xl md:text-5xl font-black text-slate-900 tabular-nums"
+                            data-target={s.value}
+                        >0</span>
+                        <span class="text-xl font-black text-primary">{s.suffix}</span>
+                    </div>
+
+                    <!-- Etiquetas -->
+                    <div>
+                        <p class="font-black text-slate-800 text-sm">{s.label}</p>
+                        <p class="text-slate-400 text-xs mt-0.5">{s.sublabel}</p>
+                    </div>
+
+                    <!-- Borde inferior animado -->
+                    <div class="absolute bottom-0 left-0 h-0.5 bg-primary w-0 group-hover:w-full transition-all duration-500 ease-out"></div>
+                </div>
+            ))}
+        </div>
+
+        <!-- TIMELINE -->
+        <div class="text-center max-w-2xl mx-auto mb-16">
+            <span class="text-primary font-bold uppercase tracking-widest text-sm mb-4 block">Evolución del proyecto</span>
+            <h2 class="text-3xl md:text-4xl font-black text-slate-900 uppercase">
+                Los 5 sprints del proyecto
+            </h2>
+            <p class="text-slate-500 font-medium mt-3">
+                Haz clic en cada sprint para ver los detalles.
+            </p>
+        </div>
+
+        <!-- Timeline horizontal en desktop, vertical en mobile -->
+        <div class="relative">
+            <!-- Línea conectora (desktop) -->
+            <div class="hidden md:block absolute top-8 left-0 right-0 h-0.5 bg-slate-200 z-0">
+                <div id="timeline-progress" class="h-full bg-primary transition-all duration-700 ease-out" style="width: 0%"></div>
+            </div>
+
+            <!-- Nodos -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
+                {timeline.map((item, i) => (
+                    <div
+                        class="timeline-item flex flex-col items-center cursor-pointer group"
+                        data-index={i}
+                    >
+                        <!-- Círculo del nodo -->
+                        <div class={`timeline-dot w-16 h-16 rounded-full border-4 border-white shadow-lg flex items-center justify-center font-black text-white text-sm transition-all duration-300 group-hover:scale-110 ${item.color}`}>
+                            S{i + 1}
+                        </div>
+
+                        <!-- Tarjeta de contenido -->
+                        <div class="timeline-card mt-5 w-full bg-white border-2 border-slate-100 rounded-2xl p-5 shadow-sm opacity-70 group-hover:opacity-100 group-hover:shadow-lg group-hover:-translate-y-1 transition-all duration-300">
+                            <span class={`text-xs font-black uppercase tracking-widest ${item.textColor} block mb-2`}>
+                                {item.sprint}
+                            </span>
+                            <h3 class="font-black text-slate-900 text-sm mb-2 leading-tight">
+                                {item.title}
+                            </h3>
+                            <!-- Descripción oculta, se muestra al hacer clic -->
+                            <div class="timeline-desc overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+                                <p class="text-slate-500 text-xs leading-relaxed pt-2 border-t border-slate-100">
+                                    {item.desc}
+                                </p>
+                            </div>
+                            <div class={`timeline-arrow mt-2 text-xs font-bold ${item.textColor} flex items-center gap-1`}>
+                                <span class="arrow-text">Ver más</span>
+                                <span class="arrow-icon transition-transform duration-300">▼</span>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<script>
+    // ── Contadores animados ──────────────────────────────────────────────
+    function animateCounter(el: HTMLElement, target: number, duration = 1400) {
+        let start = 0;
+        const step = (timestamp: number) => {
+            if (!start) start = timestamp;
+            const progress = Math.min((timestamp - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+            el.textContent = Math.floor(eased * target).toString();
+            if (progress < 1) requestAnimationFrame(step);
+            else el.textContent = target.toString();
+        };
+        requestAnimationFrame(step);
+    }
+
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    const numbers = entry.target.querySelectorAll<HTMLElement>(".stat-number");
+                    numbers.forEach((el) => {
+                        const target = parseInt(el.dataset.target || "0");
+                        animateCounter(el, target);
+                    });
+                    observer.unobserve(entry.target);
+                }
+            });
+        },
+        { threshold: 0.3 }
+    );
+
+    const statsGrid = document.querySelector(".grid.grid-cols-2");
+    if (statsGrid) observer.observe(statsGrid);
+
+    // ── Timeline interactivo ─────────────────────────────────────────────
+    const items = document.querySelectorAll<HTMLElement>(".timeline-item");
+    const progress = document.getElementById("timeline-progress");
+
+    items.forEach((item, i) => {
+        item.addEventListener("click", () => {
+            const desc = item.querySelector<HTMLElement>(".timeline-desc");
+            const arrowIcon = item.querySelector<HTMLElement>(".arrow-icon");
+            const arrowText = item.querySelector<HTMLElement>(".arrow-text");
+            const isOpen = desc && desc.style.maxHeight !== "0px" && desc.style.maxHeight !== "";
+
+            // Cierra todos
+            items.forEach((it) => {
+                const d = it.querySelector<HTMLElement>(".timeline-desc");
+                const ai = it.querySelector<HTMLElement>(".arrow-icon");
+                const at = it.querySelector<HTMLElement>(".arrow-text");
+                const dot = it.querySelector<HTMLElement>(".timeline-dot");
+                const card = it.querySelector<HTMLElement>(".timeline-card");
+                if (d) d.style.maxHeight = "0px";
+                if (ai) { ai.style.transform = "rotate(0deg)"; }
+                if (at) at.textContent = "Ver más";
+                if (dot) dot.style.transform = "";
+                if (card) card.style.borderColor = "";
+            });
+
+            if (!isOpen && desc) {
+                desc.style.maxHeight = desc.scrollHeight + "px";
+                if (arrowIcon) arrowIcon.style.transform = "rotate(180deg)";
+                if (arrowText) arrowText.textContent = "Cerrar";
+
+                // Avanza la barra de progreso
+                if (progress) {
+                    const pct = ((i + 1) / items.length) * 100;
+                    progress.style.width = pct + "%";
+                }
+            } else {
+                // Si se cierra el último abierto, retrocede la barra
+                if (progress) {
+                    const pct = (i / items.length) * 100;
+                    progress.style.width = pct + "%";
+                }
+            }
+        });
+    });
+</script>
