@@ -84,6 +84,35 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             <input name="precio" type="number" min="0" step="0.01"
               class="input input-bordered w-full" placeholder="0.00" />
           </div>
+          <!-- Fotos -->
+          <div class="sm:col-span-2">
+            <label class="label">
+              <span class="label-text font-semibold">Fotos del producto <span class="text-error">*</span></span>
+              <span class="label-text-alt text-base-content/50">M&iacute;nimo 1 &middot; JPG / PNG / WebP &middot; m&aacute;x. 10 MB por foto</span>
+            </label>
+            <!-- Drop zone (gallery / files) -->
+            <label id="foto-label"
+              class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-base-300 rounded-xl cursor-pointer hover:border-primary hover:bg-base-200/50 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-base-content/40 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V19a2 2 0 002 2h14a2 2 0 002-2v-2.5M16 10l-4-4m0 0L8 10m4-4v12" />
+              </svg>
+              <span id="foto-label-text" class="text-sm text-base-content/50">Haz clic o arrastra im&aacute;genes aqu&iacute;</span>
+              <input id="foto-input" type="file" multiple accept="image/*" class="hidden" />
+            </label>
+            <!-- Camera button (most useful on mobile) -->
+            <button type="button" id="btn-camera"
+              class="btn btn-outline btn-sm rounded-full mt-3 gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Tomar foto
+            </button>
+            <!-- Hidden camera-only input -->
+            <input id="foto-camera" type="file" accept="image/*" capture="environment" class="hidden" />
+            <!-- Preview thumbnails -->
+            <div id="foto-preview" class="flex flex-wrap gap-2 mt-3"></div>
+          </div>
           <div class="sm:col-span-2 flex gap-3 justify-end pt-2">
             <button type="button" id="btn-cancel-form" class="btn btn-ghost btn-sm">Cancelar</button>
             <button type="submit" id="btn-submit" class="btn btn-primary btn-sm rounded-full">Publicar</button>
@@ -111,8 +140,17 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
 </Layout>
 
 <script define:vars={{ API_BASE }}>
+  const BACKEND_BASE = API_BASE.replace(/\/api$/, "");
+
+  function clearSession() {
+    localStorage.removeItem("ufvshares_token");
+    localStorage.removeItem("ufvshares_email");
+    localStorage.removeItem("ufvshares_nombre");
+  }
+
   const token = localStorage.getItem("ufvshares_token");
   if (!token) {
+    clearSession();
     window.location.href = "/auth?mode=login&next=" + encodeURIComponent("/profile");
   }
 
@@ -127,7 +165,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         fetch(API_BASE + "/me/productos", { headers }),
       ]);
 
-      if (!meRes.ok) { window.location.href = "/auth"; return; }
+      if (!meRes.ok) { clearSession(); window.location.href = "/auth?mode=login&next=" + encodeURIComponent("/profile"); return; }
 
       const me = await meRes.json();
       const prods = await prodRes.json();
@@ -168,8 +206,12 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
       const badge = tipoLabel[p.tipoTransaccion] ?? p.tipoTransaccion;
       const cat = categoriaLabel[p.categoria] ?? p.categoria;
       const precio = p.precio != null ? parseFloat(p.precio).toFixed(2) + " €" : "Gratis";
+      const imgHtml = p.fotoUrl
+        ? `<img src="${BACKEND_BASE}${p.fotoUrl}" alt="${p.titulo}" class="w-full h-40 object-cover rounded-t-2xl" />`
+        : `<div class="w-full h-40 bg-base-200 rounded-t-2xl flex items-center justify-center text-base-content/30 text-sm">Sin foto</div>`;
       grid.insertAdjacentHTML("beforeend", `
         <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow">
+          ${imgHtml}
           <div class="card-body p-5">
             <div class="flex items-start justify-between gap-2">
               <h3 class="font-bold leading-tight">${p.titulo}</h3>
@@ -190,11 +232,66 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
     $("publish-form-wrap").classList.remove("hidden");
     $("publish-form-wrap").scrollIntoView({ behavior: "smooth", block: "start" });
   }
+  // ── Shared photo state ──────────────────────────────────────────
+  let selectedFiles = [];
+
+  function updateLabel() {
+    const n = selectedFiles.length;
+    const el = $("foto-label-text");
+    if (el) el.textContent = n > 0
+      ? `${n} foto${n > 1 ? "s" : ""} seleccionada${n > 1 ? "s" : ""}`
+      : "Haz clic o arrastra imágenes aquí";
+  }
+
+  function renderPreview() {
+    const preview = $("foto-preview");
+    if (!preview) return;
+    preview.innerHTML = "";
+    selectedFiles.forEach((file, idx) => {
+      const url = URL.createObjectURL(file);
+      const wrap = document.createElement("div");
+      wrap.className = "relative w-20 h-20 rounded-lg overflow-hidden border border-base-300 group";
+      wrap.innerHTML = `
+        <img src="${url}" class="w-full h-full object-cover" />
+        <button type="button" data-idx="${idx}"
+          class="absolute inset-0 flex items-start justify-end p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+          aria-label="Quitar foto">
+          <span class="w-5 h-5 rounded-full bg-error text-white text-xs flex items-center justify-center">&times;</span>
+        </button>`;
+      wrap.querySelector("button").addEventListener("click", (e) => {
+        selectedFiles.splice(Number(e.currentTarget.dataset.idx), 1);
+        renderPreview();
+      });
+      preview.appendChild(wrap);
+    });
+    updateLabel();
+  }
+
+  function addFiles(fileList) {
+    for (const file of fileList) selectedFiles.push(file);
+    renderPreview();
+  }
+
   function hideForm() {
     $("publish-form-wrap").classList.add("hidden");
     $("publish-form").reset();
     $("form-error").classList.add("hidden");
+    selectedFiles = [];
+    renderPreview();
   }
+
+  // Gallery / drop-zone input
+  $("foto-input")?.addEventListener("change", function () {
+    addFiles(this.files);
+    this.value = "";
+  });
+
+  // Camera button → triggers capture input (rear camera on mobile)
+  $("btn-camera")?.addEventListener("click", () => $("foto-camera")?.click());
+  $("foto-camera")?.addEventListener("change", function () {
+    addFiles(this.files);
+    this.value = "";
+  });
 
   $("btn-toggle-form")?.addEventListener("click", showForm);
   $("btn-empty-publish")?.addEventListener("click", showForm);
@@ -208,6 +305,15 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
     btn.textContent = "Publicando...";
     errEl.classList.add("hidden");
 
+    // Validate at least 1 photo
+    if (selectedFiles.length === 0) {
+      errEl.textContent = "Debes subir al menos una foto del producto";
+      errEl.classList.remove("hidden");
+      btn.disabled = false;
+      btn.textContent = "Publicar";
+      return;
+    }
+
     const fd = new FormData(e.target);
     const body = {
       titulo: fd.get("titulo"),
@@ -220,6 +326,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
     if (precio) body.precio = parseFloat(precio);
 
     try {
+      // Step 1: create product
       const res = await fetch(API_BASE + "/me/productos", {
         method: "POST",
         headers,
@@ -231,8 +338,25 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         errEl.classList.remove("hidden");
         return;
       }
+      const producto = await res.json();
+
+      // Step 2: upload photos
+      btn.textContent = "Subiendo fotos...";
+      const fotoData = new FormData();
+      for (const file of selectedFiles) fotoData.append("fotos", file);
+      const fotoRes = await fetch(API_BASE + "/me/productos/" + producto.idProducto + "/fotos", {
+        method: "POST",
+        headers: { Authorization: headers.Authorization },
+        body: fotoData,
+      });
+      if (!fotoRes.ok) {
+        const err = await fotoRes.json().catch(() => ({}));
+        errEl.textContent = "Producto creado pero error al subir fotos: " + (err.message ?? fotoRes.status);
+        errEl.classList.remove("hidden");
+        // Don't return — still reload products so the product shows
+      }
+
       hideForm();
-      // Reload products
       const prodRes = await fetch(API_BASE + "/me/productos", { headers });
       renderProducts(await prodRes.json());
     } catch {

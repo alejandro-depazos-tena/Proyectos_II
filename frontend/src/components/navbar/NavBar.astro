@@ -79,25 +79,44 @@ import Links from "./Links.astro";
     const navAuthLinks = document.getElementById("nav-auth-links");
 
     // Auth-aware nav links
+    const API_BASE_NAV = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
     const token = localStorage.getItem("ufvshares_token");
     const nombre = localStorage.getItem("ufvshares_nombre");
     const email = localStorage.getItem("ufvshares_email");
-    if (token) {
-        navAuthLinks.innerHTML = `
-            <span class="text-sm opacity-60 hidden xl:inline">${nombre || email || ""}</span>
-            <button id="nav-logout" class="btn btn-ghost btn-sm">Cerrar sesi&oacute;n</button>
-        `;
-        document.getElementById("nav-logout")?.addEventListener("click", () => {
-            localStorage.removeItem("ufvshares_token");
-            localStorage.removeItem("ufvshares_email");
-            localStorage.removeItem("ufvshares_nombre");
-            window.location.href = "/auth";
-        });
-    } else {
-        navAuthLinks.innerHTML = `
-            <a href="/auth?mode=login&next=%2Fapp" class="btn btn-ghost btn-sm">Iniciar sesi&oacute;n</a>
-            <a href="/auth?mode=register&next=%2Fapp" class="btn btn-primary btn-sm rounded-full">Registrarse</a>
-        `;
+
+    function clearSession() {
+        localStorage.removeItem("ufvshares_token");
+        localStorage.removeItem("ufvshares_email");
+        localStorage.removeItem("ufvshares_nombre");
+    }
+
+    if (navAuthLinks) {
+        function renderLoggedIn() {
+            navAuthLinks!.innerHTML = `
+                <span class="text-sm opacity-60 hidden xl:inline">${nombre || email || ""}</span>
+                <button id="nav-logout" class="btn btn-ghost btn-sm">Cerrar sesi&oacute;n</button>
+            `;
+            document.getElementById("nav-logout")?.addEventListener("click", () => {
+                clearSession();
+                window.location.href = "/auth";
+            });
+        }
+
+        function renderGuest() {
+            navAuthLinks!.innerHTML = `
+                <a href="/auth?mode=login&next=%2Fapp" class="btn btn-ghost btn-sm">Iniciar sesi&oacute;n</a>
+                <a href="/auth?mode=register&next=%2Fapp" class="btn btn-primary btn-sm rounded-full">Registrarse</a>
+            `;
+        }
+
+        if (token) {
+            renderLoggedIn();
+            fetch(API_BASE_NAV + "/me", { headers: { Authorization: "Bearer " + token } })
+                .then(res => { if (!res.ok) { clearSession(); renderGuest(); } })
+                .catch(() => { /* network error – keep current state */ });
+        } else {
+            renderGuest();
+        }
     }
 
     // Update favorites count in navbar

@@ -1,9 +1,34 @@
 ---
+const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
 
+const motivos = [
+    "Problema técnico con la plataforma",
+    "Duda sobre el marketplace (compra/venta)",
+    "Reportar un anuncio o usuario",
+    "Problema con mi cuenta UFV",
+    "Sugerencia de mejora",
+    "Consulta general",
+    "Otro",
+];
 ---
 
-<form class="w-full">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Aviso cuando el usuario está identificado (oculto por defecto) -->
+<div
+    id="contact-user-info"
+    class="hidden mb-6 flex items-center gap-3 rounded-xl border border-[#F9C74F]/40 bg-[#F9C74F]/10 px-5 py-4"
+>
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#0B2545] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A8.966 8.966 0 0112 15a8.966 8.966 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+    <p class="text-sm text-[#0B2545]">
+        Enviando como <strong id="contact-user-name"></strong>
+        &mdash; <span id="contact-user-email" class="text-[#0B2545]/70"></span>
+    </p>
+</div>
+
+<form class="w-full" id="contact-form">
+    <!-- Campos personales: visibles sólo para usuarios no identificados -->
+    <div id="contact-guest-fields" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <!-- First Name -->
         <div class="flex flex-col">
             <label for="nombre" class="font-semibold text-[#0B2545] mb-2">
@@ -35,51 +60,61 @@
         </div>
 
         <!-- Email -->
-        <div class="flex flex-col">
+        <div class="flex flex-col md:col-span-2">
             <label for="correo" class="font-semibold text-[#0B2545] mb-2">
-                Correo electrónico
+                Correo electrónico UFV
             </label>
             <input
                 type="email"
                 id="correo"
                 name="correo"
-                placeholder="tu@ejemplo.com"
+                placeholder="nombre.apellido@ufv.es"
                 class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#F9C74F]"
                 required
             />
         </div>
+    </div>
 
-        <!-- Phone -->
+    <!-- Campos siempre visibles -->
+    <div class="grid grid-cols-1 gap-6">
+        <!-- Motivo -->
         <div class="flex flex-col">
-            <label for="telefono" class="font-semibold text-[#0B2545] mb-2">
-                Teléfono
+            <label for="motivo" class="font-semibold text-[#0B2545] mb-2">
+                Motivo de contacto
             </label>
-            <input
-                type="tel"
-                id="telefono"
-                name="telefono"
-                placeholder="+34 600 000 000"
-                class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#F9C74F]"
-            />
+            <select
+                id="motivo"
+                name="motivo"
+                class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#F9C74F] bg-white"
+                required
+            >
+                <option value="" disabled selected>Selecciona un motivo</option>
+                {motivos.map((m) => <option value={m}>{m}</option>)}
+            </select>
         </div>
     </div>
 
     <!-- Message -->
     <div class="flex flex-col mt-6">
         <label for="mensaje" class="font-semibold text-[#0B2545] mb-2">
-            Mensaje
+            Describe tu consulta
         </label>
         <textarea
             id="mensaje"
             name="mensaje"
             rows="5"
-            placeholder="Escribe tu consulta aquí..."
+            placeholder="Cuéntanos con detalle tu problema o sugerencia. Si es un error técnico, indica qué estabas haciendo cuando ocurrió."
             class="border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#F9C74F] resize-none"
             required></textarea>
     </div>
 
+    <!-- Privacy notice -->
+    <p class="text-sm text-gray-500 mt-4">
+        Al enviar este formulario aceptas que el equipo de UFV Shares use tu correo únicamente para responder a tu consulta, conforme a la política de privacidad de la UFV.
+    </p>
+
     <!-- Button -->
-    <div class="text-center md:text-right mt-8">
+    <div class="text-center md:text-right mt-6">
         <button
             type="submit"
             class="bg-primary text-primary-content hover:bg-primary/90 font-bold px-12 py-4 rounded-full cursor-pointer transition text-lg shadow-lg hover:shadow-xl hover:scale-105 transform duration-200"
@@ -88,3 +123,44 @@
         </button>
     </div>
 </form>
+
+<script define:vars={{ API_BASE }}>
+(async () => {
+    const token = localStorage.getItem("ufvshares_token");
+    if (!token) return; // usuario no identificado: formulario completo
+
+    try {
+        const res = await fetch(API_BASE + "/me", {
+            headers: { Authorization: "Bearer " + token },
+        });
+        if (!res.ok) return;
+
+        const user = await res.json();
+
+        // Rellenar campos ocultos para que el envío los incluya
+        const inputNombre = document.getElementById("nombre");
+        const inputApellido = document.getElementById("apellido");
+        const inputCorreo = document.getElementById("correo");
+
+        if (inputNombre) { inputNombre.value = user.nombre ?? ""; inputNombre.removeAttribute("required"); }
+        if (inputApellido) { inputApellido.value = user.apellidos ?? ""; inputApellido.removeAttribute("required"); }
+        if (inputCorreo) { inputCorreo.value = user.correo ?? ""; inputCorreo.removeAttribute("required"); }
+
+        // Ocultar el bloque de campos personales
+        const guestFields = document.getElementById("contact-guest-fields");
+        if (guestFields) guestFields.classList.add("hidden");
+
+        // Mostrar aviso con nombre y correo del usuario
+        const infoBar = document.getElementById("contact-user-info");
+        const nameEl = document.getElementById("contact-user-name");
+        const emailEl = document.getElementById("contact-user-email");
+        if (infoBar && nameEl && emailEl) {
+            nameEl.textContent = [user.nombre, user.apellidos].filter(Boolean).join(" ");
+            emailEl.textContent = user.correo;
+            infoBar.classList.remove("hidden");
+        }
+    } catch {
+        // Si falla la petición dejamos el formulario completo sin cambios
+    }
+})();
+</script>
