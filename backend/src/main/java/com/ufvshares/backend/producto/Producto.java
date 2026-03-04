@@ -1,6 +1,7 @@
 package com.ufvshares.backend.producto;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -53,6 +55,31 @@ public class Producto {
   @NotNull
   @Column(name = "id_propietario", nullable = false)
   private Long idPropietario;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "condicion")
+  private CondicionProducto condicion;
+
+  @Size(max = 200)
+  @Column(name = "ubicacion", length = 200)
+  private String ubicacion;
+
+  @Size(max = 500)
+  @Column(name = "imagen_url", length = 500)
+  private String imagenUrl;
+
+  @Column(name = "fecha_publicacion", updatable = false)
+  private LocalDateTime fechaPublicacion;
+
+  @Column(name = "vistas", nullable = false, columnDefinition = "INTEGER DEFAULT 0")
+  private int vistas = 0;
+
+  @PrePersist
+  protected void onPersist() {
+    if (fechaPublicacion == null) {
+      fechaPublicacion = LocalDateTime.now();
+    }
+  }
 
   public Long getIdProducto() {
     return idProducto;
@@ -116,5 +143,45 @@ public class Producto {
 
   public void setIdPropietario(Long idPropietario) {
     this.idPropietario = idPropietario;
+  }
+
+  public CondicionProducto getCondicion() {
+    return condicion;
+  }
+
+  public void setCondicion(CondicionProducto condicion) {
+    this.condicion = condicion;
+  }
+
+  public String getUbicacion() {
+    return ubicacion;
+  }
+
+  public void setUbicacion(String ubicacion) {
+    this.ubicacion = ubicacion;
+  }
+
+  public String getImagenUrl() {
+    return imagenUrl;
+  }
+
+  public void setImagenUrl(String imagenUrl) {
+    this.imagenUrl = imagenUrl;
+  }
+
+  public LocalDateTime getFechaPublicacion() {
+    return fechaPublicacion;
+  }
+
+  public void setFechaPublicacion(LocalDateTime fechaPublicacion) {
+    this.fechaPublicacion = fechaPublicacion;
+  }
+
+  public int getVistas() {
+    return vistas;
+  }
+
+  public void setVistas(int vistas) {
+    this.vistas = vistas;
   }
 }

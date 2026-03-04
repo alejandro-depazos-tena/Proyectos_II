@@ -36,6 +36,10 @@ public class ProductoService {
     existing.setEstadoProducto(data.getEstadoProducto());
     existing.setPrecio(data.getPrecio());
     existing.setIdPropietario(data.getIdPropietario());
+    existing.setCondicion(data.getCondicion());
+    existing.setUbicacion(data.getUbicacion());
+    existing.setImagenUrl(data.getImagenUrl());
+    existing.setVistas(data.getVistas());
     return repository.save(existing);
   }
 

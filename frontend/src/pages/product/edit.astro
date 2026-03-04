@@ -1,0 +1,486 @@
+---
+import Layout from "../../layouts/Layout.astro";
+const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
+---
+
+<Layout title="Editar producto · UFV Shares">
+  <div class="max-w-2xl mx-auto px-4 py-10">
+
+    <!-- Back -->
+    <a href="/profile" class="inline-flex items-center gap-2 text-sm text-base-content/50 hover:text-base-content mb-8 transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+      </svg>
+      Volver a mi perfil
+    </a>
+
+    <!-- Loading -->
+    <div id="loading" class="flex justify-center py-20">
+      <span class="loading loading-spinner loading-lg text-primary"></span>
+    </div>
+
+    <!-- Error genérico -->
+    <div id="page-error" class="hidden alert alert-error mb-6">
+      <span id="page-error-msg">No se pudo cargar el producto.</span>
+    </div>
+
+    <!-- Contenido -->
+    <div id="content" class="hidden">
+
+      <!-- Fotos actuales -->
+      <div id="photos-section" class="card bg-base-100 shadow-md border border-base-200 mb-6 hidden">
+        <div class="card-body">
+          <h2 class="font-bold text-base mb-3">Fotos del producto</h2>
+          <div id="photos-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3"></div>
+          <!-- Añadir más fotos -->
+          <div class="mt-4 pt-4 border-t border-base-200">
+            <p class="text-sm font-semibold mb-2">Añadir más fotos</p>
+            <label id="add-foto-label"
+              class="flex flex-col items-center justify-center h-24 border-2 border-dashed border-base-300 rounded-xl cursor-pointer hover:border-primary hover:bg-base-200/50 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-base-content/40 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V19a2 2 0 002 2h14a2 2 0 002-2v-2.5M16 10l-4-4m0 0L8 10m4-4v12" />
+              </svg>
+              <span id="add-foto-label-text" class="text-xs text-base-content/50">Haz clic para subir más imágenes</span>
+              <input id="add-foto-input" type="file" multiple accept="image/*" class="hidden" />
+            </label>
+            <div id="add-foto-preview" class="flex flex-wrap gap-2 mt-2"></div>
+            <p id="add-foto-error" class="text-error text-xs mt-1 hidden"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal confirmación eliminar -->
+      <div id="confirm-delete-modal" class="fixed inset-0 z-[1001] hidden items-center justify-center bg-black/60 p-4">
+        <div class="bg-base-100 rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-full bg-error/10 flex items-center justify-center shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <div>
+              <h3 id="confirm-delete-title" class="font-bold text-lg leading-tight">Eliminar producto</h3>
+              <p class="text-sm text-base-content/60 mt-0.5">Esta acci&oacute;n no se puede deshacer.</p>
+            </div>
+          </div>
+          <div class="flex gap-3 justify-end pt-2">
+            <button id="confirm-delete-cancel" type="button" class="btn btn-ghost rounded-full">Cancelar</button>
+            <button id="confirm-delete-ok" type="button" class="btn btn-error rounded-full gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              S&iacute;, eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lightbox -->
+      <div id="lightbox" class="fixed inset-0 z-[1000] hidden items-center justify-center bg-black/90" role="dialog" aria-modal="true">
+        <button id="lightbox-close" type="button" class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white text-2xl transition-colors">&times;</button>
+        <button id="lightbox-prev" type="button" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white text-xl transition-colors">&#8592;</button>
+        <img id="lightbox-img" src="" alt="" class="max-w-[90vw] max-h-[90vh] rounded-xl object-contain shadow-2xl select-none" />
+        <button id="lightbox-next" type="button" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white text-xl transition-colors">&#8594;</button>
+        <span id="lightbox-counter" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-sm"></span>
+      </div>
+
+      <!-- Formulario edición -->
+      <div class="card bg-base-100 shadow-md border border-base-200">
+        <div class="card-body">
+          <h1 class="text-2xl font-black mb-6">Editar producto</h1>
+
+          <form id="edit-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <input type="hidden" name="idProducto" />
+
+            <div class="sm:col-span-2">
+              <label class="label"><span class="label-text font-semibold">Título</span></label>
+              <input name="titulo" type="text" required maxlength="150" class="input input-bordered w-full" />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="label"><span class="label-text font-semibold">Descripción</span></label>
+              <textarea name="descripcion" required rows="4" class="textarea textarea-bordered w-full"></textarea>
+            </div>
+
+            <div>
+              <label class="label"><span class="label-text font-semibold">Categoría</span></label>
+              <select name="categoria" required class="select select-bordered w-full">
+                <option value="LIBROS">Libros</option>
+                <option value="ELECTRONICA">Electrónica</option>
+                <option value="DEPORTE">Deporte</option>
+                <option value="HOGAR">Hogar</option>
+                <option value="OTROS">Otros</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="label"><span class="label-text font-semibold">Tipo</span></label>
+              <select name="tipoTransaccion" required class="select select-bordered w-full">
+                <option value="VENTA">Venta</option>
+                <option value="ALQUILER">Alquiler</option>
+                <option value="PRESTAMO">Préstamo</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="label"><span class="label-text font-semibold">Precio (€)</span></label>
+              <input name="precio" type="number" min="0" step="0.01" class="input input-bordered w-full" placeholder="0.00" />
+            </div>
+
+            <div>
+              <label class="label"><span class="label-text font-semibold">Condición</span></label>
+              <select name="condicion" class="select select-bordered w-full">
+                <option value="">No especificada</option>
+                <option value="NUEVO">Nuevo</option>
+                <option value="COMO_NUEVO">Como nuevo</option>
+                <option value="BUENO">Buen estado</option>
+                <option value="ACEPTABLE">Aceptable</option>
+                <option value="DETERIORADO">Deteriorado</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="label"><span class="label-text font-semibold">Estado</span></label>
+              <select name="estadoProducto" required class="select select-bordered w-full">
+                <option value="DISPONIBLE">Disponible</option>
+                <option value="RESERVADO">Reservado</option>
+                <option value="NO_DISPONIBLE">No disponible</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="label"><span class="label-text font-semibold">Ubicación / dónde recogerlo</span></label>
+              <input name="ubicacion" type="text" maxlength="200" class="input input-bordered w-full" placeholder="Ej: Residencia A hab. 204..." />
+            </div>
+
+            <p id="form-error" class="sm:col-span-2 text-error text-sm hidden"></p>
+
+            <div class="sm:col-span-2 flex flex-col sm:flex-row gap-3 justify-between pt-4 border-t border-base-200">
+              <button type="button" id="btn-delete" class="btn btn-error btn-outline rounded-full gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Eliminar producto
+              </button>
+              <div class="flex gap-3 justify-end">
+                <a href="/profile" class="btn btn-ghost rounded-full">Cancelar</a>
+                <button type="submit" id="btn-save" class="btn btn-primary rounded-full">Guardar cambios</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</Layout>
+
+<script define:vars={{ API_BASE }}>
+  const BACKEND_BASE = (() => {
+    try { return new URL(API_BASE).origin; } catch { return "http://localhost:8080"; }
+  })();
+
+  const token = localStorage.getItem("ufvshares_token");
+  if (!token) {
+    window.location.href = "/auth?mode=login&next=" + encodeURIComponent(window.location.pathname + window.location.search);
+  }
+
+  const headers = { "Authorization": "Bearer " + token, "Content-Type": "application/json" };
+  const $ = id => document.getElementById(id);
+
+  const params = new URLSearchParams(window.location.search);
+  const productId = params.get("id");
+
+  if (!productId) {
+    window.location.href = "/profile";
+  }
+
+  async function loadProduct() {
+    try {
+      const res = await fetch(API_BASE + "/me/productos", { headers });
+      if (!res.ok) { window.location.href = "/auth?mode=login"; return; }
+      const prods = await res.json();
+      const p = prods.find(x => String(x.idProducto) === String(productId));
+      if (!p) {
+        $("loading").classList.add("hidden");
+        $("page-error-msg").textContent = "Producto no encontrado o no te pertenece.";
+        $("page-error").classList.remove("hidden");
+        return;
+      }
+      fillForm(p);
+    } catch {
+      $("loading").classList.add("hidden");
+      $("page-error-msg").textContent = "No se pudo conectar con el servidor.";
+      $("page-error").classList.remove("hidden");
+    }
+  }
+
+  // ── Lightbox ──────────────────────────────────────────────────
+  let lightboxUrls = [];
+  let lightboxIdx = 0;
+
+  function openLightbox(urls, idx) {
+    lightboxUrls = urls;
+    lightboxIdx = idx;
+    showLightboxFrame();
+    $("lightbox").classList.remove("hidden");
+    $("lightbox").classList.add("flex");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeLightbox() {
+    $("lightbox").classList.add("hidden");
+    $("lightbox").classList.remove("flex");
+    document.body.style.overflow = "";
+  }
+
+  function showLightboxFrame() {
+    $("lightbox-img").src = lightboxUrls[lightboxIdx];
+    $("lightbox-counter").textContent = lightboxUrls.length > 1
+      ? `${lightboxIdx + 1} / ${lightboxUrls.length}` : "";
+    $("lightbox-prev").style.display = lightboxUrls.length > 1 ? "" : "none";
+    $("lightbox-next").style.display = lightboxUrls.length > 1 ? "" : "none";
+  }
+
+  $("lightbox-close")?.addEventListener("click", closeLightbox);
+  $("lightbox")?.addEventListener("click", (e) => { if (e.target === $("lightbox")) closeLightbox(); });
+  $("lightbox-prev")?.addEventListener("click", () => { lightboxIdx = (lightboxIdx - 1 + lightboxUrls.length) % lightboxUrls.length; showLightboxFrame(); });
+  $("lightbox-next")?.addEventListener("click", () => { lightboxIdx = (lightboxIdx + 1) % lightboxUrls.length; showLightboxFrame(); });
+  document.addEventListener("keydown", (e) => {
+    if ($("lightbox").classList.contains("hidden")) return;
+    if (e.key === "Escape") closeLightbox();
+    if (e.key === "ArrowLeft") { lightboxIdx = (lightboxIdx - 1 + lightboxUrls.length) % lightboxUrls.length; showLightboxFrame(); }
+    if (e.key === "ArrowRight") { lightboxIdx = (lightboxIdx + 1) % lightboxUrls.length; showLightboxFrame(); }
+  });
+
+  function renderPhotosGrid(fotos, productoId) {
+    const grid = $("photos-grid");
+    grid.innerHTML = "";
+    if (!fotos || fotos.length === 0) {
+      grid.insertAdjacentHTML("beforeend", `<p class="text-sm text-base-content/40 col-span-full">Sin fotos aún.</p>`);
+      return;
+    }
+    const allUrls = fotos.map(f => BACKEND_BASE + f.url);
+    fotos.forEach((f, idx) => {
+      const url = BACKEND_BASE + f.url;
+      const div = document.createElement("div");
+      div.className = "relative group rounded-xl overflow-hidden border border-base-200 aspect-square cursor-zoom-in";
+      div.innerHTML = `
+        <img src="${url}" alt="" class="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" />
+        ${f.esPrincipal ? `<span class="absolute top-1 left-1 badge badge-primary badge-xs">Principal</span>` : ""}
+        <button type="button" data-foto-id="${f.id}" data-producto-id="${productoId}"
+          class="absolute top-1 right-1 w-6 h-6 rounded-full bg-error text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
+          aria-label="Eliminar foto">&times;</button>`;
+      div.querySelector("button").addEventListener("click", handleDeleteFoto);
+      div.addEventListener("click", (e) => {
+        if (e.target.closest("button")) return;
+        openLightbox(allUrls, idx);
+      });
+      grid.appendChild(div);
+    });
+  }
+
+  async function handleDeleteFoto(e) {
+    const btn = e.currentTarget;
+    const fotoId = btn.dataset.fotoId;
+    const productoId = btn.dataset.productoId;
+    if (!await confirmDelete("Eliminar foto")) return;
+    btn.disabled = true;
+    try {
+      const res = await fetch(API_BASE + "/me/productos/" + productoId + "/fotos/" + fotoId, {
+        method: "DELETE",
+        headers,
+      });
+      if (res.ok || res.status === 204) {
+        // Reload photos
+        const prodRes = await fetch(API_BASE + "/me/productos", { headers });
+        const prods = await prodRes.json();
+        const p = prods.find(x => String(x.idProducto) === String(productoId));
+        renderPhotosGrid(p?.fotos ?? [], productoId);
+      } else {
+        alert("No se pudo eliminar la foto");
+        btn.disabled = false;
+      }
+    } catch {
+      alert("Error de conexión");
+      btn.disabled = false;
+    }
+  }
+
+  // ── Añadir más fotos ──────────────────────────────────────────
+  let newFiles = [];
+
+  function renderAddPreview() {
+    const preview = $("add-foto-preview");
+    preview.innerHTML = "";
+    newFiles.forEach((file, idx) => {
+      const url = URL.createObjectURL(file);
+      const div = document.createElement("div");
+      div.className = "relative w-16 h-16 rounded-lg overflow-hidden border border-base-300 group";
+      div.innerHTML = `
+        <img src="${url}" class="w-full h-full object-cover" />
+        <button type="button" data-idx="${idx}"
+          class="absolute inset-0 flex items-start justify-end p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <span class="w-5 h-5 rounded-full bg-error text-white text-xs flex items-center justify-center">&times;</span>
+        </button>`;
+      div.querySelector("button").addEventListener("click", (ev) => {
+        newFiles.splice(Number(ev.currentTarget.dataset.idx), 1);
+        renderAddPreview();
+      });
+      preview.appendChild(div);
+    });
+    $("add-foto-label-text").textContent = newFiles.length > 0
+      ? `${newFiles.length} foto${newFiles.length > 1 ? "s" : ""} lista${newFiles.length > 1 ? "s" : ""} para subir`
+      : "Haz clic para subir más imágenes";
+  }
+
+  $("add-foto-input")?.addEventListener("change", function () {
+    for (const f of this.files) newFiles.push(f);
+    renderAddPreview();
+    this.value = "";
+  });
+
+  async function uploadNewFotos(productoId) {
+    if (newFiles.length === 0) return;
+    const errEl = $("add-foto-error");
+    errEl.classList.add("hidden");
+    const fotoData = new FormData();
+    for (const file of newFiles) fotoData.append("fotos", file);
+    const res = await fetch(API_BASE + "/me/productos/" + productoId + "/fotos", {
+      method: "POST",
+      headers: { Authorization: headers.Authorization },
+      body: fotoData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      errEl.textContent = "Error al subir fotos: " + (err.message ?? "HTTP " + res.status);
+      errEl.classList.remove("hidden");
+      throw new Error("foto upload failed");
+    }
+    newFiles = [];
+    renderAddPreview();
+  }
+
+  function fillForm(p) {
+    const f = $("edit-form");
+    f.elements["idProducto"].value      = p.idProducto ?? "";
+    f.elements["titulo"].value           = p.titulo ?? "";
+    f.elements["descripcion"].value      = p.descripcion ?? "";
+    f.elements["categoria"].value        = p.categoria ?? "";
+    f.elements["tipoTransaccion"].value  = p.tipoTransaccion ?? "";
+    f.elements["precio"].value           = p.precio ?? "";
+    f.elements["condicion"].value        = p.condicion ?? "";
+    f.elements["estadoProducto"].value   = p.estadoProducto ?? "DISPONIBLE";
+    f.elements["ubicacion"].value        = p.ubicacion ?? "";
+
+    // Render photo gallery
+    const fotos = p.fotos ?? [];
+    renderPhotosGrid(fotos, p.idProducto);
+    $("photos-section").classList.remove("hidden");
+
+    $("loading").classList.add("hidden");
+    $("content").classList.remove("hidden");
+  }
+
+  $("edit-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = $("btn-save");
+    const errEl = $("form-error");
+    btn.disabled = true;
+    btn.textContent = "Guardando...";
+    errEl.classList.add("hidden");
+
+    const fd = new FormData(e.target);
+    const id = fd.get("idProducto");
+    const body = {
+      titulo:          fd.get("titulo"),
+      descripcion:     fd.get("descripcion"),
+      categoria:       fd.get("categoria"),
+      tipoTransaccion: fd.get("tipoTransaccion"),
+      estadoProducto:  fd.get("estadoProducto"),
+      condicion:       fd.get("condicion") || null,
+      ubicacion:       fd.get("ubicacion") || null,
+    };
+    const precio = fd.get("precio");
+    if (precio) body.precio = parseFloat(precio);
+
+    try {
+      const res = await fetch(API_BASE + "/me/productos/" + id, {
+        method: "PUT",
+        headers,
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        errEl.textContent = err.message ?? "Error al guardar";
+        errEl.classList.remove("hidden");
+        return;
+      }
+      // Upload new photos if any
+      try { await uploadNewFotos(id); } catch { return; }
+      window.location.href = "/profile";
+    } catch {
+      errEl.textContent = "No se pudo conectar con el backend";
+      errEl.classList.remove("hidden");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Guardar cambios";
+    }
+  });
+
+  // ── Confirm delete modal ──────────────────────────────────────
+  function confirmDelete(titulo = "Eliminar producto") {
+    return new Promise((resolve) => {
+      const modal = $("confirm-delete-modal");
+      const titleEl = $("confirm-delete-title");
+      if (titleEl) titleEl.textContent = titulo;
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      const ok = $("confirm-delete-ok");
+      const cancel = $("confirm-delete-cancel");
+      function cleanup() {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        ok.removeEventListener("click", onOk);
+        cancel.removeEventListener("click", onCancel);
+      }
+      function onOk()     { cleanup(); resolve(true); }
+      function onCancel() { cleanup(); resolve(false); }
+      ok.addEventListener("click", onOk);
+      cancel.addEventListener("click", onCancel);
+    });
+  }
+
+  $("btn-delete")?.addEventListener("click", async () => {
+    const id = $("edit-form").elements["idProducto"].value;
+    if (!id) return;
+    if (!await confirmDelete()) return;
+
+    const btn = $("btn-delete");
+    btn.disabled = true;
+    btn.textContent = "Eliminando...";
+
+    try {
+      const res = await fetch(API_BASE + "/me/productos/" + id, {
+        method: "DELETE",
+        headers,
+      });
+      if (!res.ok && res.status !== 204) {
+        const err = await res.json().catch(() => ({}));
+        $("form-error").textContent = err.message ?? "Error al eliminar";
+        $("form-error").classList.remove("hidden");
+        btn.disabled = false;
+        btn.textContent = "Eliminar producto";
+        return;
+      }
+      window.location.href = "/profile";
+    } catch {
+      $("form-error").textContent = "No se pudo conectar con el backend";
+      $("form-error").classList.remove("hidden");
+      btn.disabled = false;
+      btn.textContent = "Eliminar producto";
+    }
+  });
+
+  loadProduct();
+</script>

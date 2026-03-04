@@ -16,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ufvshares.backend.auth.SessionJpaRepository;
 import com.ufvshares.backend.producto.CategoriaProducto;
+import com.ufvshares.backend.producto.CondicionProducto;
 import com.ufvshares.backend.producto.EstadoProducto;
 import com.ufvshares.backend.producto.Producto;
 import com.ufvshares.backend.producto.ProductoRepository;
@@ -33,6 +35,7 @@ public class JsonSeedDataLoader implements CommandLineRunner {
   private final ResourceLoader resourceLoader;
   private final UsuarioRepository usuarioRepository;
   private final ProductoRepository productoRepository;
+  private final SessionJpaRepository sessionRepository;
 
   @Value("${app.seed.json.enabled:true}")
   private boolean seedEnabled;
@@ -44,16 +47,25 @@ public class JsonSeedDataLoader implements CommandLineRunner {
       ObjectMapper objectMapper,
       ResourceLoader resourceLoader,
       UsuarioRepository usuarioRepository,
-      ProductoRepository productoRepository) {
+      ProductoRepository productoRepository,
+      SessionJpaRepository sessionRepository) {
     this.objectMapper = objectMapper;
     this.resourceLoader = resourceLoader;
     this.usuarioRepository = usuarioRepository;
     this.productoRepository = productoRepository;
+    this.sessionRepository = sessionRepository;
   }
 
   @Override
   @Transactional
   public void run(String... args) throws Exception {
+    // Siempre limpiar sesiones al arrancar: el reinicio del backend invalida los tokens.
+    long sessionsBorradas = sessionRepository.count();
+    sessionRepository.deleteAll();
+    if (sessionsBorradas > 0) {
+      log.info("Sesiones anteriores eliminadas al arrancar: {} tokens invalidados.", sessionsBorradas);
+    }
+
     if (!seedEnabled) {
       return;
     }
@@ -126,6 +138,22 @@ public class JsonSeedDataLoader implements CommandLineRunner {
 
       if (!node.path("precio").isNull()) {
         producto.setPrecio(BigDecimal.valueOf(node.path("precio").asDouble()));
+      }
+
+      if (!node.path("condicion").isMissingNode() && !node.path("condicion").isNull()) {
+        producto.setCondicion(CondicionProducto.valueOf(node.path("condicion").asText()));
+      }
+
+      if (!node.path("ubicacion").isMissingNode() && !node.path("ubicacion").isNull()) {
+        producto.setUbicacion(node.path("ubicacion").asText());
+      }
+
+      if (!node.path("imagen_url").isMissingNode() && !node.path("imagen_url").isNull()) {
+        producto.setImagenUrl(node.path("imagen_url").asText());
+      }
+
+      if (!node.path("vistas").isMissingNode()) {
+        producto.setVistas(node.path("vistas").asInt(0));
       }
 
       productos.add(producto);

@@ -48,6 +48,9 @@ public class Usuario {
   @Column(name = "password", nullable = false, length = 255)
   private String passwordHash;
 
+  @Column(name = "foto_perfil", length = 512)
+  private String fotoPerfil;
+
   public Long getIdUsuario() {
     return idUsuario;
   }
@@ -102,5 +105,13 @@ public class Usuario {
 
   public void setPasswordHash(String passwordHash) {
     this.passwordHash = passwordHash;
+  }
+
+  public String getFotoPerfil() {
+    return fotoPerfil;
+  }
+
+  public void setFotoPerfil(String fotoPerfil) {
+    this.fotoPerfil = fotoPerfil;
   }
 }
