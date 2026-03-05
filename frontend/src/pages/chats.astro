@@ -1,0 +1,349 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Chats | UFV Shares">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <h1 class="text-2xl font-bold text-base-content">Mis chats</h1>
+    </div>
+
+    <div class="bg-base-100 rounded-2xl shadow border border-base-200 overflow-hidden" style="height: calc(100vh - 200px); min-height: 500px;">
+      <div class="flex h-full">
+
+        <!-- Sidebar: conversation list -->
+        <div id="chat-sidebar" class="w-full sm:w-80 lg:w-96 border-r border-base-200 flex flex-col shrink-0">
+
+          <!-- Search -->
+          <div class="p-3 border-b border-base-200">
+            <div class="relative">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <input id="chat-search" type="text" placeholder="Buscar conversación…"
+                class="input input-sm w-full pl-8 bg-base-200 border-none focus:outline-none rounded-xl" />
+            </div>
+          </div>
+
+          <!-- Conv list -->
+          <div id="conv-list" class="flex-1 overflow-y-auto divide-y divide-base-200">
+            <!-- filled by JS -->
+          </div>
+        </div>
+
+        <!-- Main chat area -->
+        <div id="chat-main" class="hidden sm:flex flex-1 flex-col">
+
+          <!-- Chat header -->
+          <div id="chat-header" class="flex items-center gap-3 px-5 py-3 border-b border-base-200 bg-base-50 shrink-0">
+            <div id="chat-header-avatar" class="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-sm font-black text-primary">?</div>
+            <div>
+              <p id="chat-header-name" class="font-semibold text-sm text-base-content">Selecciona una conversación</p>
+              <p id="chat-header-product" class="text-xs text-base-content/50"></p>
+            </div>
+            <!-- Online dot -->
+            <div id="chat-status" class="ml-auto hidden flex items-center gap-1.5 text-xs text-success font-medium">
+              <span class="w-2 h-2 rounded-full bg-success inline-block"></span>
+              En línea
+            </div>
+          </div>
+
+          <!-- Messages area -->
+          <div id="chat-messages" class="flex-1 overflow-y-auto p-5 flex flex-col gap-3">
+            <!-- Empty state -->
+            <div id="chat-empty-state" class="flex-1 flex flex-col items-center justify-center gap-3 py-16 text-center">
+              <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-primary/60"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <p class="font-semibold text-base-content/70">Ninguna conversación seleccionada</p>
+              <p class="text-sm text-base-content/40 max-w-xs">Elige una conversación de la lista o inicia una nueva desde la página de un producto.</p>
+            </div>
+          </div>
+
+          <!-- Input -->
+          <div id="chat-input-area" class="hidden shrink-0 border-t border-base-200 p-3 bg-base-50">
+            <form id="chat-form" class="flex items-end gap-2">
+              <textarea id="msg-input" rows="1"
+                placeholder="Escribe un mensaje…"
+                class="textarea textarea-bordered flex-1 resize-none text-sm rounded-2xl min-h-[42px] max-h-32 focus:outline-primary"
+              ></textarea>
+              <button type="submit"
+                class="btn btn-primary btn-sm rounded-2xl h-[42px] px-4 gap-1.5 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                Enviar
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- No conversations at all -->
+        <div id="no-convs-state" class="hidden flex-1 flex-col items-center justify-center gap-4 py-16 text-center px-8">
+          <div class="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-primary/60"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div>
+            <p class="font-bold text-lg text-base-content/70">Aún no tienes mensajes</p>
+            <p class="text-sm text-base-content/40 mt-1 max-w-xs">Cuando contactes con el vendedor de un producto, la conversación aparecerá aquí.</p>
+          </div>
+          <a href="/app" class="btn btn-primary btn-sm rounded-xl mt-2 gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            Explorar productos
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // ── Types ──────────────────────────────────────────────────
+  interface Message { id: number; from: 'me' | 'other'; text: string; ts: string; }
+  interface Conv {
+    id: number; name: string; productName: string; productId: number;
+    avatar: string; unread: number; lastMsg: string; lastTs: string;
+    messages: Message[];
+  }
+
+  // ── Demo data (replace with real API calls) ────────────────
+  const API_BASE = (import.meta as any).env.PUBLIC_API_BASE ?? 'http://localhost:8080/api';
+  const token = localStorage.getItem('ufvshares_token');
+
+  // Load conversations – currently uses demo data while backend chat is not yet implemented.
+  // TODO: replace with real endpoint:  GET /api/chats  (returns Conv[])
+  let conversations: Conv[] = [];
+
+  async function loadConversations(): Promise<Conv[]> {
+    // Uncomment when backend is ready:
+    // const res = await fetch(API_BASE + '/chats', { headers: { Authorization: 'Bearer ' + token } });
+    // if (res.ok) return res.json();
+    // return [];
+
+    // Demo data for now
+    return [
+      {
+        id: 1, name: 'Carlos López', avatar: 'CL', unread: 2, productId: 101,
+        productName: 'MacBook Pro 14"',
+        lastMsg: '¿Sigue disponible para esta tarde?', lastTs: '10:42',
+        messages: [
+          { id: 1, from: 'other', text: 'Hola! Vi tu anuncio del MacBook, ¿sigue disponible?', ts: '10:30' },
+          { id: 2, from: 'me',    text: 'Hola Carlos, sí, todavía está disponible.', ts: '10:35' },
+          { id: 3, from: 'other', text: '¿Sigue disponible para esta tarde?', ts: '10:42' },
+        ]
+      },
+      {
+        id: 2, name: 'Ana García', avatar: 'AG', unread: 0, productId: 205,
+        productName: 'Cálculo I – Stewart',
+        lastMsg: 'Perfecto, nos vemos el viernes en la cafetería 👍', lastTs: 'Ayer',
+        messages: [
+          { id: 1, from: 'me',    text: 'Hola Ana, te vendo el Cálculo I por 12 €.', ts: 'Ayer 16:00' },
+          { id: 2, from: 'other', text: '¡Genial! ¿Puede ser el viernes?', ts: 'Ayer 16:15' },
+          { id: 3, from: 'me',    text: 'Sí, en la cafetería a las 13:00.', ts: 'Ayer 16:20' },
+          { id: 4, from: 'other', text: 'Perfecto, nos vemos el viernes en la cafetería 👍', ts: 'Ayer 16:22' },
+        ]
+      },
+      {
+        id: 3, name: 'Marcos Ruiz', avatar: 'MR', unread: 1, productId: 310,
+        productName: 'Bicicleta de montaña',
+        lastMsg: '¿Cuánto pides por ella?', lastTs: 'Lu.',
+        messages: [
+          { id: 1, from: 'other', text: '¿Cuánto pides por ella?', ts: 'Lu. 09:10' },
+        ]
+      },
+    ];
+  }
+
+  // ── State ──────────────────────────────────────────────────
+  let activeConvId: number | null = null;
+  let filteredConvs: Conv[] = [];
+
+  // ── DOM refs ───────────────────────────────────────────────
+  const convList       = document.getElementById('conv-list')!;
+  const chatMessages   = document.getElementById('chat-messages')!;
+  const chatEmptyState = document.getElementById('chat-empty-state')!;
+  const chatInputArea  = document.getElementById('chat-input-area')!;
+  const chatHeaderName = document.getElementById('chat-header-name')!;
+  const chatHeaderProduct = document.getElementById('chat-header-product')!;
+  const chatHeaderAvatar  = document.getElementById('chat-header-avatar')!;
+  const noConvsState   = document.getElementById('no-convs-state')!;
+  const chatMain       = document.getElementById('chat-main')!;
+  const chatSidebar    = document.getElementById('chat-sidebar')!;
+  const chatSearch     = document.getElementById('chat-search') as HTMLInputElement;
+  const chatForm       = document.getElementById('chat-form') as HTMLFormElement;
+  const msgInput       = document.getElementById('msg-input') as HTMLTextAreaElement;
+
+  // ── Helpers ────────────────────────────────────────────────
+  function timeAgo(ts: string) { return ts; }
+
+  function renderConvItem(conv: Conv, active: boolean): string {
+    const unreadBadge = conv.unread > 0
+      ? `<span class="badge badge-sm badge-primary border-none shrink-0">${conv.unread}</span>` : '';
+    const activeCls = active ? 'bg-primary/10' : 'hover:bg-base-200';
+    return `
+      <button data-id="${conv.id}"
+        class="conv-item w-full flex items-start gap-3 px-4 py-3 text-left transition-colors ${activeCls}">
+        <div class="w-10 h-10 rounded-full bg-primary/20 text-primary font-black text-sm flex items-center justify-center shrink-0">
+          ${conv.avatar}
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between gap-1">
+            <p class="font-semibold text-sm truncate text-base-content">${conv.name}</p>
+            <span class="text-[10px] text-base-content/40 shrink-0">${conv.lastTs}</span>
+          </div>
+          <p class="text-xs text-base-content/50 truncate">${conv.productName}</p>
+          <div class="flex items-center justify-between gap-1 mt-0.5">
+            <p class="text-xs text-base-content/60 truncate">${conv.lastMsg}</p>
+            ${unreadBadge}
+          </div>
+        </div>
+      </button>`;
+  }
+
+  function renderMessages(conv: Conv) {
+    // Clear old messages (keep empty state node but hide it)
+    chatEmptyState.classList.add('hidden');
+    const msgs = chatMessages.querySelectorAll('.msg-bubble');
+    msgs.forEach(m => m.remove());
+
+    conv.messages.forEach(msg => {
+      const isMe = msg.from === 'me';
+      const bubble = document.createElement('div');
+      bubble.className = `msg-bubble flex ${isMe ? 'justify-end' : 'justify-start'}`;
+      bubble.innerHTML = `
+        <div class="max-w-[70%] flex flex-col ${isMe ? 'items-end' : 'items-start'} gap-0.5">
+          <div class="px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm
+            ${isMe ? 'bg-primary text-primary-content rounded-br-sm' : 'bg-base-200 text-base-content rounded-bl-sm'}">
+            ${msg.text}
+          </div>
+          <span class="text-[10px] text-base-content/40 px-1">${msg.ts}</span>
+        </div>`;
+      chatMessages.appendChild(bubble);
+    });
+
+    // Scroll to bottom
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function openConversation(conv: Conv) {
+    activeConvId = conv.id;
+    // Clear unread
+    conv.unread = 0;
+
+    // Update header
+    chatHeaderAvatar.textContent = conv.avatar;
+    chatHeaderName.textContent = conv.name;
+    chatHeaderProduct.textContent = conv.productName;
+
+    // Show input
+    chatInputArea.classList.remove('hidden');
+    chatInputArea.classList.add('flex');
+
+    // Render messages
+    renderMessages(conv);
+
+    // Re-render sidebar to remove unread badge
+    renderConvList();
+
+    // On mobile: hide sidebar, show chat
+    chatSidebar.classList.add('hidden');
+    chatMain.classList.remove('hidden');
+    chatMain.classList.add('flex');
+  }
+
+  function renderConvList() {
+    convList.innerHTML = filteredConvs.length === 0
+      ? `<div class="p-6 text-center text-sm text-base-content/40">Sin resultados</div>`
+      : filteredConvs.map(c => renderConvItem(c, c.id === activeConvId)).join('');
+
+    convList.querySelectorAll<HTMLButtonElement>('.conv-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = Number(btn.dataset.id);
+        const conv = conversations.find(c => c.id === id);
+        if (conv) openConversation(conv);
+      });
+    });
+  }
+
+  // ── Init ───────────────────────────────────────────────────
+  (async () => {
+    conversations = await loadConversations();
+    filteredConvs = [...conversations];
+
+    if (conversations.length === 0) {
+      // Show empty state centered across full area
+      chatSidebar.classList.add('hidden');
+      chatMain.classList.add('hidden');
+      noConvsState.classList.remove('hidden');
+      noConvsState.classList.add('flex');
+    } else {
+      noConvsState.classList.add('hidden');
+      renderConvList();
+    }
+  })();
+
+  // ── Search filter ──────────────────────────────────────────
+  chatSearch?.addEventListener('input', () => {
+    const q = chatSearch.value.toLowerCase();
+    filteredConvs = conversations.filter(c =>
+      c.name.toLowerCase().includes(q) ||
+      c.productName.toLowerCase().includes(q) ||
+      c.lastMsg.toLowerCase().includes(q)
+    );
+    renderConvList();
+  });
+
+  // ── Send message ───────────────────────────────────────────
+  chatForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = msgInput.value.trim();
+    if (!text || activeConvId === null) return;
+
+    const conv = conversations.find(c => c.id === activeConvId);
+    if (!conv) return;
+
+    const now = new Date();
+    const ts = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    const newMsg: Message = { id: Date.now(), from: 'me', text, ts };
+
+    conv.messages.push(newMsg);
+    conv.lastMsg = text;
+    conv.lastTs = ts;
+
+    // TODO: POST /api/chats/{convId}/messages  { text }
+
+    msgInput.value = '';
+    msgInput.style.height = 'auto';
+    renderMessages(conv);
+    renderConvList();
+  });
+
+  // Auto-resize textarea
+  msgInput?.addEventListener('input', () => {
+    msgInput.style.height = 'auto';
+    msgInput.style.height = Math.min(msgInput.scrollHeight, 128) + 'px';
+  });
+
+  // Enter to send (Shift+Enter for newline)
+  msgInput?.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      chatForm.requestSubmit();
+    }
+  });
+
+  // ── Mobile back button ─────────────────────────────────────
+  // Inject "back" button in header for mobile
+  const chatHeader = document.getElementById('chat-header')!;
+  const backBtn = document.createElement('button');
+  backBtn.className = 'btn btn-ghost btn-circle btn-xs mr-1 sm:hidden';
+  backBtn.setAttribute('aria-label', 'Volver');
+  backBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>`;
+  backBtn.addEventListener('click', () => {
+    chatSidebar.classList.remove('hidden');
+    chatMain.classList.add('hidden');
+    chatMain.classList.remove('flex');
+    activeConvId = null;
+  });
+  chatHeader.prepend(backBtn);
+</script>

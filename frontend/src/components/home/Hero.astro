@@ -1,185 +1,90 @@
 ---
-import { Icon } from "astro-icon/components";
+// Hero personalizado — sin imágenes, con saludo dinámico y barra de búsqueda
 ---
 
-<section class="relative w-full overflow-hidden">
-    <!-- Swiper Container -->
-    <div class="swiper hero-swiper h-[350px] sm:h-[450px] md:h-[500px]">
-        <div class="swiper-wrapper">
-            <!-- Slide 1: Laptops -->
-            <div class="swiper-slide relative">
-                <img
-                    src="/campus.webp"
-                    alt="Campus UFV"
-                    class="absolute inset-0 w-full h-full object-cover"
-                />
-                <div
-                    class="absolute inset-0 bg-black/40 flex items-center justify-center text-center px-4"
-                >
-                    <div class="max-w-3xl animate-fade-in">
-                        <h2
-                            class="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight"
-                        >
-                            Marketplace universitario
-                        </h2>
-                        <p
-                            class="text-lg md:text-xl text-white/90 mb-8 max-w-xl mx-auto"
-                        >
-                            Compra, vende y alquila entre estudiantes de la UFV.
-                        </p>
+<!-- Greeting banner -->
+<section class="bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#312e81] pt-6 pb-10 px-4 relative overflow-hidden">
+  <!-- decorative blobs -->
+  <div class="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-primary/20 blur-3xl pointer-events-none"></div>
+  <div class="absolute bottom-0 right-0 w-64 h-64 rounded-full bg-yellow-400/10 blur-3xl pointer-events-none"></div>
 
-                    </div>
-                </div>
-            </div>
-
-            <!-- Slide 2: Smartphones -->
-            <div class="swiper-slide relative">
-                <img
-                    src="/foto.webp"
-                    alt="Publica tu anuncio"
-                    class="absolute inset-0 w-full h-full object-cover"
-                />
-                <div
-                    class="absolute inset-0 bg-linear-to-r from-black/60 to-transparent flex items-center justify-start px-8 md:px-24"
-                >
-                    <div class="max-w-2xl text-left">
-                        <span
-                            class="badge badge-primary mb-4 p-4 font-bold uppercase tracking-widest"
-                            >Nuevo</span
-                        >
-                        <h2
-                            class="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight"
-                        >
-                            Publica en 1 minuto
-                        </h2>
-                        <p class="text-lg md:text-xl text-white/90 mb-8">Crea un anuncio, pon precio y elige venta o alquiler.</p>
-                        <a
-                            href="/app#publicar"
-                            class="btn btn-secondary btn-lg rounded-full px-8 shadow-xl hover:scale-105 transition-transform"
-                        >
-                            Publicar
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Slide 3: Gaming -->
-            <div class="swiper-slide relative">
-                <img
-                    src="/campus.webp"
-                    alt="Explora categorías"
-                    class="absolute inset-0 w-full h-full object-cover"
-                />
-                <div
-                    class="absolute inset-0 bg-black/50 flex items-center justify-center text-center px-4"
-                >
-                    <div class="max-w-3xl">
-                        <h2
-                            class="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight"
-                        >
-                            Encuentra lo que necesitas
-                        </h2>
-                        <p
-                            class="text-lg md:text-xl text-white/90 mb-8 max-w-xl mx-auto"
-                        >
-                            Filtra por venta o alquiler y explora categorías.
-                        </p>
-                        <a
-                            href="/category/libros"
-                            class="btn btn-outline btn-white btn-lg rounded-full px-8 text-white hover:bg-white hover:text-black transition-all"
-                        >
-                            Libros
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Navigation -->
-        <div
-            class="hero-next text-white! w-10 h-10 hover:scale-110 transition-transform hidden sm:flex items-center justify-center bg-black/20 hover:bg-black/40 rounded-full cursor-pointer absolute right-4 top-1/2 -translate-y-1/2 z-50"
-        >
-            <Icon name="lucide:chevron-right" class="w-6 h-6" />
-        </div>
-        <div
-            class="hero-prev text-white! w-10 h-10 hover:scale-110 transition-transform hidden sm:flex items-center justify-center bg-black/20 hover:bg-black/40 rounded-full cursor-pointer absolute left-4 top-1/2 -translate-y-1/2 z-50"
-        >
-            <Icon name="lucide:chevron-left" class="w-6 h-6" />
-        </div>
-
-        <!-- Pagination -->
-        <div class="swiper-pagination bottom-8!"></div>
+  <div class="max-w-7xl mx-auto relative z-10">
+    <!-- top row: greeting + publish btn -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+      <div>
+        <p class="text-white/50 text-sm font-medium mb-1 uppercase tracking-widest">Bienvenido de vuelta</p>
+        <h1 class="text-3xl sm:text-4xl font-black text-white" id="hero-greeting">UFV Shares</h1>
+      </div>
+      <a href="/profile#publicar"
+        class="btn btn-warning btn-md rounded-full px-7 gap-2 shadow-lg hover:scale-105 transition-transform self-start sm:self-auto font-bold">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        Publicar anuncio
+      </a>
     </div>
+
+    <!-- Search bar -->
+    <div class="relative max-w-2xl">
+      <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
+      <input
+        id="hero-search"
+        type="text"
+        placeholder="Busca libros, calculadoras, portátiles…"
+        class="w-full pl-12 pr-16 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-white/15 transition-all text-base"
+        autocomplete="off"
+      />
+      <button id="hero-search-btn"
+        class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-primary btn-sm rounded-xl px-4">
+        Buscar
+      </button>
+    </div>
+
+    <!-- quick stats pills -->
+    <div class="flex flex-wrap gap-3 mt-6" id="hero-stats">
+      <span class="badge badge-lg bg-white/10 border-white/20 text-white/70 gap-1.5 font-medium">
+        <span class="w-2 h-2 rounded-full bg-success inline-block animate-pulse"></span>
+        Marketplace activo
+      </span>
+      <span class="badge badge-lg bg-white/10 border-white/20 text-white/70 font-medium" id="stat-products">Cargando anuncios…</span>
+    </div>
+  </div>
 </section>
 
-<!-- Swiper Styles -->
-<link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
-/>
-
-<style>
-    /* Custom Swiper Pagination Colors */
-    :root {
-        --swiper-pagination-color: var(--color-primary);
-        --swiper-pagination-bullet-inactive-color: #fff;
-        --swiper-pagination-bullet-inactive-opacity: 0.5;
-        --swiper-pagination-bullet-size: 10px;
-        --swiper-pagination-bullet-horizontal-gap: 6px;
-    }
-
-    .swiper-pagination-bullet-active {
-        width: 24px;
-        border-radius: 5px;
-        transition: width 0.3s ease;
-    }
-
-    @keyframes fade-in {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .animate-fade-in {
-        animation: fade-in 1s ease-out forwards;
-    }
-</style>
 
 <script>
-    import Swiper from "swiper";
-    import {
-        Navigation,
-        Pagination,
-        Autoplay,
-        EffectFade,
-    } from "swiper/modules";
+  // Greeting with username
+  const token = localStorage.getItem('ufvshares_token');
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const name = payload.nombre || payload.name || payload.sub || '';
+      const first = name.split(' ')[0];
+      if (first) {
+        const el = document.getElementById('hero-greeting');
+        if (el) el.textContent = '¡Hola, ' + first + '!';
+      }
+    } catch {}
+  }
 
-    const initHeroSwiper = () => {
-        new Swiper(".hero-swiper", {
-            modules: [Navigation, Pagination, Autoplay, EffectFade],
-            loop: true,
-            effect: "fade",
-            autoplay: {
-                delay: 5000,
-                disableOnInteraction: false,
-            },
-            pagination: {
-                el: ".swiper-pagination",
-                clickable: true,
-            },
-            navigation: {
-                nextEl: ".hero-next",
-                prevEl: ".hero-prev",
-            },
-        });
-    };
+  // Search
+  function triggerSearch() {
+    const q = (document.getElementById('hero-search') as HTMLInputElement)?.value?.trim();
+    if (q) {
+      document.getElementById('featured-products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.dispatchEvent(new CustomEvent('ufv:search', { detail: q }));
+    }
+  }
+  document.getElementById('hero-search-btn')?.addEventListener('click', triggerSearch);
+  document.getElementById('hero-search')?.addEventListener('keydown', (e: Event) => {
+    if ((e as KeyboardEvent).key === 'Enter') triggerSearch();
+  });
 
-    // Initialize on load and after view transitions
-    initHeroSwiper();
-    document.addEventListener("astro:after-swap", initHeroSwiper);
 </script>
+
+<style>
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+
+

@@ -1,81 +1,556 @@
 ﻿---
-import Pagination from "../ui/Pagination.astro";
 const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
 ---
 
-<section class="pb-10 bg-base-100" id="featured-products-section">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between mb-12">
-            <h2
-                class="text-3xl font-black text-slate-900 uppercase tracking-tighter"
-            >
-                Anuncios destacados
-            </h2>
+<section class="py-8 bg-base-100" id="featured-products-section">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- ── Mobile top bar ───────────────────────────────────── -->
+    <div class="flex md:hidden items-center justify-between mb-5">
+      <div>
+        <h2 class="text-xl font-black text-base-content">Anuncios</h2>
+        <p class="text-sm text-base-content/50" id="products-count-mobile"></p>
+      </div>
+      <button id="mobile-filter-btn" class="btn btn-sm btn-outline rounded-full gap-2 border-base-300">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M7 10h10M11 16h2"/>
+        </svg>
+        Filtrar
+        <span id="filter-badge" class="badge badge-primary badge-xs hidden">0</span>
+      </button>
+    </div>
+
+    <!-- ── Layout: sidebar + grid ───────────────────────────── -->
+    <div class="flex gap-7 items-start">
+
+      <!-- ── Filter Sidebar ──────────────────────────────────── -->
+      <aside id="filter-sidebar"
+        class="flex flex-col gap-5 bg-base-100 w-72 p-5
+               md:w-64 md:shrink-0 md:sticky md:top-20 md:max-h-[calc(100vh-5rem)] md:overflow-y-auto
+               md:rounded-2xl md:border md:border-base-200 md:shadow-sm">
+
+        <!-- Mobile header -->
+        <div class="flex items-center justify-between md:hidden">
+          <span class="font-black text-lg">Filtros</span>
+          <button id="close-filter-btn" class="btn btn-ghost btn-circle btn-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
         </div>
+
+        <!-- Desktop title -->
+        <p class="hidden md:block text-xs font-black uppercase tracking-widest text-base-content/40">Filtrar anuncios</p>
+
+        <!-- BÚSQUEDA -->
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2">Búsqueda</p>
+          <div class="relative">
+            <input id="sidebar-search" type="text" placeholder="Busca productos…"
+              class="input input-sm input-bordered w-full rounded-xl text-sm pr-8" autocomplete="off"/>
+            <button id="sidebar-search-clear" aria-label="Limpiar búsqueda"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 opacity-40 hover:opacity-100 hidden">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="h-px bg-base-200"></div>
+
+        <!-- TIPO DE ANUNCIO -->
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-3">Tipo de anuncio</p>
+          <div class="flex flex-col gap-1.5">
+            <button data-tipo="all" class="tipo-btn btn btn-sm btn-primary justify-start rounded-xl gap-2.5 text-sm font-semibold">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/>
+              </svg>
+              Todos
+            </button>
+            <button data-tipo="VENTA" class="tipo-btn btn btn-sm btn-ghost justify-start rounded-xl gap-2.5 text-sm font-semibold border border-base-200">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Venta
+            </button>
+            <button data-tipo="ALQUILER" class="tipo-btn btn btn-sm btn-ghost justify-start rounded-xl gap-2.5 text-sm font-semibold border border-base-200">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              Alquiler
+            </button>
+          </div>
+        </div>
+
+        <div class="h-px bg-base-200"></div>
+
+        <!-- CATEGORÍA -->
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-3">Categoría</p>
+          <div class="flex flex-col gap-1.5">
+            <button data-cat="" class="cat-btn btn btn-sm btn-primary justify-start rounded-xl gap-2.5 text-sm font-semibold">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+              </svg>
+              Todas las categorías
+            </button>
+            <button data-cat="LIBROS" class="cat-btn btn btn-sm btn-ghost justify-start rounded-xl gap-2.5 text-sm font-semibold border border-base-200">
+              <span class="w-5 h-5 rounded-md bg-blue-50 border border-blue-200 inline-flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+              </span>
+              Libros
+            </button>
+            <button data-cat="ELECTRONICA" class="cat-btn btn btn-sm btn-ghost justify-start rounded-xl gap-2.5 text-sm font-semibold border border-base-200">
+              <span class="w-5 h-5 rounded-md bg-violet-50 border border-violet-200 inline-flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+              </span>
+              Electrónica
+            </button>
+            <button data-cat="DEPORTE" class="cat-btn btn btn-sm btn-ghost justify-start rounded-xl gap-2.5 text-sm font-semibold border border-base-200">
+              <span class="w-5 h-5 rounded-md bg-green-50 border border-green-200 inline-flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.4 2.4 3 5.6 3 9s-.6 6.6-3 9M12 3c-2.4 2.4-3 5.6-3 9s.6 6.6 3 9M3 12h18"/>
+                </svg>
+              </span>
+              Deporte
+            </button>
+            <button data-cat="HOGAR" class="cat-btn btn btn-sm btn-ghost justify-start rounded-xl gap-2.5 text-sm font-semibold border border-base-200">
+              <span class="w-5 h-5 rounded-md bg-rose-50 border border-rose-200 inline-flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+              </span>
+              Hogar
+            </button>
+            <button data-cat="OTROS" class="cat-btn btn btn-sm btn-ghost justify-start rounded-xl gap-2.5 text-sm font-semibold border border-base-200">
+              <span class="w-5 h-5 rounded-md bg-slate-100 border border-slate-200 inline-flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
+                </svg>
+              </span>
+              Otros
+            </button>
+          </div>
+        </div>
+
+        <div class="h-px bg-base-200"></div>
+
+        <!-- CONDICIÓN -->
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-3">Condición</p>
+          <div class="flex flex-col gap-1.5">
+            <button data-cond="" class="cond-btn btn btn-sm btn-primary justify-start rounded-xl gap-2.5 text-sm font-semibold">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+              </svg>
+              Cualquier condición
+            </button>
+            <button data-cond="NUEVO" class="cond-btn btn btn-sm btn-ghost justify-start rounded-xl gap-2.5 text-sm font-semibold border border-base-200">
+              <span class="w-5 h-5 rounded-md bg-emerald-50 border border-emerald-200 inline-flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+              </span>
+              Nuevo
+              <span class="ml-auto text-[10px] font-bold uppercase tracking-wide text-emerald-500 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.5">A+</span>
+            </button>
+            <button data-cond="COMO_NUEVO" class="cond-btn btn btn-sm btn-ghost justify-start rounded-xl gap-2.5 text-sm font-semibold border border-base-200">
+              <span class="w-5 h-5 rounded-md bg-teal-50 border border-teal-200 inline-flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+              </span>
+              Como nuevo
+              <span class="ml-auto text-[10px] font-bold uppercase tracking-wide text-teal-500 bg-teal-50 border border-teal-200 rounded px-1.5 py-0.5">A</span>
+            </button>
+            <button data-cond="BUENO" class="cond-btn btn btn-sm btn-ghost justify-start rounded-xl gap-2.5 text-sm font-semibold border border-base-200">
+              <span class="w-5 h-5 rounded-md bg-blue-50 border border-blue-200 inline-flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
+                </svg>
+              </span>
+              Bueno
+              <span class="ml-auto text-[10px] font-bold uppercase tracking-wide text-blue-500 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5">B</span>
+            </button>
+            <button data-cond="ACEPTABLE" class="cond-btn btn btn-sm btn-ghost justify-start rounded-xl gap-2.5 text-sm font-semibold border border-base-200">
+              <span class="w-5 h-5 rounded-md bg-amber-50 border border-amber-200 inline-flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+              </span>
+              Aceptable
+              <span class="ml-auto text-[10px] font-bold uppercase tracking-wide text-amber-600 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5">C</span>
+            </button>
+            <button data-cond="DETERIORADO" class="cond-btn btn btn-sm btn-ghost justify-start rounded-xl gap-2.5 text-sm font-semibold border border-base-200">
+              <span class="w-5 h-5 rounded-md bg-orange-50 border border-orange-200 inline-flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+              </span>
+              Deteriorado
+              <span class="ml-auto text-[10px] font-bold uppercase tracking-wide text-orange-500 bg-orange-50 border border-orange-200 rounded px-1.5 py-0.5">D</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="h-px bg-base-200"></div>
+
+        <!-- PRECIO -->
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-3">Precio (€)</p>
+          <div class="flex gap-2 items-center">
+            <input id="price-min" type="number" min="0" step="0.01" placeholder="Mín"
+              class="input input-sm input-bordered w-full rounded-xl text-sm"/>
+            <span class="text-base-content/30 font-bold shrink-0">–</span>
+            <input id="price-max" type="number" min="0" step="0.01" placeholder="Máx"
+              class="input input-sm input-bordered w-full rounded-xl text-sm"/>
+          </div>
+          <button id="price-apply" class="btn btn-xs btn-outline rounded-xl mt-2 w-full">Aplicar precio</button>
+        </div>
+
+        <div class="h-px bg-base-200"></div>
+
+        <!-- ORDENAR POR -->
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2">Ordenar por</p>
+          <select id="sort-select" class="select select-sm select-bordered w-full rounded-xl text-sm">
+            <option value="recent">Más reciente</option>
+            <option value="price-asc">Precio: menor → mayor</option>
+            <option value="price-desc">Precio: mayor → menor</option>
+            <option value="name-az">Nombre: A → Z</option>
+          </select>
+        </div>
+
+        <!-- LIMPIAR FILTROS -->
+        <button id="clear-filters-btn"
+          class="btn btn-sm btn-ghost w-full rounded-xl border border-error/20 gap-2 text-error/60 hover:text-error hover:bg-error/5 hidden">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/>
+          </svg>
+          Limpiar filtros
+        </button>
+
+      </aside>
+
+      <!-- Mobile overlay -->
+      <div id="filter-overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden"></div>
+
+      <!-- ── Product Grid ──────────────────────────────────────── -->
+      <main class="flex-1 min-w-0">
+
+        <!-- Desktop header -->
+        <div class="hidden md:flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-2xl font-black text-base-content">Todos los anuncios</h2>
+            <p class="text-base-content/50 text-sm mt-0.5" id="products-count"></p>
+          </div>
+        </div>
+
+        <!-- Active filter tags -->
+        <div id="active-filter-tags" class="flex flex-wrap gap-2 mb-5 empty:hidden"></div>
 
         <!-- Loading skeletons -->
-        <div id="products-loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 min-h-[400px]">
-            {Array.from({ length: 8 }).map(() => (
-                <div class="rounded-xl overflow-hidden border border-base-200 animate-pulse">
-                    <div class="bg-slate-200" style="aspect-ratio: 4/5;"></div>
-                    <div class="p-4 space-y-3">
-                        <div class="h-3 bg-slate-200 rounded w-1/3"></div>
-                        <div class="h-4 bg-slate-200 rounded w-3/4"></div>
-                        <div class="h-4 bg-slate-200 rounded w-1/2"></div>
-                    </div>
-                </div>
-            ))}
+        <div id="products-loading" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+          {Array.from({ length: 6 }).map(() => (
+            <div class="rounded-xl overflow-hidden border border-base-200 animate-pulse">
+              <div class="bg-slate-200" style="aspect-ratio: 4/5;"></div>
+              <div class="p-4 space-y-3">
+                <div class="h-3 bg-slate-200 rounded w-1/3"></div>
+                <div class="h-4 bg-slate-200 rounded w-3/4"></div>
+                <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+              </div>
+            </div>
+          ))}
         </div>
 
-        <!-- Real product grid (hidden until loaded) -->
-        <div
-            id="product-grid"
-            class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 min-h-[800px]"
-        ></div>
+        <!-- Product grid -->
+        <div id="product-grid" class="hidden grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 min-h-[500px]"></div>
 
-        <p id="no-products-msg" class="hidden text-center py-24 text-slate-400 font-bold uppercase tracking-widest bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-            No hay productos disponibles ahora mismo
+        <p id="no-products-msg"
+          class="hidden text-center py-24 text-slate-400 font-bold uppercase tracking-widest bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 mt-4">
+          No hay productos que coincidan con los filtros
         </p>
 
-        <!-- Pagination Controls -->
-        <div class="flex justify-center mt-12" id="pagination-controls"></div>
+        <!-- Pagination -->
+        <div class="flex justify-center mt-10" id="pagination-controls"></div>
+
+      </main>
     </div>
+  </div>
 </section>
 
+<style>
+  /* Mobile sidebar: fixed off-screen drawer */
+  @media (max-width: 767px) {
+    #filter-sidebar {
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      height: 100dvh;
+      z-index: 50;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 0 !important;
+      border: none !important;
+      box-shadow: 4px 0 32px rgba(0, 0, 0, 0.18);
+      overflow-y: auto;
+    }
+    #filter-sidebar.sidebar-open {
+      transform: translateX(0);
+    }
+  }
+</style>
+
 <script define:vars={{ API_BASE }}>
-    const ITEMS_PER_PAGE = 8;
+  const ITEMS_PER_PAGE = 9;
+  const BACKEND_BASE = (() => { try { return new URL(API_BASE).origin; } catch { return 'http://localhost:8080'; } })();
 
-    const BACKEND_BASE = (() => { try { return new URL(API_BASE).origin; } catch { return 'http://localhost:8080'; } })();
+  // ── Filter state ──────────────────────────────────────────────
+  let _allProducts = [];
+  let _filterTipo = 'all';
+  let _filterCat = '';
+  let _filterQuery = '';
+  let _filterPriceMin = null;
+  let _filterPriceMax = null;
+  let _filterCondicion = '';
 
-    function getImageUrl(product) {
-        if (product.fotoUrl) return BACKEND_BASE + product.fotoUrl;
-        if (product.fotos && product.fotos.length > 0) return BACKEND_BASE + product.fotos[0].url;
-        if (product.imagenUrl) return product.imagenUrl;
-        return '/foto.webp';
+  // ── Mobile sidebar ────────────────────────────────────────────
+  const sidebar = document.getElementById('filter-sidebar');
+  const overlay = document.getElementById('filter-overlay');
+
+  function openSidebar() {
+    sidebar?.classList.add('sidebar-open');
+    overlay?.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    sidebar?.classList.remove('sidebar-open');
+    overlay?.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('mobile-filter-btn')?.addEventListener('click', openSidebar);
+  document.getElementById('close-filter-btn')?.addEventListener('click', closeSidebar);
+  overlay?.addEventListener('click', closeSidebar);
+
+  // ── Tipo buttons ──────────────────────────────────────────────
+  function setActiveTipo(value) {
+    document.querySelectorAll('.tipo-btn').forEach(btn => {
+      const active = btn.dataset.tipo === value;
+      btn.classList.toggle('btn-primary', active);
+      btn.classList.toggle('btn-ghost', !active);
+      btn.classList.toggle('border', !active);
+      btn.classList.toggle('border-base-200', !active);
+    });
+  }
+  document.querySelectorAll('.tipo-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _filterTipo = btn.dataset.tipo ?? 'all';
+      setActiveTipo(_filterTipo);
+      applyFilters();
+      updateUI();
+    });
+  });
+
+  // ── Category buttons ──────────────────────────────────────────
+  function setActiveCat(value) {
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+      const active = btn.dataset.cat === value;
+      btn.classList.toggle('btn-primary', active);
+      btn.classList.toggle('btn-ghost', !active);
+      btn.classList.toggle('border', !active);
+      btn.classList.toggle('border-base-200', !active);
+    });
+  }
+  document.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _filterCat = btn.dataset.cat ?? '';
+      setActiveCat(_filterCat);
+      applyFilters();
+      updateUI();
+    });
+  });
+
+  // ── Condición buttons ──────────────────────────────────────────
+  function setActiveCond(value) {
+    document.querySelectorAll('.cond-btn').forEach(btn => {
+      const active = btn.dataset.cond === value;
+      btn.classList.toggle('btn-primary', active);
+      btn.classList.toggle('btn-ghost', !active);
+      btn.classList.toggle('border', !active);
+      btn.classList.toggle('border-base-200', !active);
+    });
+  }
+  document.querySelectorAll('.cond-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _filterCondicion = btn.dataset.cond ?? '';
+      setActiveCond(_filterCondicion);
+      applyFilters();
+      updateUI();
+    });
+  });
+
+  // ── Search ────────────────────────────────────────────────────
+  const searchInput = document.getElementById('sidebar-search');
+  const searchClear = document.getElementById('sidebar-search-clear');
+  let searchDebounce;
+
+  searchInput?.addEventListener('input', () => {
+    const val = searchInput.value.trim();
+    searchClear?.classList.toggle('hidden', !val);
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => {
+      _filterQuery = val;
+      applyFilters();
+      updateUI();
+    }, 300);
+  });
+  searchClear?.addEventListener('click', () => {
+    if (searchInput) searchInput.value = '';
+    searchClear.classList.add('hidden');
+    _filterQuery = '';
+    applyFilters();
+    updateUI();
+  });
+
+  // Sync with Hero search bar
+  window.addEventListener('ufv:search', (e) => {
+    _filterQuery = e.detail || '';
+    if (searchInput) searchInput.value = _filterQuery;
+    searchClear?.classList.toggle('hidden', !_filterQuery);
+    applyFilters();
+    updateUI();
+    document.getElementById('featured-products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  // ── Price ─────────────────────────────────────────────────────
+  document.getElementById('price-apply')?.addEventListener('click', () => {
+    const minVal = parseFloat(document.getElementById('price-min').value);
+    const maxVal = parseFloat(document.getElementById('price-max').value);
+    _filterPriceMin = isNaN(minVal) ? null : minVal;
+    _filterPriceMax = isNaN(maxVal) ? null : maxVal;
+    applyFilters();
+    updateUI();
+  });
+
+  // ── Sort ──────────────────────────────────────────────────────
+  document.getElementById('sort-select')?.addEventListener('change', applyFilters);
+
+  // ── Clear all filters ─────────────────────────────────────────
+  document.getElementById('clear-filters-btn')?.addEventListener('click', () => {
+    _filterTipo = 'all'; _filterCat = ''; _filterQuery = ''; _filterPriceMin = null; _filterPriceMax = null; _filterCondicion = '';
+    if (searchInput) searchInput.value = '';
+    searchClear?.classList.add('hidden');
+    const pMin = document.getElementById('price-min'); if (pMin) pMin.value = '';
+    const pMax = document.getElementById('price-max'); if (pMax) pMax.value = '';
+    const sortSel = document.getElementById('sort-select'); if (sortSel) sortSel.value = 'recent';
+    setActiveTipo('all');
+    setActiveCat('');
+    setActiveCond('');
+    applyFilters();
+    updateUI();
+  });
+
+  // ── UI helpers ────────────────────────────────────────────────
+  const TIPO_LABELS = { all: 'Todos', VENTA: 'Venta', ALQUILER: 'Alquiler' };
+  const CAT_LABELS = { '': '', LIBROS: 'Libros', ELECTRONICA: 'Electrónica', DEPORTE: 'Deporte', HOGAR: 'Hogar', OTROS: 'Otros' };
+  const COND_LABELS = { '': '', NUEVO: 'Nuevo', COMO_NUEVO: 'Como nuevo', BUENO: 'Bueno', ACEPTABLE: 'Aceptable', DETERIORADO: 'Deteriorado' };
+
+  function getActiveFilterCount() {
+    return [_filterTipo !== 'all', _filterCat !== '', _filterQuery !== '', _filterPriceMin !== null, _filterPriceMax !== null, _filterCondicion !== ''].filter(Boolean).length;
+  }
+
+  function updateUI() {
+    const count = getActiveFilterCount();
+    const badge = document.getElementById('filter-badge');
+    if (badge) { badge.textContent = String(count); badge.classList.toggle('hidden', count === 0); }
+    document.getElementById('clear-filters-btn')?.classList.toggle('hidden', count === 0);
+
+    const tags = [];
+    if (_filterTipo !== 'all') tags.push({ label: TIPO_LABELS[_filterTipo] || _filterTipo, key: 'tipo' });
+    if (_filterCat !== '') tags.push({ label: CAT_LABELS[_filterCat] || _filterCat, key: 'cat' });
+    if (_filterQuery !== '') tags.push({ label: '🔍 ' + _filterQuery, key: 'query' });
+    if (_filterPriceMin !== null) tags.push({ label: 'Desde ' + _filterPriceMin + '€', key: 'pmin' });
+    if (_filterPriceMax !== null) tags.push({ label: 'Hasta ' + _filterPriceMax + '€', key: 'pmax' });
+    if (_filterCondicion !== '') tags.push({ label: COND_LABELS[_filterCondicion] || _filterCondicion, key: 'cond' });
+
+    const tagsEl = document.getElementById('active-filter-tags');
+    if (tagsEl) {
+      tagsEl.innerHTML = tags.map(t =>
+        `<button class="badge badge-lg gap-1.5 bg-primary/10 text-primary border-primary/20 font-semibold hover:bg-error/10 hover:text-error hover:border-error/20 transition-colors cursor-pointer" data-remove-tag="${t.key}">
+          ${t.label}
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>`
+      ).join('');
+      tagsEl.querySelectorAll('[data-remove-tag]').forEach(el => {
+        el.addEventListener('click', () => {
+          const key = el.dataset.removeTag;
+          if (key === 'tipo') { _filterTipo = 'all'; setActiveTipo('all'); }
+          else if (key === 'cat') { _filterCat = ''; setActiveCat(''); }
+          else if (key === 'query') { _filterQuery = ''; if (searchInput) searchInput.value = ''; searchClear?.classList.add('hidden'); }
+          else if (key === 'pmin') { _filterPriceMin = null; const el = document.getElementById('price-min'); if (el) el.value = ''; }
+          else if (key === 'pmax') { _filterPriceMax = null; const el = document.getElementById('price-max'); if (el) el.value = ''; }
+          else if (key === 'cond') { _filterCondicion = ''; setActiveCond(''); }
+          applyFilters(); updateUI();
+        });
+      });
     }
+  }
 
-    function escAttr(str) {
-        return String(str ?? '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+  // ── Apply filters + sort ──────────────────────────────────────
+  function applyFilters() {
+    let list = _allProducts.slice();
+    if (_filterTipo !== 'all') list = list.filter(p => p.tipoTransaccion === _filterTipo);
+    if (_filterCat) list = list.filter(p => p.categoria === _filterCat);
+    if (_filterQuery) {
+      const q = _filterQuery.toLowerCase();
+      list = list.filter(p => (p.titulo || '').toLowerCase().includes(q) || (p.descripcion || '').toLowerCase().includes(q));
     }
+    if (_filterPriceMin !== null) list = list.filter(p => (p.precio ?? 0) >= _filterPriceMin);
+    if (_filterPriceMax !== null) list = list.filter(p => (p.precio ?? 0) <= _filterPriceMax);
+    if (_filterCondicion) list = list.filter(p => p.condicion === _filterCondicion);
+    const sort = document.getElementById('sort-select')?.value ?? 'recent';
+    if (sort === 'price-asc') list.sort((a, b) => (a.precio ?? 0) - (b.precio ?? 0));
+    else if (sort === 'price-desc') list.sort((a, b) => (b.precio ?? 0) - (a.precio ?? 0));
+    else if (sort === 'name-az') list.sort((a, b) => (a.titulo || '').localeCompare(b.titulo || '', 'es'));
+    renderProducts(list);
+  }
 
-    function createProductCard(p) {
-        const img = getImageUrl(p);
-        const id = p.idProducto;
-        const title = p.titulo || '';
-        const category = (p.categoria || '').replace(/_/g, ' ');
-        const price = p.precio != null ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Number(p.precio)) : 'Gratis';
-        const tipo = p.tipoTransaccion === 'ALQUILER' ? 'Alquiler' : 'Venta';
+  // ── Product card ──────────────────────────────────────────────
+  function getImageUrl(product) {
+    if (product.fotoUrl) return BACKEND_BASE + product.fotoUrl;
+    if (product.fotos && product.fotos.length > 0) return BACKEND_BASE + product.fotos[0].url;
+    if (product.imagenUrl) return product.imagenUrl;
+    return '/foto.webp';
+  }
 
-        const productData = escAttr(JSON.stringify({ id: String(id), name: title, price: p.precio ?? 0, image: img, stock: 1 }));
-        const favData = escAttr(JSON.stringify({ id: String(id), name: title, price: p.precio ?? 0, image: img, stock: 1, slug: String(id) }));
+  function escAttr(str) {
+    return String(str ?? '').replace(/&/g, '&amp;').replace(/'/g, '&#39;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
 
-        return `<div class="product-card-wrapper hidden">
+  function createProductCard(p) {
+    const img = getImageUrl(p);
+    const id = p.idProducto;
+    const title = p.titulo || '';
+    const category = (p.categoria || '').replace(/_/g, ' ');
+    const price = p.precio != null
+      ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Number(p.precio))
+      : 'Gratis';
+    const tipo = p.tipoTransaccion === 'ALQUILER' ? 'Alquiler' : 'Venta';
+    const productData = escAttr(JSON.stringify({ id: String(id), name: title, price: p.precio ?? 0, image: img, stock: 1 }));
+    const favData = escAttr(JSON.stringify({ id: String(id), name: title, price: p.precio ?? 0, image: img, stock: 1, slug: String(id) }));
+    return `<div class="product-card-wrapper hidden">
   <div class="card bg-base-100 shadow-sm hover:shadow-xl transition-shadow duration-300 group relative rounded-xl overflow-hidden border border-base-200">
     <div class="absolute top-3 right-3 z-20 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 ease-in-out">
-      <button class="add-to-favorite-btn btn btn-circle btn-sm bg-white hover:bg-primary hover:text-white border-none shadow-md" aria-label="AÃ±adir a favoritos" data-favorite='${favData}'>
+      <button class="add-to-favorite-btn btn btn-circle btn-sm bg-white hover:bg-primary hover:text-white border-none shadow-md" aria-label="Añadir a favoritos" data-favorite='${favData}'>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
       </button>
-      <button class="add-to-cart-btn btn btn-circle btn-sm bg-white hover:bg-primary hover:text-white border-none shadow-md" aria-label="AÃ±adir al carrito" data-product='${productData}'>
+      <button class="add-to-cart-btn btn btn-circle btn-sm bg-white hover:bg-primary hover:text-white border-none shadow-md" aria-label="Añadir al carrito" data-product='${productData}'>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
       </button>
     </div>
@@ -89,81 +564,94 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
       <h3 class="font-bold text-base mt-1 truncate" title="${escAttr(title)}">${title}</h3>
       <div class="flex items-center justify-between mt-2">
         <span class="text-xl font-bold text-primary">${price}</span>
-        <span class="text-success text-xs flex items-center gap-1">
-          <span class="w-2 h-2 rounded-full bg-success inline-block"></span>Disponible
-        </span>
+        <span class="text-success text-xs flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-success inline-block"></span>Disponible</span>
       </div>
     </div>
   </div>
 </div>`;
+  }
+
+  // ── Pagination ────────────────────────────────────────────────
+  function renderPagination(currentPage, totalPages) {
+    const container = document.getElementById('pagination-controls');
+    if (!container) return;
+    if (totalPages <= 1) { container.innerHTML = ''; return; }
+    let html = '<div class="join">';
+    if (currentPage > 1) html += `<button class="join-item btn btn-sm pagination-btn" data-page="${currentPage - 1}">«</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button class="join-item btn btn-sm pagination-btn${i === currentPage ? ' btn-active' : ''}" data-page="${i}">${i}</button>`;
+    }
+    if (currentPage < totalPages) html += `<button class="join-item btn btn-sm pagination-btn" data-page="${currentPage + 1}">»</button>`;
+    html += '</div>';
+    container.innerHTML = html;
+    container.querySelectorAll('.pagination-btn').forEach(btn => {
+      btn.addEventListener('click', () => showPage(parseInt(btn.dataset.page)));
+    });
+  }
+
+  function showPage(page) {
+    const wrappers = document.querySelectorAll('#product-grid .product-card-wrapper');
+    const totalPages = Math.ceil(wrappers.length / ITEMS_PER_PAGE);
+    const start = (page - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    wrappers.forEach((w, i) => w.classList.toggle('hidden', i < start || i >= end));
+    renderPagination(page, totalPages);
+  }
+
+  // ── Render & load ────────────────────────────────────────────
+  function renderProducts(products) {
+    const grid = document.getElementById('product-grid');
+    const noMsg = document.getElementById('no-products-msg');
+    const countEl = document.getElementById('products-count');
+    const countElMob = document.getElementById('products-count-mobile');
+    if (!grid) return;
+
+    if (!products.length) {
+      grid.classList.add('hidden'); grid.classList.remove('grid');
+      noMsg?.classList.remove('hidden');
+      const msg = 'Sin resultados';
+      if (countEl) countEl.textContent = msg;
+      if (countElMob) countElMob.textContent = msg;
+      document.getElementById('pagination-controls').innerHTML = '';
+      return;
     }
 
-    function renderPagination(currentPage, totalPages) {
-        const container = document.getElementById('pagination-controls');
-        if (!container || totalPages <= 1) { if(container) container.innerHTML = ''; return; }
-        let html = '<div class="join">';
-        for (let i = 1; i <= totalPages; i++) {
-            html += `<button class="join-item btn pagination-btn${i === currentPage ? ' btn-active' : ''}" data-page="${i}">${i}</button>`;
-        }
-        html += '</div>';
-        container.innerHTML = html;
-        container.querySelectorAll('.pagination-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const page = parseInt(btn.dataset.page);
-                showPage(page);
-            });
-        });
+    grid.innerHTML = products.map(createProductCard).join('');
+    grid.classList.remove('hidden'); grid.classList.add('grid');
+    noMsg?.classList.add('hidden');
+
+    const label = products.length + ' anuncio' + (products.length !== 1 ? 's' : '');
+    if (countEl) countEl.textContent = label;
+    if (countElMob) countElMob.textContent = label;
+
+    showPage(1);
+    document.dispatchEvent(new Event('astro:page-load'));
+  }
+
+  async function loadProducts() {
+    const loading = document.getElementById('products-loading');
+    const noMsg = document.getElementById('no-products-msg');
+    const token = localStorage.getItem('ufvshares_token');
+    const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+    try {
+      const res = await fetch(API_BASE + '/productos', { headers });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const products = await res.json();
+      loading?.classList.add('hidden');
+      if (!products.length) { noMsg?.classList.remove('hidden'); return; }
+      _allProducts = products;
+      window._allProducts = products;
+      renderProducts(products);
+      // Update hero stat counter
+      const statEl = document.getElementById('stat-products');
+      if (statEl) statEl.textContent = products.length + ' anuncios activos';
+    } catch (e) {
+      loading?.classList.add('hidden');
+      noMsg?.classList.remove('hidden');
+      console.error('Error cargando productos:', e);
     }
+  }
 
-    function showPage(page) {
-        const wrappers = document.querySelectorAll('#product-grid .product-card-wrapper');
-        const total = wrappers.length;
-        const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
-        const start = (page - 1) * ITEMS_PER_PAGE;
-        const end = start + ITEMS_PER_PAGE;
-        wrappers.forEach((w, i) => {
-            w.classList.toggle('hidden', i < start || i >= end);
-        });
-        renderPagination(page, totalPages);
-        document.getElementById('featured-products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    async function loadProducts() {
-        const loading = document.getElementById('products-loading');
-        const grid = document.getElementById('product-grid');
-        const noMsg = document.getElementById('no-products-msg');
-        if (!grid) return;
-
-        const token = localStorage.getItem('ufvshares_token');
-        const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
-
-        try {
-            const res = await fetch(`${API_BASE}/productos`, { headers });
-            if (!res.ok) throw new Error('Error ' + res.status);
-            const products = await res.json();
-
-            loading?.classList.add('hidden');
-
-            if (!products.length) {
-                noMsg?.classList.remove('hidden');
-                return;
-            }
-
-            grid.innerHTML = products.map(createProductCard).join('');
-            grid.classList.remove('hidden');
-            grid.classList.add('grid');
-
-            showPage(1);
-
-            // Reinit cart & favorites listeners for dynamically added buttons
-            document.dispatchEvent(new Event('astro:page-load'));
-        } catch (e) {
-            loading?.classList.add('hidden');
-            noMsg?.classList.remove('hidden');
-            console.error('Error cargando productos:', e);
-        }
-    }
-
-    loadProducts();
+  loadProducts();
 </script>
 

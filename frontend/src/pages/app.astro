@@ -1,18 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Hero from "../components/home/Hero.astro";
-import CategoryHome from "../components/home/CategoryHome.astro";
 import FeaturedProducts from "../components/home/FeaturedProducts.astro";
 ---
 
 <Layout title="UFV Shares · Inicio">
   <Hero />
-  <CategoryHome />
   <FeaturedProducts />
-
-  <script>
-    if (!localStorage.getItem("ufvshares_token")) {
-      window.location.href = "/auth?mode=login&next=" + encodeURIComponent("/app");
-    }
-  </script>
 </Layout>

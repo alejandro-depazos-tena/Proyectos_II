@@ -1,37 +1,85 @@
 ---
-import CategoryCardHome from "./CategoryCardHome.astro";
-import { categories, featuredLinks } from "../../data/home.ts";
+// Categorías con iconos de color — sin imágenes
 ---
 
-<section class="py-10 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2
-            class="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-12"
-        >
-            Categorías
-        </h2>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {
-                categories.map((category) => (
-                    <CategoryCardHome
-                        name={category.name}
-                        image={category.image}
-                        path={category.path}
-                    />
-                ))
-            }
-            {
-                featuredLinks.map((link) => (
-                    <CategoryCardHome
-                        name={link.name}
-                        image={link.image}
-                        path={link.path}
-                        className={link.className}
-                        imageClass={link.imageClass}
-                    />
-                ))
-            }
-        </div>
+<section class="py-10 bg-base-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-2xl font-black text-base-content">Explorar por categoría</h2>
+      <a href="/category/libros" class="btn btn-ghost btn-sm gap-1 text-primary font-semibold">
+        Ver todo
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+      </a>
     </div>
+
+    <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
+
+      <!-- Libros -->
+      <a href="/category/libros"
+        class="group flex flex-col items-center gap-2.5 p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 hover:-translate-y-1 hover:shadow-md transition-all duration-200 text-center">
+        <div class="w-12 h-12 rounded-xl bg-blue-100 group-hover:bg-blue-200 transition-colors flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v13M12 7c-1.8-1.2-4.2-1.7-7-1.7v11c2.8 0 5.2.5 7 1.7M12 7c1.8-1.2 4.2-1.7 7-1.7v11c-2.8 0-5.2.5-7 1.7"/>
+          </svg>
+        </div>
+        <span class="font-bold text-xs text-blue-900 leading-tight">Libros</span>
+      </a>
+
+      <!-- Electrónica -->
+      <a href="/category/electronica"
+        class="group flex flex-col items-center gap-2.5 p-4 rounded-2xl bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-100 hover:-translate-y-1 hover:shadow-md transition-all duration-200 text-center">
+        <div class="w-12 h-12 rounded-xl bg-violet-100 group-hover:bg-violet-200 transition-colors flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17a2 2 0 01-2-2V6a1 1 0 011-1h14a1 1 0 011 1v9a2 2 0 01-2 2H5z"/>
+          </svg>
+        </div>
+        <span class="font-bold text-xs text-violet-900 leading-tight">Electrónica</span>
+      </a>
+
+      <!-- Deporte -->
+      <a href="/category/deporte"
+        class="group flex flex-col items-center gap-2.5 p-4 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 hover:-translate-y-1 hover:shadow-md transition-all duration-200 text-center">
+        <div class="w-12 h-12 rounded-xl bg-green-100 group-hover:bg-green-200 transition-colors flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M12 2v4M12 18v4M2 12h4M18 12h4"/>
+          </svg>
+        </div>
+        <span class="font-bold text-xs text-green-900 leading-tight">Deporte</span>
+      </a>
+
+      <!-- Material -->
+      <a href="/category/material"
+        class="group flex flex-col items-center gap-2.5 p-4 rounded-2xl bg-gradient-to-br from-yellow-50 to-amber-50 border border-yellow-100 hover:-translate-y-1 hover:shadow-md transition-all duration-200 text-center">
+        <div class="w-12 h-12 rounded-xl bg-yellow-100 group-hover:bg-yellow-200 transition-colors flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+          </svg>
+        </div>
+        <span class="font-bold text-xs text-yellow-900 leading-tight">Material</span>
+      </a>
+
+      <!-- Hogar -->
+      <a href="/category/hogar"
+        class="group flex flex-col items-center gap-2.5 p-4 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100 hover:-translate-y-1 hover:shadow-md transition-all duration-200 text-center">
+        <div class="w-12 h-12 rounded-xl bg-rose-100 group-hover:bg-rose-200 transition-colors flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 11l9-7 9 7M5 10v10h14V10"/>
+          </svg>
+        </div>
+        <span class="font-bold text-xs text-rose-900 leading-tight">Hogar</span>
+      </a>
+
+      <!-- Idiomas -->
+      <a href="/category/idiomas"
+        class="group flex flex-col items-center gap-2.5 p-4 rounded-2xl bg-gradient-to-br from-cyan-50 to-teal-50 border border-cyan-100 hover:-translate-y-1 hover:shadow-md transition-all duration-200 text-center">
+        <div class="w-12 h-12 rounded-xl bg-cyan-100 group-hover:bg-cyan-200 transition-colors flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
+          </svg>
+        </div>
+        <span class="font-bold text-xs text-cyan-900 leading-tight">Idiomas</span>
+      </a>
+
+    </div>
+  </div>
 </section>

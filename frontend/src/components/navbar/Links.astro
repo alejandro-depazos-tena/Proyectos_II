@@ -1,74 +1,82 @@
 ---
 import { Icon } from "astro-icon/components";
-
-const categories = [
-    { name: "Inicio", href: "/app" },
-    { name: "Libros", href: "/category/libros" },
-    { name: "Material", href: "/category/material" },
-    { name: "Tecnología", href: "/category/tecnologia" },
-    { name: "Idiomas", href: "/category/idiomas" },
-    { name: "Deporte", href: "/category/deporte" },
-];
 ---
 
 <div class="bg-primary text-primary-content shadow-sm relative z-40">
-    <div
-        class="max-w-7xl mx-auto flex justify-between items-center text-xs sm:text-sm font-medium h-10"
-    >
-        <!-- Mobile: Heart + Contact -->
-        <div
-            class="flex sm:hidden w-full items-center justify-between h-full px-4"
-        >
-            <a
-                href="/favorites"
-                class="flex items-center gap-2 h-full px-2 hover:bg-white/10 transition-colors"
-                aria-label="Favoritos"
-            >
-                <Icon name="lucide:heart" class="w-5 h-5" />
-                <span>Favoritos</span>
+    <div class="max-w-7xl mx-auto flex justify-between items-center text-xs sm:text-sm font-medium h-10 px-4 sm:px-6 lg:px-8">
+
+        <!-- Mobile: scroll horizontally -->
+        <div class="flex sm:hidden w-full items-center gap-0 h-full overflow-x-auto scrollbar-none">
+            <a href="/app"       class="flex items-center gap-1.5 h-full px-3 whitespace-nowrap hover:bg-white/10 transition-colors shrink-0">
+                <Icon name="lucide:home" class="w-3.5 h-3.5" />Inicio
             </a>
-
-            <div class="flex h-full items-center">
-                <a
-                    href="/contact"
-                    class="flex items-center h-full px-2 hover:bg-white/10 transition-colors"
-                    >Contacto</a
-                >
-            </div>
+            <a href="/favorites" class="flex items-center gap-1.5 h-full px-3 whitespace-nowrap hover:bg-white/10 transition-colors shrink-0">
+                <Icon name="lucide:heart" class="w-3.5 h-3.5" />Favoritos
+            </a>
+            <a href="/chats"     class="flex items-center gap-1.5 h-full px-3 whitespace-nowrap hover:bg-white/10 transition-colors shrink-0">
+                <Icon name="lucide:message-circle" class="w-3.5 h-3.5" />Chats
+            </a>
+            <a href="/profile"   class="flex items-center gap-1.5 h-full px-3 whitespace-nowrap hover:bg-white/10 transition-colors shrink-0">
+                <Icon name="lucide:user" class="w-3.5 h-3.5" />Perfil
+            </a>
+            <a href="/blog"      class="flex items-center gap-1.5 h-full px-3 whitespace-nowrap hover:bg-white/10 transition-colors shrink-0">
+                <Icon name="lucide:rss" class="w-3.5 h-3.5" />Blog
+            </a>
+            <a href="/contact"   class="flex items-center gap-1.5 h-full px-3 whitespace-nowrap hover:bg-white/10 transition-colors shrink-0">
+                <Icon name="lucide:mail" class="w-3.5 h-3.5" />Contacto
+            </a>
         </div>
 
-        <!-- Desktop: Left Side (Mapped Categories) -->
-        <div class="hidden sm:flex h-full items-center">
-            {
-                categories.map((cat) => (
-                    <a
-                        href={cat.href}
-                        class="flex items-center h-full px-4 hover:bg-white/10 text-white/90 hover:text-white transition-all cursor-pointer"
-                    >
-                        {cat.name}
-                    </a>
-                ))
-            }
+        <!-- Desktop left: primary section links -->
+        <div class="hidden sm:flex h-full items-center gap-0">
+            <a href="/app"
+                class="links-item flex items-center gap-1.5 h-full px-4 hover:bg-white/10 text-white/80 hover:text-white transition-all text-xs font-medium">
+                <Icon name="lucide:home" class="w-3.5 h-3.5" />Inicio
+            </a>
+            <a href="/profile"
+                class="links-item flex items-center gap-1.5 h-full px-4 hover:bg-white/10 text-white/80 hover:text-white transition-all text-xs font-medium">
+                <Icon name="lucide:user" class="w-3.5 h-3.5" />Mi perfil
+            </a>
+            <a href="/profile#mis-anuncios"
+                class="links-item flex items-center gap-1.5 h-full px-4 hover:bg-white/10 text-white/80 hover:text-white transition-all text-xs font-medium">
+                <Icon name="lucide:package" class="w-3.5 h-3.5" />Mis anuncios
+            </a>
+            <a href="/favorites"
+                class="links-item flex items-center gap-1.5 h-full px-4 hover:bg-white/10 text-white/80 hover:text-white transition-all text-xs font-medium">
+                <Icon name="lucide:heart" class="w-3.5 h-3.5" />Favoritos
+            </a>
+            <a href="/chats"
+                class="links-item flex items-center gap-1.5 h-full px-4 hover:bg-white/10 text-white/80 hover:text-white transition-all text-xs font-medium">
+                <Icon name="lucide:message-circle" class="w-3.5 h-3.5" />Chats
+            </a>
         </div>
 
-        <!-- Desktop: Right Side -->
-        <div class="hidden sm:flex h-full items-center">
-            <a
-                href="/about"
-                class="flex items-center h-full px-4 hover:bg-white/10 text-white/90 hover:text-white transition-all cursor-pointer"
-                >Sobre UFV Shares</a
-            >
-            <a
-                href="/blog"
-                class="flex items-center h-full px-4 hover:bg-white/10 text-white/90 hover:text-white transition-all cursor-pointer"
-                >Blog</a
-            >
-            <a
-                href="/contact"
-                class="flex items-center h-full px-4 hover:bg-white/10 text-white/90 hover:text-white transition-all cursor-pointer"
-                >Contacto</a
-            >
+        <!-- Desktop right: info + publish -->
+        <div class="hidden sm:flex h-full items-center gap-0">
+            <a href="/blog"    class="flex items-center h-full px-3 hover:bg-white/10 text-white/70 hover:text-white transition-all text-xs">Blog</a>
+            <a href="/about"   class="flex items-center h-full px-3 hover:bg-white/10 text-white/70 hover:text-white transition-all text-xs">Sobre nosotros</a>
+            <a href="/contact" class="flex items-center h-full px-3 hover:bg-white/10 text-white/70 hover:text-white transition-all text-xs">Contacto</a>
+            <div class="w-px h-5 bg-white/20 mx-1"></div>
+            <a href="/profile#publicar"
+                class="flex items-center gap-1.5 h-full px-4 bg-white/15 hover:bg-white/25 text-white font-bold transition-all text-xs">
+                <Icon name="lucide:plus-circle" class="w-3.5 h-3.5" />Publicar
+            </a>
         </div>
     </div>
-
 </div>
+
+<style>
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+
+<script>
+    // Highlight current page
+    const path = location.pathname;
+    document.querySelectorAll<HTMLAnchorElement>('.links-item').forEach(link => {
+        const href = new URL(link.href).pathname;
+        if (href === path) {
+            link.classList.add('bg-white/20', 'text-white', '!font-bold');
+        }
+    });
+</script>

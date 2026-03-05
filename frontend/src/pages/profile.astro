@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
+const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
 ---
 
 <Layout title="Mi perfil · UFV Shares">
@@ -224,6 +225,36 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
               <option value="PRESTAMO">Pr&eacute;stamo</option>
             </select>
           </div>
+          <!-- ── Google Books lookup (visible sólo cuando categoría = LIBROS) ── -->
+          <div id="books-lookup" class="sm:col-span-2 hidden">
+            <div class="rounded-xl border border-blue-200 bg-blue-50/60 p-4 flex flex-col gap-3">
+              <div class="flex flex-wrap items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 shrink-0"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                <span class="font-bold text-sm text-blue-700">Autocompletar con Google Books</span>
+                <span class="text-xs text-blue-500 ml-auto hidden sm:inline">Rellena el t&iacute;tulo y descripci&oacute;n autom&aacute;ticamente</span>
+              </div>
+              <div class="flex gap-2">
+                <input id="books-query" type="text"
+                  placeholder="ISBN (ej. 9788420412337) o t&iacute;tulo del libro…"
+                  class="input input-sm input-bordered flex-1 bg-white text-sm" />
+                <button type="button" id="btn-books-search"
+                  class="btn btn-sm btn-primary gap-1.5 shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  Buscar
+                </button>
+              </div>
+              <!-- Resultados de búsqueda -->
+              <div id="books-results" class="hidden flex-col gap-1 max-h-56 overflow-y-auto rounded-lg border border-blue-100 bg-white divide-y divide-blue-50"></div>
+              <!-- Libro seleccionado -->
+              <div id="books-selected" class="hidden items-center gap-2 text-sm bg-blue-100 text-blue-800 rounded-lg px-3 py-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-blue-500"><path d="M20 6 9 17l-5-5"/></svg>
+                <span id="books-selected-title" class="flex-1 font-medium truncate"></span>
+                <button type="button" id="btn-books-clear"
+                  class="shrink-0 w-5 h-5 rounded-full hover:bg-blue-200 flex items-center justify-center text-blue-500 hover:text-blue-800 transition-colors">&times;</button>
+              </div>
+            </div>
+          </div>
+
           <div>
             <label class="label"><span class="label-text font-semibold">Precio (&euro;)</span></label>
             <input name="precio" type="number" min="0" step="0.01"
@@ -316,7 +347,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
   </div>
 </Layout>
 
-<script define:vars={{ API_BASE }}>
+<script define:vars={{ API_BASE, GOOGLE_BOOKS_KEY }}>
   const BACKEND_BASE = (() => {
     try { return new URL(API_BASE).origin; } catch { return "http://localhost:8080"; }
   })();
@@ -774,6 +805,176 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
       btn.disabled = false;
       btn.textContent = "Publicar";
     }
+  });
+
+  // ── Google Books API integration ──────────────────────────────────────
+  const GBOOKS_API = 'https://www.googleapis.com/books/v1/volumes';
+  const GBOOKS_KEY = GOOGLE_BOOKS_KEY ?? '';
+  const _gBooksCache = new Map();
+
+  const categoriaSelect  = document.querySelector('select[name="categoria"]');
+  const booksLookup      = $('books-lookup');
+  const booksQueryInput  = $('books-query');
+  const booksResultsEl   = $('books-results');
+  const booksSelectedEl  = $('books-selected');
+  const booksSelTitleEl  = $('books-selected-title');
+
+  // Mostrar / ocultar panel según categoría
+  categoriaSelect?.addEventListener('change', () => {
+    if (categoriaSelect.value === 'LIBROS') {
+      booksLookup?.classList.remove('hidden');
+    } else {
+      booksLookup?.classList.add('hidden');
+      clearSelectedBook();
+    }
+  });
+
+  // Si el formulario se resetea, resetear también el panel
+  $('btn-cancel-form')?.addEventListener('click', () => {
+    booksLookup?.classList.add('hidden');
+    clearSelectedBook();
+  }, true); // useCapture para que corra antes del hideForm
+
+  async function searchGoogleBooks(query) {
+    const isIsbn = /^[\d\-]{9,17}$/.test(query.replace(/\s/g, ''));
+    const q = isIsbn ? 'isbn:' + query.replace(/[^\d]/g, '') : query;
+
+    // Devolver desde caché si ya se hizo esta consulta
+    if (_gBooksCache.has(q)) return _gBooksCache.get(q);
+
+    const paramObj = { q, maxResults: '6', printType: 'books' };
+    if (GBOOKS_KEY) paramObj.key = GBOOKS_KEY;
+    const params = new URLSearchParams(paramObj);
+    const url = GBOOKS_API + '?' + params.toString();
+
+    const res = await fetch(url);
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new Error('HTTP ' + res.status + (body ? ': ' + body.substring(0, 200) : ''));
+    }
+    const data = await res.json();
+    _gBooksCache.set(q, data); // guardar en caché
+    return data;
+  }
+
+  function fillFormWithBook(item) {
+    const info = item.volumeInfo;
+
+    const tituloInput   = document.querySelector('input[name="titulo"]');
+    const descTextarea  = document.querySelector('textarea[name="descripcion"]');
+
+    // Rellenar título si está vacío
+    if (tituloInput && !tituloInput.value.trim()) {
+      tituloInput.value = info.title
+        + (info.subtitle ? ': ' + info.subtitle : '')
+        + (info.authors?.length ? ' - ' + info.authors[0] : '');
+    }
+
+    // Rellenar descripción si está vacía
+    if (descTextarea && !descTextarea.value.trim()) {
+      const lines = [];
+      if (info.authors?.length)  lines.push('Autor/es: '    + info.authors.join(', '));
+      if (info.publisher)        lines.push('Editorial: '   + info.publisher);
+      if (info.publishedDate)    lines.push('Año: '         + info.publishedDate.substring(0, 4));
+      if (info.pageCount)        lines.push('Páginas: '     + info.pageCount);
+      const isbn13 = info.industryIdentifiers?.find(x => x.type === 'ISBN_13')?.identifier;
+      if (isbn13)                lines.push('ISBN-13: '     + isbn13);
+      if (info.description) {
+        lines.push('');
+        lines.push(info.description.length > 500
+          ? info.description.substring(0, 500) + '…'
+          : info.description);
+      }
+      descTextarea.value = lines.join('\n');
+    }
+
+    // Mostrar badge del libro seleccionado
+    booksSelTitleEl.textContent =
+      info.title + (info.authors?.length ? '  —  ' + info.authors[0] : '');
+    booksSelectedEl.classList.remove('hidden');
+    booksSelectedEl.classList.add('flex');
+    booksResultsEl.classList.add('hidden');
+    booksResultsEl.innerHTML = '';
+  }
+
+  function clearSelectedBook() {
+    booksSelTitleEl.textContent = '';
+    booksSelectedEl?.classList.add('hidden');
+    booksSelectedEl?.classList.remove('flex');
+    if (booksResultsEl) {
+      booksResultsEl.classList.add('hidden');
+      booksResultsEl.innerHTML = '';
+    }
+    if (booksQueryInput) booksQueryInput.value = '';
+  }
+
+  async function runBooksSearch() {
+    const query = booksQueryInput?.value.trim();
+    if (!query) return;
+
+    const btn = $('btn-books-search');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading loading-spinner loading-xs"></span> Buscando…';
+
+    booksResultsEl.innerHTML = '';
+    booksResultsEl.classList.remove('hidden');
+    booksResultsEl.classList.add('flex');
+
+    try {
+      const data = await searchGoogleBooks(query);
+      const items = data.items ?? [];
+
+      if (!items.length) {
+        booksResultsEl.innerHTML =
+          '<p class="text-sm text-center text-base-content/50 py-4 px-3">Sin resultados. Prueba con el ISBN completo o el título en otro idioma.</p>';
+        return;
+      }
+
+      items.forEach(item => {
+        const info = item.volumeInfo;
+        const thumb = info.imageLinks?.smallThumbnail ?? info.imageLinks?.thumbnail ?? null;
+        const authors = info.authors?.slice(0, 2).join(', ') ?? 'Autor desconocido';
+        const year = info.publishedDate?.substring(0, 4) ?? '';
+        const isbn = info.industryIdentifiers?.find(x => x.type === 'ISBN_13')?.identifier ?? '';
+
+        const btn2 = document.createElement('button');
+        btn2.type = 'button';
+        btn2.className = 'flex items-center gap-3 w-full text-left px-3 py-2.5 hover:bg-blue-50 transition-colors';
+        btn2.innerHTML = `
+          ${thumb
+            ? `<img src="${thumb}" class="w-9 h-12 object-cover rounded shadow-sm shrink-0" alt="" loading="lazy" />`
+            : `<div class="w-9 h-12 bg-blue-100 rounded shrink-0 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+               </div>`
+          }
+          <div class="min-w-0 flex-1">
+            <p class="font-semibold text-sm text-base-content leading-snug truncate">${info.title}</p>
+            <p class="text-xs text-base-content/55 truncate">${authors}${year ? ' · ' + year : ''}</p>
+            ${isbn ? `<p class="text-[10px] text-blue-500 mt-0.5">ISBN ${isbn}</p>` : ''}
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-blue-400"><path d="M20 6 9 17l-5-5"/></svg>`;
+
+        btn2.addEventListener('click', () => fillFormWithBook(item));
+        booksResultsEl.appendChild(btn2);
+      });
+    } catch (err) {
+      console.error('[Google Books]', err);
+      const isNetwork = err instanceof TypeError;
+      const msg = isNetwork
+        ? 'No se pudo contactar con Google Books. Comprueba tu conexión a internet.'
+        : 'Google Books respondió con un error (' + (err.message ?? '') + '). Inténtalo de nuevo.';
+      booksResultsEl.innerHTML =
+        `<p class="text-sm text-center text-error/70 py-4 px-3">${msg}</p>`;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Buscar`;
+    }
+  }
+
+  $('btn-books-search')?.addEventListener('click', runBooksSearch);
+  $('btn-books-clear')?.addEventListener('click', clearSelectedBook);
+  booksQueryInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); runBooksSearch(); }
   });
 
   loadProfile();
