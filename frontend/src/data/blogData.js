@@ -1018,7 +1018,7 @@ export const blogPosts = [
         title: "Impresión 3D para principiantes: por dónde empezar",
         date: "1 de marzo de 2024",
         author: "Maker Space",
-        image: "https://images.unsplash.com/photo-1609643242070-15c2aa42e4e4?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80",
         description: "Todo lo que necesitas saber para imprimir tus primeras piezas en 3D.",
         content: `
       <p>La impresión 3D pasó de ser un hobby elitista reservado a ingenieros y makers avanzados a convertirse en una tecnología doméstica accesible. Con una impresora bien elegida puedes fabricar desde accesorios de escritorio hasta piezas de repuesto para electrodomésticos, pasando por figuras personalizadas, organizadores, prototipos y mucho más.</p>

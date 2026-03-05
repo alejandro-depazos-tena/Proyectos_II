@@ -2,35 +2,42 @@
 import Layout from "../../layouts/Layout.astro";
 import CategoriesHeader from "../../components/categories/CategoriesHeader.astro";
 import Breadcrumbs from "../../components/ui/Breadcrumbs.astro";
-import CardProduct from "../../components/products/CardProduct.astro";
-import { products } from "../../data/products";
-import { categories } from "../../data/home";
+import { categories as categoryImages } from "../../data/home";
+
+const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
+
+const CATEGORIES = [
+    { slug: "libros",      name: "Libros",       apiCategory: "LIBROS"      },
+    { slug: "electronica", name: "Electrónica",  apiCategory: "ELECTRONICA" },
+    { slug: "tecnologia",  name: "Tecnología",   apiCategory: "ELECTRONICA" },
+    { slug: "deporte",     name: "Deporte",      apiCategory: "DEPORTE"     },
+    { slug: "hogar",       name: "Hogar",        apiCategory: "HOGAR"       },
+    { slug: "otros",       name: "Otros",        apiCategory: "OTROS"       },
+    { slug: "material",    name: "Material",     apiCategory: "OTROS"       },
+    { slug: "idiomas",     name: "Idiomas",      apiCategory: "LIBROS"      },
+];
 
 export async function getStaticPaths() {
-    // Get unique categories from products
-    const uniqueCategories = [...new Set(products.map((p) => p.category))];
-
-    return uniqueCategories.map((category) => {
-        const categoryData = categories.find(
-            (c) => c.name.toLowerCase() === category.toLowerCase(),
-        );
-        const categorySlug = category.toLowerCase();
-        return {
-            params: { category: categorySlug },
-            props: {
-                categoryName: category,
-                categoryProducts: products.filter(
-                    (p) => p.category === category,
-                ),
-                image: categoryData?.image,
-            },
-        };
-    });
+    const CATEGORIES_STATIC = [
+        { slug: "libros",      name: "Libros",       apiCategory: "LIBROS"      },
+        { slug: "electronica", name: "Electrónica",  apiCategory: "ELECTRONICA" },
+        { slug: "tecnologia",  name: "Tecnología",   apiCategory: "ELECTRONICA" },
+        { slug: "deporte",     name: "Deporte",      apiCategory: "DEPORTE"     },
+        { slug: "hogar",       name: "Hogar",        apiCategory: "HOGAR"       },
+        { slug: "otros",       name: "Otros",        apiCategory: "OTROS"       },
+        { slug: "material",    name: "Material",     apiCategory: "OTROS"       },
+        { slug: "idiomas",     name: "Idiomas",      apiCategory: "LIBROS"      },
+    ];
+    return CATEGORIES_STATIC.map((cat) => ({
+        params: { category: cat.slug },
+        props: { categoryName: cat.name, apiCategory: cat.apiCategory },
+    }));
 }
 
-const { categoryName, categoryProducts, image } = Astro.props;
-
-const breadcrumbItems = [{ label: "Inicio", href: "/" }, { label: categoryName }];
+const { categoryName, apiCategory } = Astro.props;
+const image = categoryImages.find(
+    (c: any) => c.name?.toLowerCase() === categoryName?.toLowerCase(),
+)?.image;
 ---
 
 <Layout title={`${categoryName} | UFV Shares`}>
@@ -39,42 +46,36 @@ const breadcrumbItems = [{ label: "Inicio", href: "/" }, { label: categoryName }
     <div class="bg-white min-h-screen pb-20 pt-10">
         <div class="max-w-7xl mx-auto px-6">
             <div id="breadcrumbs-container">
-                <Breadcrumbs items={breadcrumbItems} />
+                <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: categoryName }]} />
             </div>
 
             <main class="py-12">
+                <!-- Loading skeletons -->
+                <div id="products-loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {Array.from({ length: 8 }).map(() => (
+                        <div class="rounded-xl overflow-hidden border border-base-200 animate-pulse">
+                            <div class="bg-slate-200" style="aspect-ratio: 4/5;"></div>
+                            <div class="p-4 space-y-3">
+                                <div class="h-3 bg-slate-200 rounded w-1/3"></div>
+                                <div class="h-4 bg-slate-200 rounded w-3/4"></div>
+                                <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
                 <div
                     id="products-grid"
-                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 animate-fade-in"
-                >
-                    {
-                        categoryProducts.map((product) => (
-                            <div
-                                class="product-item transition-all duration-300"
-                                data-subcategory={
-                                    product.subcategory?.toLowerCase() || ""
-                                }
-                            >
-                                <CardProduct
-                                    title={product.title}
-                                    price={product.price}
-                                    images={product.images}
-                                    stock={product.stock}
-                                    slug={product.slug}
-                                />
-                            </div>
-                        ))
-                    }
-                </div>
+                    class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 animate-fade-in"
+                    data-api-category={apiCategory}
+                ></div>
 
                 <div
                     id="no-products-msg"
                     class="hidden text-center py-24 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200"
                 >
-                    <p
-                        class="text-slate-400 font-bold uppercase tracking-widest"
-                    >
-                        No se han encontrado productos en esta categor\u00eda
+                    <p class="text-slate-400 font-bold uppercase tracking-widest">
+                        No se han encontrado productos en esta categoría
                     </p>
                 </div>
             </main>
@@ -82,69 +83,99 @@ const breadcrumbItems = [{ label: "Inicio", href: "/" }, { label: categoryName }
     </div>
 </Layout>
 
-<script>
-    function filterProducts() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const subCategory = urlParams.get("sub")?.toLowerCase();
+<script define:vars={{ API_BASE }}>
+    const BACKEND_BASE = (() => { try { return new URL(API_BASE).origin; } catch { return 'http://localhost:8080'; } })();
 
-        const products = document.querySelectorAll(".product-item");
-        const noProductsMsg = document.getElementById("no-products-msg");
-        let visibleCount = 0;
+    function getImageUrl(product) {
+        if (product.fotoUrl) return BACKEND_BASE + product.fotoUrl;
+        if (product.fotos && product.fotos.length > 0) return BACKEND_BASE + product.fotos[0].url;
+        if (product.imagenUrl) return product.imagenUrl;
+        return '/foto.webp';
+    }
 
-        if (subCategory) {
-            // Update Breadcrumbs (Visual only)
-            const breadcrumbNav = document.querySelector(
-                'nav[aria-label="Breadcrumb"] ol',
-            );
-            if (breadcrumbNav) {
-                // Check if already added to avoid duplication on re-runs if any
-                if (!document.getElementById("breadcrumb-sub")) {
-                    const li = document.createElement("li");
-                    li.id = "breadcrumb-sub";
-                    li.className = "flex items-center";
-                    li.innerHTML = `
-                        <svg class="w-3 h-3 mx-1 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-                        </svg>
-                        <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2 capitalize">${subCategory}</span>
-                    `;
-                    breadcrumbNav.appendChild(li);
-                }
+    function escAttr(str) {
+        return String(str ?? '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+    }
+
+    function createProductCard(p) {
+        const img = getImageUrl(p);
+        const id = p.idProducto;
+        const title = p.titulo || '';
+        const category = (p.categoria || '').replace(/_/g, ' ');
+        const price = p.precio != null ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Number(p.precio)) : 'Gratis';
+        const tipo = p.tipoTransaccion === 'ALQUILER' ? 'Alquiler' : 'Venta';
+
+        const productData = escAttr(JSON.stringify({ id: String(id), name: title, price: p.precio ?? 0, image: img, stock: 1 }));
+        const favData = escAttr(JSON.stringify({ id: String(id), name: title, price: p.precio ?? 0, image: img, stock: 1, slug: String(id) }));
+
+        return `<div class="product-item transition-all duration-300">
+  <div class="card bg-base-100 shadow-sm hover:shadow-xl transition-shadow duration-300 group relative rounded-xl overflow-hidden border border-base-200">
+    <div class="absolute top-3 right-3 z-20 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 ease-in-out">
+      <button class="add-to-favorite-btn btn btn-circle btn-sm bg-white hover:bg-primary hover:text-white border-none shadow-md" aria-label="Añadir a favoritos" data-favorite='${favData}'>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+      </button>
+      <button class="add-to-cart-btn btn btn-circle btn-sm bg-white hover:bg-primary hover:text-white border-none shadow-md" aria-label="Añadir al carrito" data-product='${productData}'>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+      </button>
+    </div>
+    <div class="relative w-full overflow-hidden bg-gray-100" style="aspect-ratio:4/5">
+      <img src="${img}" alt="${escAttr(title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" onerror="this.src='/foto.webp'" />
+      <a href="/product/view?id=${id}" class="absolute inset-0 z-10" aria-label="Ver ${escAttr(title)}"></a>
+      <span class="absolute top-3 left-3 badge badge-primary font-bold text-xs z-20">${tipo}</span>
+    </div>
+    <div class="p-4">
+      <span class="text-xs font-semibold text-slate-400 uppercase tracking-widest">${category}</span>
+      <h3 class="font-bold text-base mt-1 truncate" title="${escAttr(title)}">${title}</h3>
+      <div class="flex items-center justify-between mt-2">
+        <span class="text-xl font-bold text-primary">${price}</span>
+        <span class="text-success text-xs flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-success inline-block"></span>Disponible
+        </span>
+      </div>
+    </div>
+  </div>
+</div>`;
+    }
+
+    async function loadCategoryProducts() {
+        const grid = document.getElementById('products-grid');
+        const loading = document.getElementById('products-loading');
+        const noMsg = document.getElementById('no-products-msg');
+        if (!grid) return;
+
+        const apiCategory = grid.dataset.apiCategory;
+        const token = localStorage.getItem('ufvshares_token');
+        const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+
+        try {
+            const url = apiCategory
+                ? `${API_BASE}/productos?categoria=${apiCategory}`
+                : `${API_BASE}/productos`;
+            const res = await fetch(url, { headers });
+            if (!res.ok) throw new Error('Error ' + res.status);
+            const products = await res.json();
+
+            loading?.classList.add('hidden');
+
+            if (!products.length) {
+                noMsg?.classList.remove('hidden');
+                return;
             }
 
-            // Filter logic
-            products.forEach((el) => {
-                const item = el as HTMLElement;
-                const itemSub = item.dataset.subcategory;
+            grid.innerHTML = products.map(createProductCard).join('');
+            grid.classList.remove('hidden');
+            grid.classList.add('grid');
 
-                if (itemSub === subCategory) {
-                    item.classList.remove("hidden");
-                    visibleCount++;
-                } else {
-                    item.classList.add("hidden");
-                }
-            });
-        } else {
-            // Show all if no sub param
-            products.forEach((el) => {
-                el.classList.remove("hidden");
-                visibleCount++;
-            });
-        }
-
-        // Show "No products" message
-        if (visibleCount === 0) {
-            noProductsMsg?.classList.remove("hidden");
-        } else {
-            noProductsMsg?.classList.add("hidden");
+            document.dispatchEvent(new Event('astro:page-load'));
+        } catch (e) {
+            loading?.classList.add('hidden');
+            noMsg?.classList.remove('hidden');
+            console.error('Error cargando productos:', e);
         }
     }
 
-    // Run on load
-    filterProducts();
-
-    // Run on view transitions
-    document.addEventListener("astro:page-load", filterProducts);
+    loadCategoryProducts();
+    document.addEventListener('astro:after-swap', loadCategoryProducts);
 </script>
 
 <style>

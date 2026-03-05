@@ -19,6 +19,34 @@ public class ProductoService {
     return repository.findAll();
   }
 
+  /**
+   * Devuelve productos DISPONIBLES, opcionalmente filtrando por categoría y/o
+   * excluyendo los productos del propio usuario autenticado.
+   */
+  public List<Producto> findDisponibles(Long excludeOwnerId, String categoria) {
+    CategoriaProducto cat = null;
+    if (categoria != null && !categoria.isBlank()) {
+      try {
+        cat = CategoriaProducto.valueOf(categoria.toUpperCase());
+      } catch (IllegalArgumentException ignored) {
+        // categoría desconocida → devolver lista vacía
+        return List.of();
+      }
+    }
+
+    if (cat != null && excludeOwnerId != null) {
+      return repository.findByEstadoProductoAndCategoriaAndIdPropietarioNot(
+          EstadoProducto.DISPONIBLE, cat, excludeOwnerId);
+    } else if (cat != null) {
+      return repository.findByEstadoProductoAndCategoria(EstadoProducto.DISPONIBLE, cat);
+    } else if (excludeOwnerId != null) {
+      return repository.findByEstadoProductoAndIdPropietarioNot(
+          EstadoProducto.DISPONIBLE, excludeOwnerId);
+    } else {
+      return repository.findByEstadoProducto(EstadoProducto.DISPONIBLE);
+    }
+  }
+
   public Producto findById(Long id) {
     return repository.findById(id).orElseThrow(() -> new NotFoundException("PRODUCTO_NOT_FOUND"));
   }
