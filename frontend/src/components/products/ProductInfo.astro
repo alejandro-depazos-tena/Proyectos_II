@@ -12,6 +12,7 @@ interface Product {
     image?: string;
     images?: string[];
     specs?: { label: string; value: string }[];
+    slug?: string;
 }
 
 interface Props {
@@ -21,18 +22,28 @@ interface Props {
 const { product } = Astro.props;
 
 const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
+const productSlug = product.slug || product.name.toLowerCase().replace(/\s+/g, "-");
+const productImage = product.image || (product as any).images?.[0] || "";
 ---
 
 <div
     class="product-info space-y-10"
     data-product={JSON.stringify({
-        id: product.name.toLowerCase().replace(/\s+/g, "-"), // fallback
+        id: productSlug,
         name: product.name,
         price: product.price,
-        image: product.image || (product as any).images?.[0] || "",
+        image: productImage,
         category: product.category,
         discount: product.discount,
         stock: product.stock,
+    })}
+    data-favorite={JSON.stringify({
+        id: productSlug,
+        name: product.name,
+        price: product.price,
+        image: productImage,
+        stock: product.stock,
+        slug: productSlug,
     })}
 >
     <!-- Header Info -->
@@ -157,7 +168,16 @@ const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
                 disabled={product.stock <= 0}
             >
                 <Icon name="lucide:shopping-bag" class="w-5 h-5" />
-                A\u00f1adir al carrito
+                Añadir al carrito
+            </button>
+
+            <!-- Add to Favorites -->
+            <button
+                id="add-to-favorite-btn"
+                class="sm:col-span-2 w-full border-2 border-primary text-primary rounded-2xl py-5 font-black uppercase tracking-widest text-sm flex items-center justify-center gap-4 hover:bg-primary hover:text-white transition-all active:scale-[0.98] cursor-pointer"
+            >
+                <Icon name="lucide:heart" class="w-5 h-5 transition-colors duration-300" id="fav-heart-icon" />
+                <span id="fav-btn-label">Guardar en favoritos</span>
             </button>
 
             <!-- Buy Now -->
@@ -193,6 +213,7 @@ const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
 
 <script>
     import { addToCart } from "../../store/cartStore";
+    import { toggleFavorite, isFavorite, favoriteItems } from "../../store/favoriteStore";
     import { toast } from "sonner";
 
     function setupPurchaseActions() {
@@ -202,13 +223,47 @@ const discountedPrice = product.price * (1 - (product.discount || 0) / 100);
         const product = JSON.parse(
             productInfo.getAttribute("data-product") || "{}",
         );
+        const favoriteData = JSON.parse(
+            productInfo.getAttribute("data-favorite") || "{}",
+        );
         const decrementBtn = document.getElementById("decrement-qty");
         const incrementBtn = document.getElementById("increment-qty");
         const quantityDisplay = document.getElementById("quantity-display");
         const addToCartBtn = document.getElementById("add-to-cart-btn");
         const buyNowBtn = document.getElementById("buy-now-btn");
+        const favBtn = document.getElementById("add-to-favorite-btn");
+        const favIcon = document.getElementById("fav-heart-icon");
+        const favLabel = document.getElementById("fav-btn-label");
 
         let quantity = 1;
+
+        const updateFavUI = (isFav: boolean) => {
+            if (!favBtn || !favIcon || !favLabel) return;
+            if (isFav) {
+                favIcon.classList.add("fill-primary");
+                favLabel.textContent = "Eliminar de favoritos";
+                favBtn.classList.add("bg-primary/10");
+            } else {
+                favIcon.classList.remove("fill-primary");
+                favLabel.textContent = "Guardar en favoritos";
+                favBtn.classList.remove("bg-primary/10");
+            }
+        };
+
+        // Init favorite button state
+        updateFavUI(isFavorite(favoriteData.id));
+
+        // Subscribe to store changes
+        favoriteItems.subscribe(() => {
+            updateFavUI(isFavorite(favoriteData.id));
+        });
+
+        favBtn?.addEventListener("click", () => {
+            const result = toggleFavorite(favoriteData);
+            if (result.success) {
+                toast.success(result.message);
+            }
+        });
 
         const updateUI = () => {
             if (quantityDisplay) quantityDisplay.textContent = String(quantity);
