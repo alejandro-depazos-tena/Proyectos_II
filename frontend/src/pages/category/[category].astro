@@ -102,7 +102,7 @@ const image = categoryImages.find(
         const id = p.idProducto;
         const title = p.titulo || '';
         const category = (p.categoria || '').replace(/_/g, ' ');
-        const price = p.precio != null ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Number(p.precio)) : 'Gratis';
+        const price = (p.precio == null || Number(p.precio) === 0) ? 'Gratis' : new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Number(p.precio));
         const tipo = p.tipoTransaccion === 'ALQUILER' ? 'Alquiler' : 'Venta';
 
         const productData = escAttr(JSON.stringify({ id: String(id), name: title, price: p.precio ?? 0, image: img, stock: 1 }));

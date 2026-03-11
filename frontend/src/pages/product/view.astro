@@ -324,7 +324,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
     function renderProduct(p, token) {
         const fallbackImg = getImageUrl(p);
         const title = p.titulo || 'Sin título';
-        const price = p.precio != null ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Number(p.precio)) : 'Gratis';
+        const price = (p.precio == null || Number(p.precio) === 0) ? 'Gratis' : new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Number(p.precio));
         const category = (p.categoria || '').replace(/_/g, ' ');
         const tipo = p.tipoTransaccion === 'ALQUILER' ? 'Alquiler' : 'Venta';
         const id = p.idProducto;

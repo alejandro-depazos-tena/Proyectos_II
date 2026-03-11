@@ -256,8 +256,14 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
           </div>
 
           <div>
-            <label class="label"><span class="label-text font-semibold">Precio (&euro;)</span></label>
-            <input name="precio" type="number" min="0" step="0.01"
+            <div class="flex items-center justify-between mb-1">
+              <label class="label py-0"><span class="label-text font-semibold">Precio (&euro;)</span></label>
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" id="precio-gratis-cb" class="checkbox checkbox-primary checkbox-sm" />
+                <span class="text-sm font-semibold text-primary">Gratis</span>
+              </label>
+            </div>
+            <input id="precio-input" name="precio" type="number" min="0" step="0.01"
               class="input input-bordered w-full" placeholder="0.00" />
           </div>
           <div>
@@ -549,7 +555,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
     prods.forEach(p => {
       const badge = tipoLabel[p.tipoTransaccion] ?? p.tipoTransaccion;
       const cat = categoriaLabel[p.categoria] ?? p.categoria;
-      const precio = p.precio != null ? parseFloat(p.precio).toFixed(2) + " €" : "Gratis";
+      const precio = (p.precio == null || Number(p.precio) === 0) ? "Gratis" : parseFloat(p.precio).toFixed(2) + " €";
       const condicion = condicionLabel[p.condicion] ?? "";
       const estClss = estadoClass[p.estadoProducto] ?? "badge-ghost";
       const estTxt = estadoTxt[p.estadoProducto] ?? p.estadoProducto;
@@ -647,9 +653,28 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
     $("publish-form-wrap").classList.add("hidden");
     $("publish-form").reset();
     $("form-error").classList.add("hidden");
+    // Resetear checkbox gratis
+    const gratisCb = document.getElementById("precio-gratis-cb");
+    const precioInput = document.getElementById("precio-input");
+    if (gratisCb) gratisCb.checked = false;
+    if (precioInput) { precioInput.disabled = false; precioInput.value = ""; }
     selectedFiles = [];
     renderPreview();
   }
+
+  // Checkbox "Gratis"
+  document.getElementById("precio-gratis-cb")?.addEventListener("change", function () {
+    const precioInput = document.getElementById("precio-input");
+    if (!precioInput) return;
+    if (this.checked) {
+      precioInput.value = "";
+      precioInput.disabled = true;
+      precioInput.placeholder = "Gratis";
+    } else {
+      precioInput.disabled = false;
+      precioInput.placeholder = "0.00";
+    }
+  });
 
   // Gallery / drop-zone input
   $("foto-input")?.addEventListener("change", function () {
@@ -751,8 +776,13 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       estadoProducto: "DISPONIBLE",
       condicion: fd.get("condicion") || null,
     };
-    const precio = fd.get("precio");
-    if (precio) body.precio = parseFloat(precio);
+    const esGratis = document.getElementById('precio-gratis-cb')?.checked;
+    if (esGratis) {
+      body.precio = 0;
+    } else {
+      const precio = fd.get("precio");
+      if (precio) body.precio = parseFloat(precio);
+    }
 
     try {
       // Step 1: create product
