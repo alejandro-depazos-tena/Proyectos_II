@@ -7,9 +7,10 @@ interface Props {
     images: string[];
     stock: number;
     slug: string;
+    category?: string;
 }
 
-const { title, price, images, stock, slug } = Astro.props;
+const { title, price, images, stock, slug, category } = Astro.props;
 ---
 
 <div
@@ -36,9 +37,23 @@ const { title, price, images, stock, slug } = Astro.props;
                 class="w-4 h-4 transition-colors duration-300"
             />
         </button>
+        <button
+            class="add-to-cart-card-btn btn btn-circle btn-sm bg-white hover:bg-primary hover:text-white border-none shadow-md"
+            aria-label="A\u00f1adir al carrito"
+            data-cart={JSON.stringify({
+                id: slug,
+                name: title,
+                price: price,
+                image: images[0] || "",
+                stock: stock,
+                category: category || "",
+            })}
+        >
+            <Icon name="lucide:shopping-cart" class="w-4 h-4" />
+        </button>
         <a
             href={`/product/${slug}`}
-            class="add-to-cart-btn btn btn-circle btn-sm bg-white hover:bg-primary hover:text-white border-none shadow-md"
+            class="btn btn-circle btn-sm bg-white hover:bg-primary hover:text-white border-none shadow-md"
             aria-label="Ver producto y contactar"
             title="Contactar"
         >
@@ -136,6 +151,7 @@ const { title, price, images, stock, slug } = Astro.props;
         isFavorite,
         favoriteItems,
     } from "../../store/favoriteStore";
+    import { addToCart, openCart } from "../../store/cartStore";
     import { toast } from "sonner";
 
     function initProductComponents() {
@@ -224,6 +240,27 @@ const { title, price, images, stock, slug } = Astro.props;
                 const isFav = items.some((i) => i.id === product.id);
                 updateHeartStyle(btn, isFav);
             });
+        });
+
+        // Cart buttons setup
+        const cartButtons = document.querySelectorAll(".add-to-cart-card-btn");
+        cartButtons.forEach((btn) => {
+            if (btn.getAttribute("data-cart-listener")) return;
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const product = JSON.parse(
+                    btn.getAttribute("data-cart") || "{}",
+                );
+                const result = addToCart(product);
+                if (result.success) {
+                    toast.success(result.message);
+                    openCart();
+                } else {
+                    toast.error(result.message);
+                }
+            });
+            btn.setAttribute("data-cart-listener", "true");
         });
     }
 
