@@ -1,8 +1,10 @@
 package com.ufvshares.backend.transaccion;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,6 +37,14 @@ public class TransaccionController {
     return service.findById(id);
   }
 
+  /** Devuelve la transacción activa (EN_CURSO) de un producto con sus fechas. */
+  @GetMapping("/producto/{idProducto}")
+  public ResponseEntity<Map<String, Object>> getActivaByProducto(@PathVariable Long idProducto) {
+    Map<String, Object> detalle = service.getDetalleActivo(idProducto);
+    if (detalle == null) return ResponseEntity.noContent().build();
+    return ResponseEntity.ok(detalle);
+  }
+
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public Transaccion create(@Valid @RequestBody Transaccion transaccion) {
@@ -46,9 +56,22 @@ public class TransaccionController {
     return service.update(id, transaccion);
   }
 
+  /** Marca la transacción como COMPLETADA y libera el producto si era alquiler/préstamo. */
+  @PutMapping("/{id}/completar")
+  public Transaccion completar(@PathVariable Long id) {
+    return service.completar(id);
+  }
+
+  /** Cancela la transacción y devuelve el producto a DISPONIBLE. */
+  @PutMapping("/{id}/cancelar")
+  public Transaccion cancelar(@PathVariable Long id) {
+    return service.cancelar(id);
+  }
+
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void delete(@PathVariable Long id) {
     service.delete(id);
   }
 }
+

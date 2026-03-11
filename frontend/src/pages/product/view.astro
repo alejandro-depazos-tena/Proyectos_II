@@ -67,6 +67,24 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                     <!-- Meta chips -->
                     <div class="flex flex-wrap gap-2" id="product-meta"></div>
 
+                    <!-- Unavailability banner -->
+                    <div id="unavailability-banner" class="hidden rounded-2xl p-4 border font-semibold text-sm flex items-start gap-3"></div>
+
+                    <!-- Rental dates block (shown when ALQUILADO) -->
+                    <div id="rental-dates" class="hidden rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-amber-600 mb-3">Fechas del alquiler activo</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Inicio</p>
+                                <p id="rental-start" class="text-sm font-bold text-slate-800">—</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Devolución prevista</p>
+                                <p id="rental-end" class="text-sm font-bold text-slate-800">—</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Description -->
                     <div class="border-t border-slate-100 pt-4">
                         <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">Descripción</p>
@@ -310,9 +328,77 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             if (!res.ok) { showNotFound(); return; }
             const p = await res.json();
             renderProduct(p, token);
+
+            // Cargar detalles de transacción activa si el producto no está disponible
+            if (p.estadoProducto === 'VENDIDO' || p.estadoProducto === 'ALQUILADO' || p.estadoProducto === 'NO_DISPONIBLE') {
+                loadTransaccionActiva(id);
+            }
         } catch (e) {
             showNotFound();
             console.error(e);
+        }
+    }
+
+    async function loadTransaccionActiva(productId) {
+        try {
+            const res = await fetch(`${API_BASE}/transacciones/producto/${productId}`);
+            if (!res.ok || res.status === 204) return;
+            const t = await res.json();
+            renderTransaccionBanner(t);
+        } catch (e) {
+            console.error('Error cargando transacción activa', e);
+        }
+    }
+
+    function renderTransaccionBanner(t) {
+        const tipo = t.tipoTransaccion;
+        const banner = document.getElementById('unavailability-banner');
+        const rentalDates = document.getElementById('rental-dates');
+
+        if (!banner) return;
+
+        if (tipo === 'VENTA') {
+            banner.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                </svg>
+                <span class="text-red-700">Este producto ya ha sido <strong>vendido</strong> y no está disponible.</span>`;
+            banner.className = 'rounded-2xl p-4 border border-red-200 bg-red-50 font-semibold text-sm flex items-start gap-3';
+            banner.classList.remove('hidden');
+        } else {
+            // ALQUILER o PRESTAMO
+            const fmtDate = (iso) => {
+                if (!iso) return 'No especificada';
+                return new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
+            };
+            banner.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="text-amber-700">Este producto está actualmente <strong>${tipo === 'PRESTAMO' ? 'en préstamo' : 'alquilado'}</strong> y no está disponible hasta que se devuelva.</span>`;
+            banner.className = 'rounded-2xl p-4 border border-amber-200 bg-amber-50 font-semibold text-sm flex items-start gap-3';
+            banner.classList.remove('hidden');
+
+            // Mostrar fechas
+            if (rentalDates) {
+                const startEl = document.getElementById('rental-start');
+                const endEl = document.getElementById('rental-end');
+                if (startEl) startEl.textContent = fmtDate(t.fechaInicio);
+                if (endEl) endEl.textContent = fmtDate(t.fechaDevolucion);
+                rentalDates.classList.remove('hidden');
+            }
+        }
+    }
+
+    function disableCtaButtons() {
+        const contactBtn = document.getElementById('contact-btn');
+        const favBtn = document.getElementById('add-fav-btn');
+        if (contactBtn) {
+            contactBtn.removeAttribute('href');
+            contactBtn.setAttribute('disabled', 'true');
+            contactBtn.className = contactBtn.className.replace('btn-primary', 'btn-disabled');
+            const label = document.getElementById('contact-btn-label');
+            if (label) label.textContent = 'No disponible';
         }
     }
 
@@ -367,8 +453,32 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             const chips = [];
             if (p.condicion)      chips.push(chip('Condición',  p.condicion,      'bg-sky-50 border-sky-200 text-sky-700'));
             if (p.ubicacion)      chips.push(chip('Ubicación',  p.ubicacion,      'bg-amber-50 border-amber-200 text-amber-700'));
-            if (p.estadoProducto) chips.push(chip('Estado',     p.estadoProducto, 'bg-emerald-50 border-emerald-200 text-emerald-700'));
+            if (p.estadoProducto) {
+                const estadoColors = {
+                    DISPONIBLE:    'bg-emerald-50 border-emerald-200 text-emerald-700',
+                    VENDIDO:       'bg-red-50 border-red-200 text-red-700',
+                    ALQUILADO:     'bg-amber-50 border-amber-200 text-amber-700',
+                    RESERVADO:     'bg-blue-50 border-blue-200 text-blue-700',
+                    NO_DISPONIBLE: 'bg-slate-100 border-slate-300 text-slate-500',
+                };
+                const labels = {
+                    DISPONIBLE:    'Disponible',
+                    VENDIDO:       'Vendido',
+                    ALQUILADO:     'Alquilado',
+                    RESERVADO:     'Reservado',
+                    NO_DISPONIBLE: 'No disponible',
+                };
+                const color = estadoColors[p.estadoProducto] ?? 'bg-emerald-50 border-emerald-200 text-emerald-700';
+                const label = labels[p.estadoProducto] ?? p.estadoProducto;
+                chips.push(chip('Estado', label, color));
+            }
             meta.innerHTML = chips.join('');
+        }
+
+        // Deshabilitar CTAs si el producto no está disponible
+        const noDisponible = ['VENDIDO', 'ALQUILADO', 'NO_DISPONIBLE', 'RESERVADO'].includes(p.estadoProducto);
+        if (noDisponible) {
+            disableCtaButtons();
         }
 
         // Favorites data

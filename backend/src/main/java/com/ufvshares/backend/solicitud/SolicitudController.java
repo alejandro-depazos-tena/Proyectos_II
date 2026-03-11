@@ -46,9 +46,22 @@ public class SolicitudController {
     return service.update(id, solicitud);
   }
 
+  /** Acepta una solicitud: actualiza el estado del producto y crea la transacción. */
+  @PutMapping("/{id}/aceptar")
+  public Solicitud aceptar(@PathVariable Long id) {
+    return service.aceptar(id);
+  }
+
+  /** Rechaza una solicitud pendiente. */
+  @PutMapping("/{id}/rechazar")
+  public Solicitud rechazar(@PathVariable Long id) {
+    return service.rechazar(id);
+  }
+
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void delete(@PathVariable Long id) {
     service.delete(id);
   }
 }
+

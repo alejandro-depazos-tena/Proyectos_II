@@ -1,18 +1,33 @@
 package com.ufvshares.backend.solicitud;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ufvshares.backend.common.NotFoundException;
+import com.ufvshares.backend.producto.EstadoProducto;
+import com.ufvshares.backend.producto.Producto;
+import com.ufvshares.backend.producto.ProductoRepository;
+import com.ufvshares.backend.producto.TipoTransaccion;
+import com.ufvshares.backend.transaccion.EstadoTransaccion;
+import com.ufvshares.backend.transaccion.Transaccion;
+import com.ufvshares.backend.transaccion.TransaccionRepository;
 
 @Service
 public class SolicitudService {
 
   private final SolicitudRepository repository;
+  private final ProductoRepository productoRepository;
+  private final TransaccionRepository transaccionRepository;
 
-  public SolicitudService(SolicitudRepository repository) {
+  public SolicitudService(SolicitudRepository repository,
+      ProductoRepository productoRepository,
+      TransaccionRepository transaccionRepository) {
     this.repository = repository;
+    this.productoRepository = productoRepository;
+    this.transaccionRepository = transaccionRepository;
   }
 
   public List<Solicitud> findAll() {
@@ -39,8 +54,65 @@ public class SolicitudService {
     return repository.save(existing);
   }
 
+  @Transactional
+  public Solicitud aceptar(Long id) {
+    Solicitud solicitud = findById(id);
+    if (solicitud.getEstadoSolicitud() != EstadoSolicitud.PENDIENTE) {
+      throw new IllegalStateException("La solicitud ya fue procesada");
+    }
+
+    // 1. Marcar esta solicitud como ACEPTADA
+    solicitud.setEstadoSolicitud(EstadoSolicitud.ACEPTADA);
+    solicitud = repository.save(solicitud);
+
+    // 2. Rechazar las demás solicitudes pendientes del mismo producto
+    List<Solicitud> otras = repository.findByIdProducto(solicitud.getIdProducto());
+    for (Solicitud otra : otras) {
+      if (!otra.getIdSolicitud().equals(id) && otra.getEstadoSolicitud() == EstadoSolicitud.PENDIENTE) {
+        otra.setEstadoSolicitud(EstadoSolicitud.RECHAZADA);
+        repository.save(otra);
+      }
+    }
+
+    // 3. Actualizar el estado del producto
+    Producto producto = productoRepository.findById(solicitud.getIdProducto())
+        .orElseThrow(() -> new NotFoundException("PRODUCTO_NOT_FOUND"));
+
+    TipoTransaccion tipo = solicitud.getTipoTransaccion();
+    if (tipo == TipoTransaccion.VENTA) {
+      producto.setEstadoProducto(EstadoProducto.VENDIDO);
+    } else {
+      // ALQUILER o PRESTAMO
+      producto.setEstadoProducto(EstadoProducto.ALQUILADO);
+    }
+    productoRepository.save(producto);
+
+    // 4. Crear la transacción EN_CURSO
+    Transaccion transaccion = new Transaccion();
+    transaccion.setIdSolicitud(solicitud.getIdSolicitud());
+    transaccion.setFechaCreacion(LocalDateTime.now());
+    transaccion.setFechaInicioReal(
+        solicitud.getFechaInicio() != null ? solicitud.getFechaInicio() : LocalDateTime.now());
+    transaccion.setFechaFinReal(solicitud.getFechaFin());
+    transaccion.setEstadoTransaccion(EstadoTransaccion.EN_CURSO);
+    transaccionRepository.save(transaccion);
+
+    return solicitud;
+  }
+
+  @Transactional
+  public Solicitud rechazar(Long id) {
+    Solicitud solicitud = findById(id);
+    if (solicitud.getEstadoSolicitud() != EstadoSolicitud.PENDIENTE) {
+      throw new IllegalStateException("La solicitud ya fue procesada");
+    }
+    solicitud.setEstadoSolicitud(EstadoSolicitud.RECHAZADA);
+    return repository.save(solicitud);
+  }
+
   public void delete(Long id) {
     Solicitud existing = findById(id);
     repository.delete(existing);
   }
 }
+
