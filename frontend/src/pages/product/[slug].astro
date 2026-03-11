@@ -17,7 +17,7 @@ const { product } = Astro.props;
 const relatedProducts = getRelatedProducts(product.category, product.slug);
 
 const breadcrumbItems = [
-    { label: "Inicio", href: "/" },
+    { label: "Inicio", href: "/app" },
     {
         label: product.category,
         href: `/category/${product.category.toLowerCase()}`,
