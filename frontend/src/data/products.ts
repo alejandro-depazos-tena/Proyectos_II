@@ -1,3 +1,13 @@
+export interface Seller {
+  name: string;
+  avatar?: string;
+  degree?: string;
+  rating?: number;
+  totalSales?: number;
+  whatsapp?: string;
+  email?: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -12,6 +22,7 @@ export interface Product {
   badge?: string;
   discount?: number;
   specs?: { label: string; value: string }[];
+  seller?: Seller;
 }
 
 export const products: Product[] = [
@@ -30,6 +41,13 @@ export const products: Product[] = [
       { label: "Estado", value: "Buen estado" },
       { label: "Entrega", value: "En campus" },
     ],
+    seller: {
+      name: "Carlos Martínez",
+      degree: "Ingeniería Informática, 3º",
+      rating: 4.8,
+      totalSales: 12,
+      email: "carlos.martinez@ufv.es",
+    },
   },
   {
     id: "2",
@@ -42,6 +60,13 @@ export const products: Product[] = [
     images: ["/campus.webp"],
     slug: "libro-microeconomia",
     badge: "Venta",
+    seller: {
+      name: "Laura Sánchez",
+      degree: "ADE, 2º",
+      rating: 4.5,
+      totalSales: 5,
+      email: "laura.sanchez@ufv.es",
+    },
   },
   {
     id: "5",
@@ -54,6 +79,13 @@ export const products: Product[] = [
     images: ["/campus.webp"],
     slug: "calculadora-cientifica",
     badge: "Alquiler",
+    seller: {
+      name: "Miguel Torres",
+      degree: "Física, 4º",
+      rating: 4.9,
+      totalSales: 20,
+      email: "miguel.torres@ufv.es",
+    },
   },
   {
     id: "6",
@@ -66,6 +98,13 @@ export const products: Product[] = [
     images: ["/foto.webp"],
     slug: "bata-laboratorio",
     badge: "Alquiler",
+    seller: {
+      name: "Ana Gómez",
+      degree: "Biología, 1º",
+      rating: 4.3,
+      totalSales: 3,
+      email: "ana.gomez@ufv.es",
+    },
   },
   {
     id: "7",
@@ -78,6 +117,13 @@ export const products: Product[] = [
     images: ["/campus.webp"],
     slug: "tripode-movil",
     badge: "Venta",
+    seller: {
+      name: "Pablo Ruiz",
+      degree: "Comunicación, 3º",
+      rating: 4.6,
+      totalSales: 8,
+      email: "pablo.ruiz@ufv.es",
+    },
   },
   {
     id: "8",
@@ -90,6 +136,13 @@ export const products: Product[] = [
     images: ["/foto.webp"],
     slug: "teclado-mecanico",
     badge: "Venta",
+    seller: {
+      name: "Pablo Ruiz",
+      degree: "Comunicación, 3º",
+      rating: 4.6,
+      totalSales: 8,
+      email: "pablo.ruiz@ufv.es",
+    },
   },
   {
     id: "9",
@@ -102,6 +155,13 @@ export const products: Product[] = [
     images: ["/foto.webp"],
     slug: "diccionario-ingles-c1",
     badge: "Venta",
+    seller: {
+      name: "Sofía Navarro",
+      degree: "Traducción e Interpretación, 2º",
+      rating: 5.0,
+      totalSales: 7,
+      email: "sofia.navarro@ufv.es",
+    },
   },
   {
     id: "10",
@@ -114,6 +174,13 @@ export const products: Product[] = [
     images: ["/campus.webp"],
     slug: "libro-frances",
     badge: "Venta",
+    seller: {
+      name: "Sofía Navarro",
+      degree: "Traducción e Interpretación, 2º",
+      rating: 5.0,
+      totalSales: 7,
+      email: "sofia.navarro@ufv.es",
+    },
   },
   {
     id: "11",
@@ -126,6 +193,13 @@ export const products: Product[] = [
     images: ["/campus.webp"],
     slug: "balon-futbol",
     badge: "Venta",
+    seller: {
+      name: "Diego Morales",
+      degree: "Ciencias del Deporte, 1º",
+      rating: 4.4,
+      totalSales: 2,
+      email: "diego.morales@ufv.es",
+    },
   },
   {
     id: "12",
@@ -138,6 +212,13 @@ export const products: Product[] = [
     images: ["/foto.webp"],
     slug: "raqueta-tenis",
     badge: "Alquiler",
+    seller: {
+      name: "Diego Morales",
+      degree: "Ciencias del Deporte, 1º",
+      rating: 4.4,
+      totalSales: 2,
+      email: "diego.morales@ufv.es",
+    },
   },
 ];
 

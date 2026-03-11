@@ -1,27 +1,9 @@
 import { useStore } from '@nanostores/react';
 import { favoriteItems, removeFromFavorites } from '../../store/favoriteStore';
-import { addToCart } from '../../store/cartStore';
 import { toast } from 'sonner';
 
 export default function FavoritesList() {
     const favorites = useStore(favoriteItems);
-
-    const handleAddToCart = (product: any) => {
-        const cartProduct = {
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            image: product.image,
-            stock: product.stock
-        };
-
-        const result = addToCart(cartProduct, 1);
-        if (result.success) {
-            toast.success(result.message);
-        } else {
-            toast.error(result.message);
-        }
-    };
 
     const handleRemove = (id: string, name: string) => {
         const result = removeFromFavorites(id);
@@ -59,7 +41,7 @@ export default function FavoritesList() {
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                     </button>
 
-                    <a href={`/product/${product.slug}`} className="block relative aspect-4/5 bg-gray-100 overflow-hidden">
+                    <a href={`/product/view?id=${product.id}`} className="block relative aspect-4/5 bg-gray-100 overflow-hidden">
                         <img
                             src={product.image}
                             alt={product.name}
@@ -69,7 +51,7 @@ export default function FavoritesList() {
 
                     <div className="p-4">
                         <h3 className="font-bold text-lg mb-1 truncate">
-                            <a href={`/product/${product.slug}`} className="hover:text-primary transition-colors">
+                            <a href={`/product/view?id=${product.id}`} className="hover:text-primary transition-colors">
                                 {product.name}
                             </a>
                         </h3>
@@ -78,13 +60,13 @@ export default function FavoritesList() {
                             <span className="text-xl font-bold text-primary">
                                 ${product.price.toLocaleString("en-US")}
                             </span>
-                            <button
-                                onClick={() => handleAddToCart(product)}
+                            <a
+                                href={`/product/view?id=${product.id}`}
                                 className="btn btn-circle btn-sm btn-primary text-primary-content shadow-md"
-                                aria-label="A\u00f1adir al carrito"
+                                aria-label="Ver producto"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg>
-                            </button>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                            </a>
                         </div>
                     </div>
                 </div>

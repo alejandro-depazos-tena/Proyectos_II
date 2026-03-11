@@ -36,19 +36,14 @@ const { title, price, images, stock, slug } = Astro.props;
                 class="w-4 h-4 transition-colors duration-300"
             />
         </button>
-        <button
+        <a
+            href={`/product/${slug}`}
             class="add-to-cart-btn btn btn-circle btn-sm bg-white hover:bg-primary hover:text-white border-none shadow-md"
-            aria-label="A\u00f1adir al carrito"
-            data-product={JSON.stringify({
-                id: slug,
-                name: title,
-                price: price,
-                image: images[0] || "",
-                stock: stock,
-            })}
+            aria-label="Ver producto y contactar"
+            title="Contactar"
         >
-            <Icon name="lucide:shopping-cart" class="w-4 h-4" />
-        </button>
+            <Icon name="lucide:message-circle" class="w-4 h-4" />
+        </a>
     </div>
 
     <!-- Image Slider -->
@@ -136,7 +131,6 @@ const { title, price, images, stock, slug } = Astro.props;
     import { Pagination, Navigation } from "swiper/modules";
     import "swiper/css";
     import "swiper/css/pagination";
-    import { addToCart } from "../../store/cartStore";
     import {
         toggleFavorite,
         isFavorite,
@@ -173,27 +167,6 @@ const { title, price, images, stock, slug } = Astro.props;
                 observer: true,
                 observeParents: true,
             });
-        });
-
-        // Add to cart buttons setup
-        const cartButtons = document.querySelectorAll(".add-to-cart-btn");
-        cartButtons.forEach((btn) => {
-            if (btn.getAttribute("data-listener")) return;
-
-            btn.addEventListener("click", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const product = JSON.parse(
-                    btn.getAttribute("data-product") || "{}",
-                );
-                const result = addToCart(product, 1);
-                if (result.success) {
-                    toast.success(result.message);
-                } else {
-                    toast.error(result.message);
-                }
-            });
-            btn.setAttribute("data-listener", "true");
         });
 
         // Favorite buttons setup

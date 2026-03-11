@@ -19,6 +19,10 @@ public class FotoProductoService {
     return repository.findAll();
   }
 
+  public List<FotoProducto> findByIdProducto(Long idProducto) {
+    return repository.findByIdProductoOrderByEsPrincipalDesc(idProducto);
+  }
+
   public FotoProducto findById(Long id) {
     return repository.findById(id).orElseThrow(() -> new NotFoundException("FOTO_PRODUCTO_NOT_FOUND"));
   }

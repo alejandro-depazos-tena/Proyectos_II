@@ -30,6 +30,11 @@ public class FotoProductoController {
     return service.findAll();
   }
 
+  @GetMapping("/producto/{idProducto}")
+  public List<FotoProducto> getByProducto(@PathVariable Long idProducto) {
+    return service.findByIdProducto(idProducto);
+  }
+
   @GetMapping("/{id}")
   public FotoProducto getById(@PathVariable Long id) {
     return service.findById(id);

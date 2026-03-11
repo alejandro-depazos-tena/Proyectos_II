@@ -4,7 +4,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
 ---
 
 <Layout title="Producto | UFV Shares">
-    <!-- Breadcrumb skeleton / placeholder filled by JS -->
+    <!-- Breadcrumb -->
     <nav aria-label="Breadcrumb" class="bg-white border-b border-slate-100 py-3">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <ol id="breadcrumb-list" class="flex items-center gap-2 text-sm text-slate-500">
@@ -20,58 +20,122 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
     <div class="bg-white min-h-screen pb-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-            <!-- Loading -->
+            <!-- Loading skeleton -->
             <div id="product-loading" class="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-pulse">
-                <div class="rounded-2xl bg-slate-200" style="aspect-ratio:1/1;"></div>
+                <div class="space-y-3">
+                    <div class="rounded-2xl bg-slate-200" style="aspect-ratio:4/3;"></div>
+                    <div class="flex gap-2">
+                        <div class="h-16 w-16 rounded-xl bg-slate-200"></div>
+                        <div class="h-16 w-16 rounded-xl bg-slate-200"></div>
+                        <div class="h-16 w-16 rounded-xl bg-slate-200"></div>
+                    </div>
+                </div>
                 <div class="space-y-6 pt-4">
                     <div class="h-4 bg-slate-200 rounded w-1/4"></div>
                     <div class="h-8 bg-slate-200 rounded w-3/4"></div>
                     <div class="h-10 bg-slate-200 rounded w-1/3"></div>
                     <div class="h-4 bg-slate-200 rounded w-full"></div>
                     <div class="h-4 bg-slate-200 rounded w-5/6"></div>
-                    <div class="h-4 bg-slate-200 rounded w-4/6"></div>
                 </div>
             </div>
 
-            <!-- Product detail (hidden until loaded) -->
+            <!-- Product detail -->
             <div id="product-detail" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <!-- Image -->
-                <div class="relative rounded-2xl overflow-hidden bg-slate-100 border border-slate-200" style="aspect-ratio:1/1;">
-                    <img id="product-img" src="/foto.webp" alt="" class="w-full h-full object-cover" loading="eager" onerror="this.src='/foto.webp'" />
-                    <span id="product-badge-tipo" class="absolute top-4 left-4 badge badge-primary font-bold text-sm"></span>
+
+                <!-- LEFT: Gallery -->
+                <div class="space-y-3">
+                    <!-- Main image -->
+                    <div class="relative rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 cursor-zoom-in" id="main-img-wrap" style="aspect-ratio:4/3;">
+                        <img id="product-img" src="/foto.webp" alt="" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" loading="eager" onerror="this.src='/foto.webp'" />
+                        <span id="product-badge-tipo" class="absolute top-4 left-4 badge badge-primary font-bold text-sm"></span>
+                        <!-- Zoom hint -->
+                        <div class="absolute bottom-3 right-3 bg-black/40 text-white rounded-lg px-2 py-1 text-xs font-medium flex items-center gap-1 pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35M11 8v6M8 11h6"/></svg>
+                            Ampliar
+                        </div>
+                    </div>
+                    <!-- Thumbnails -->
+                    <div id="thumbnail-strip" class="flex gap-2 overflow-x-auto pb-1"></div>
                 </div>
 
-                <!-- Info -->
-                <div class="flex flex-col gap-6 pt-2">
+                <!-- RIGHT: Info -->
+                <div class="flex flex-col gap-5 pt-2">
                     <span id="product-category" class="text-xs font-semibold uppercase tracking-widest text-slate-400"></span>
                     <h1 id="product-title" class="text-3xl font-black text-slate-900 leading-tight"></h1>
                     <p id="product-price" class="text-4xl font-black text-primary"></p>
 
                     <!-- Meta chips -->
-                    <div class="flex flex-wrap gap-3" id="product-meta">
-                        <!-- filled by JS -->
+                    <div class="flex flex-wrap gap-2" id="product-meta"></div>
+
+                    <!-- Description -->
+                    <div class="border-t border-slate-100 pt-4">
+                        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">Descripción</p>
+                        <p id="product-desc" class="text-slate-600 leading-relaxed text-base"></p>
                     </div>
 
-                    <p id="product-desc" class="text-slate-600 leading-relaxed text-base"></p>
+                    <!-- Stats row -->
+                    <div id="product-stats" class="grid grid-cols-3 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <div class="text-center">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Publicado</p>
+                            <p class="text-sm font-bold text-slate-700" id="stat-fecha">—</p>
+                        </div>
+                        <div class="text-center border-x border-slate-200">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Vistas</p>
+                            <p class="text-sm font-bold text-slate-700" id="stat-vistas">—</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Fotos</p>
+                            <p class="text-sm font-bold text-slate-700" id="stat-fotos">—</p>
+                        </div>
+                    </div>
+
+                    <!-- Seller card -->
+                    <div id="seller-card" class="hidden rounded-2xl border border-slate-100 bg-slate-50 p-5">
+                        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-3" id="seller-role-label">Vendedor</p>
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-white shadow">
+                                <img id="seller-avatar" src="" alt="" class="hidden w-14 h-14 rounded-full object-cover" />
+                                <svg id="seller-avatar-placeholder" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-black text-slate-900 text-base" id="seller-name">—</p>
+                                <p class="text-xs text-slate-500 font-medium truncate" id="seller-email"></p>
+                            </div>
+                            <a id="seller-contact-quick" href="#" class="btn btn-sm btn-ghost border border-slate-200 gap-1 text-xs">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                Escribir
+                            </a>
+                        </div>
+                    </div>
 
                     <!-- CTA buttons -->
-                    <div class="flex flex-col sm:flex-row gap-3 mt-2">
-                        <button id="add-cart-btn"
-                            class="add-to-cart-btn btn btn-primary flex-1 gap-2 text-base font-bold"
-                            data-product="">
+                    <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                        <a id="contact-btn" href="#" class="btn btn-primary flex-1 gap-2 text-base font-bold">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                             </svg>
-                            Añadir al carrito
-                        </button>
-                        <button id="add-fav-btn"
-                            class="add-to-favorite-btn btn btn-outline flex-1 gap-2 text-base font-bold"
-                            data-favorite="">
+                            <span id="contact-btn-label">Contactar al vendedor</span>
+                        </a>
+                        <button id="add-fav-btn" class="btn btn-outline flex-1 gap-2 text-base font-bold" data-favorite="">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                             </svg>
                             Guardar
                         </button>
+                    </div>
+
+                    <!-- Trust row -->
+                    <div class="flex flex-wrap gap-4 text-xs text-slate-400 pt-2 border-t border-slate-100">
+                        <span class="flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            Transacción entre estudiantes UFV
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            Recogida en campus
+                        </span>
                     </div>
                 </div>
             </div>
@@ -84,10 +148,29 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
 
         </div>
     </div>
+
+    <!-- Lightbox modal -->
+    <div id="lightbox" class="fixed inset-0 z-50 hidden bg-black/90 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Galería de fotos">
+        <button id="lightbox-close" class="absolute top-4 right-4 text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors" aria-label="Cerrar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <button id="lightbox-prev" class="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors" aria-label="Anterior">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <button id="lightbox-next" class="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors" aria-label="Siguiente">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        </button>
+        <img id="lightbox-img" src="" alt="" class="max-h-[90vh] max-w-[90vw] object-contain rounded-xl shadow-2xl" />
+        <p id="lightbox-counter" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm font-medium"></p>
+    </div>
 </Layout>
 
 <script define:vars={{ API_BASE }}>
     const BACKEND_BASE = (() => { try { return new URL(API_BASE).origin; } catch { return 'http://localhost:8080'; } })();
+
+    // Gallery state
+    let galleryPhotos = [];
+    let lightboxIndex = 0;
 
     function getImageUrl(product) {
         if (product.fotoUrl) return BACKEND_BASE + product.fotoUrl;
@@ -100,6 +183,121 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         return `<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${colorClass}">${label}: <span class="font-bold">${value}</span></span>`;
     }
 
+    // ── Gallery & lightbox ───────────────────────────────────────────────────
+
+    function buildGallery(photos, fallbackUrl) {
+        galleryPhotos = photos.length > 0 ? photos : [fallbackUrl];
+
+        const mainImg = document.getElementById('product-img');
+        const thumbStrip = document.getElementById('thumbnail-strip');
+        const statFotos = document.getElementById('stat-fotos');
+
+        if (mainImg) {
+            mainImg.src = galleryPhotos[0];
+            mainImg.onerror = () => { mainImg.src = '/foto.webp'; };
+        }
+        if (statFotos) statFotos.textContent = galleryPhotos.length;
+
+        // Click main image → open lightbox
+        const mainWrap = document.getElementById('main-img-wrap');
+        if (mainWrap) {
+            mainWrap.onclick = () => openLightbox(0);
+        }
+
+        // Build thumbnails
+        if (thumbStrip) {
+            thumbStrip.innerHTML = '';
+            if (galleryPhotos.length > 1) {
+                galleryPhotos.forEach((url, i) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = `flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${i === 0 ? 'border-primary' : 'border-slate-200 hover:border-primary/60'}`;
+                    btn.innerHTML = `<img src="${url}" alt="" class="w-full h-full object-cover" onerror="this.src='/foto.webp'" />`;
+                    btn.onclick = () => {
+                        switchMainImage(i);
+                    };
+                    thumbStrip.appendChild(btn);
+                });
+            }
+        }
+
+        // Init lightbox buttons
+        document.getElementById('lightbox-close')?.addEventListener('click', closeLightbox);
+        document.getElementById('lightbox-prev')?.addEventListener('click', () => navigateLightbox(-1));
+        document.getElementById('lightbox-next')?.addEventListener('click', () => navigateLightbox(1));
+        document.getElementById('lightbox')?.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('lightbox')) closeLightbox();
+        });
+        document.addEventListener('keydown', handleLightboxKey);
+    }
+
+    function switchMainImage(index) {
+        lightboxIndex = index;
+        const mainImg = document.getElementById('product-img');
+        if (mainImg) mainImg.src = galleryPhotos[index];
+        // Update thumbnail active state
+        const thumbStrip = document.getElementById('thumbnail-strip');
+        if (thumbStrip) {
+            thumbStrip.querySelectorAll('button').forEach((btn, i) => {
+                btn.className = btn.className.replace('border-primary', i === index ? 'border-primary' : 'border-slate-200 hover:border-primary/60');
+                if (i === index) btn.classList.add('border-primary');
+                else btn.classList.remove('border-primary');
+            });
+        }
+    }
+
+    function openLightbox(index) {
+        lightboxIndex = index;
+        const lb = document.getElementById('lightbox');
+        const lbImg = document.getElementById('lightbox-img');
+        const lbCounter = document.getElementById('lightbox-counter');
+        const lbPrev = document.getElementById('lightbox-prev');
+        const lbNext = document.getElementById('lightbox-next');
+        if (!lb || !lbImg) return;
+        lbImg.src = galleryPhotos[index];
+        if (lbCounter) lbCounter.textContent = galleryPhotos.length > 1 ? `${index + 1} / ${galleryPhotos.length}` : '';
+        if (lbPrev) lbPrev.style.display = galleryPhotos.length > 1 ? '' : 'none';
+        if (lbNext) lbNext.style.display = galleryPhotos.length > 1 ? '' : 'none';
+        lb.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        document.getElementById('lightbox')?.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    function navigateLightbox(dir) {
+        const newIndex = (lightboxIndex + dir + galleryPhotos.length) % galleryPhotos.length;
+        openLightbox(newIndex);
+    }
+
+    function handleLightboxKey(e) {
+        const lb = document.getElementById('lightbox');
+        if (!lb || lb.classList.contains('hidden')) return;
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowLeft') navigateLightbox(-1);
+        if (e.key === 'ArrowRight') navigateLightbox(1);
+    }
+
+    async function loadPhotos(productId, token, fallbackUrl) {
+        const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+        try {
+            const res = await fetch(`${API_BASE}/fotos-producto/producto/${productId}`, { headers });
+            if (res.ok) {
+                const photos = await res.json();
+                const urls = photos.map(f => BACKEND_BASE + f.urlFoto);
+                buildGallery(urls, fallbackUrl);
+            } else {
+                buildGallery([], fallbackUrl);
+            }
+        } catch {
+            buildGallery([], fallbackUrl);
+        }
+    }
+
+    // ── Main ─────────────────────────────────────────────────────────────────
+
     async function loadProduct() {
         const id = new URLSearchParams(location.search).get('id');
         if (!id) { showNotFound(); return; }
@@ -111,7 +309,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             const res = await fetch(`${API_BASE}/productos/${id}`, { headers });
             if (!res.ok) { showNotFound(); return; }
             const p = await res.json();
-            renderProduct(p);
+            renderProduct(p, token);
         } catch (e) {
             showNotFound();
             console.error(e);
@@ -123,8 +321,8 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         document.getElementById('product-not-found')?.classList.remove('hidden');
     }
 
-    function renderProduct(p) {
-        const img = getImageUrl(p);
+    function renderProduct(p, token) {
+        const fallbackImg = getImageUrl(p);
         const title = p.titulo || 'Sin título';
         const price = p.precio != null ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Number(p.precio)) : 'Gratis';
         const category = (p.categoria || '').replace(/_/g, ' ');
@@ -141,9 +339,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         if (bcTitle) bcTitle.textContent = title;
         document.title = `${title} | UFV Shares`;
 
-        // Image
-        document.getElementById('product-img').src = img;
-        document.getElementById('product-img').alt = title;
+        // Badge
         document.getElementById('product-badge-tipo').textContent = tipo;
 
         // Text
@@ -152,21 +348,78 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         document.getElementById('product-price').textContent = price;
         document.getElementById('product-desc').textContent = p.descripcion || '';
 
+        // Stats row
+        const statFecha = document.getElementById('stat-fecha');
+        const statVistas = document.getElementById('stat-vistas');
+        if (statFecha) {
+            if (p.fechaPublicacion) {
+                const d = new Date(p.fechaPublicacion);
+                statFecha.textContent = d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+            } else {
+                statFecha.textContent = '—';
+            }
+        }
+        if (statVistas) statVistas.textContent = p.vistas ?? p.numVisitas ?? '—';
+
         // Meta chips
         const meta = document.getElementById('product-meta');
         if (meta) {
             const chips = [];
             if (p.condicion)      chips.push(chip('Condición',  p.condicion,      'bg-sky-50 border-sky-200 text-sky-700'));
-            if (p.ubicacion)      chips.push(chip('Ubic.',      p.ubicacion,      'bg-amber-50 border-amber-200 text-amber-700'));
+            if (p.ubicacion)      chips.push(chip('Ubicación',  p.ubicacion,      'bg-amber-50 border-amber-200 text-amber-700'));
             if (p.estadoProducto) chips.push(chip('Estado',     p.estadoProducto, 'bg-emerald-50 border-emerald-200 text-emerald-700'));
             meta.innerHTML = chips.join('');
         }
 
-        // Cart & favourite data
-        const productData = JSON.stringify({ id: String(id), name: title, price: p.precio ?? 0, image: img, stock: 1 });
-        const favData = JSON.stringify({ id: String(id), name: title, price: p.precio ?? 0, image: img, stock: 1, slug: String(id) });
-        document.getElementById('add-cart-btn').dataset.product = productData;
+        // Favorites data
+        const favData = JSON.stringify({ id: String(id), name: title, price: p.precio ?? 0, image: fallbackImg, stock: 1, slug: String(id) });
         document.getElementById('add-fav-btn').dataset.favorite = favData;
+
+        // Seller info
+        const roleLabel = p.tipoTransaccion === 'ALQUILER' ? 'Arrendador' : 'Vendedor';
+        const sellerRoleEl = document.getElementById('seller-role-label');
+        const sellerCard = document.getElementById('seller-card');
+        if (sellerRoleEl) sellerRoleEl.textContent = roleLabel;
+
+        const contactBtn = document.getElementById('contact-btn');
+        const contactBtnLabel = document.getElementById('contact-btn-label');
+        const sellerContactQuick = document.getElementById('seller-contact-quick');
+        if (contactBtnLabel) contactBtnLabel.textContent = `Contactar al ${p.tipoTransaccion === 'ALQUILER' ? 'arrendador' : 'vendedor'}`;
+
+        // Fetch owner info
+        if (p.idPropietario) {
+            const ownerHeaders = token ? { 'Authorization': 'Bearer ' + token } : {};
+            fetch(`${API_BASE}/usuarios/${p.idPropietario}/public`, { headers: ownerHeaders })
+                .then(r => r.ok ? r.json() : null)
+                .then(owner => {
+                    if (!owner) return;
+                    const fullName = [owner.nombre, owner.apellidos].filter(Boolean).join(' ');
+                    const sellerNameEl = document.getElementById('seller-name');
+                    const sellerEmailEl = document.getElementById('seller-email');
+                    const avatarImg = document.getElementById('seller-avatar');
+                    const avatarPlaceholder = document.getElementById('seller-avatar-placeholder');
+                    if (sellerNameEl) sellerNameEl.textContent = fullName || '—';
+                    if (sellerEmailEl) sellerEmailEl.textContent = owner.correo || '';
+                    if (owner.fotoPerfil && avatarImg) {
+                        avatarImg.src = BACKEND_BASE + owner.fotoPerfil;
+                        avatarImg.classList.remove('hidden');
+                        avatarPlaceholder?.classList.add('hidden');
+                    }
+                    const mailHref = owner.correo
+                        ? `mailto:${owner.correo}?subject=${encodeURIComponent('Interés en: ' + title)}`
+                        : '/chats';
+                    if (contactBtn) contactBtn.href = mailHref;
+                    if (sellerContactQuick) sellerContactQuick.href = mailHref;
+                    sellerCard?.classList.remove('hidden');
+                })
+                .catch(() => {
+                    if (contactBtn) contactBtn.href = '/chats';
+                    if (sellerContactQuick) sellerContactQuick.href = '/chats';
+                });
+        } else {
+            if (contactBtn) contactBtn.href = '/chats';
+            if (sellerContactQuick) sellerContactQuick.href = '/chats';
+        }
 
         // Show detail
         document.getElementById('product-loading')?.classList.add('hidden');
@@ -174,7 +427,10 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         detail?.classList.remove('hidden');
         detail?.classList.add('grid');
 
-        // Reinit cart/favorites listeners
+        // Load photos (must be after detail is visible so elements exist)
+        loadPhotos(id, token, fallbackImg);
+
+        // Reinit favorites listeners
         document.dispatchEvent(new CustomEvent('view:product-loaded'));
     }
 
@@ -183,50 +439,12 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
 
 <script>
     import { toggleFavorite, isFavorite, favoriteItems } from '../../store/favoriteStore';
-    import { addToCart } from '../../store/cartStore';
     import { toast } from 'sonner';
 
-    function setupViewListeners() {
-        const cartBtn = document.getElementById('add-cart-btn');
-        const favBtn = document.getElementById('add-fav-btn');
-
-        if (!cartBtn || !favBtn) return;
-
-        // Cart listener
-        if (!cartBtn.getAttribute('data-listener')) {
-            cartBtn.addEventListener('click', () => {
-                const product = JSON.parse(cartBtn.getAttribute('data-product') || '{}');
-                if (!product.id) return;
-                const result = addToCart(product, 1);
-                if (result.success) {
-                    toast.success(result.message);
-                } else {
-                    toast.error(result.message);
-                }
-            });
-            cartBtn.setAttribute('data-listener', 'true');
-        }
-
-        // Favorites listener
-        if (!favBtn.getAttribute('data-listener')) {
-            favBtn.addEventListener('click', () => {
-                const fav = JSON.parse(favBtn.getAttribute('data-favorite') || '{}');
-                if (!fav.id) return;
-                const result = toggleFavorite(fav);
-                if (result.success) {
-                    toast.success(result.message);
-                }
-                updateFavBtn();
-            });
-            favBtn.setAttribute('data-listener', 'true');
-        }
-
-        // Subscribe to store to keep button in sync
-        favoriteItems.subscribe(() => updateFavBtn());
-    }
+    let storeUnsubscribe: (() => void) | null = null;
 
     function updateFavBtn() {
-        const favBtn = document.getElementById('add-fav-btn');
+        const favBtn = document.getElementById('add-fav-btn') as HTMLButtonElement | null;
         if (!favBtn) return;
         const fav = JSON.parse(favBtn.getAttribute('data-favorite') || '{}');
         if (!fav.id) return;
@@ -243,8 +461,43 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         }
     }
 
-    // Init when product data is loaded into buttons
+    function setupViewListeners() {
+        const favBtn = document.getElementById('add-fav-btn') as HTMLButtonElement | null;
+        if (!favBtn) return;
+
+        // Remove old listener flag so it re-binds on each page load
+        favBtn.removeAttribute('data-listener');
+
+        if (!favBtn.getAttribute('data-listener')) {
+            favBtn.addEventListener('click', () => {
+                const fav = JSON.parse(favBtn.getAttribute('data-favorite') || '{}');
+                if (!fav.id) {
+                    toast.error('Producto no cargado aún');
+                    return;
+                }
+                const result = toggleFavorite(fav);
+                toast.success(result.message);
+                updateFavBtn();
+            });
+            favBtn.setAttribute('data-listener', 'true');
+        }
+
+        // Unsubscribe previous subscription to avoid duplicates
+        if (storeUnsubscribe) storeUnsubscribe();
+        storeUnsubscribe = favoriteItems.subscribe(() => updateFavBtn());
+    }
+
+    // Run immediately (handles case where event fired before module loaded)
+    setupViewListeners();
+
+    // Run when product data is ready
     document.addEventListener('view:product-loaded', () => {
+        setupViewListeners();
+        updateFavBtn();
+    });
+
+    // Run on Astro page transitions
+    document.addEventListener('astro:page-load', () => {
         setupViewListeners();
         updateFavBtn();
     });

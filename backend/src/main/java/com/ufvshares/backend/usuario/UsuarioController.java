@@ -35,6 +35,12 @@ public class UsuarioController {
     return service.findById(id);
   }
 
+  @GetMapping("/{id}/public")
+  public UsuarioPublicDto getPublicById(@PathVariable Long id) {
+    Usuario u = service.findById(id);
+    return new UsuarioPublicDto(u.getIdUsuario(), u.getNombre(), u.getApellidos(), u.getCorreo(), u.getFotoPerfil());
+  }
+
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public Usuario create(@Valid @RequestBody Usuario usuario) {
