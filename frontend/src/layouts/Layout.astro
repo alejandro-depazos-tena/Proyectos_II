@@ -4,7 +4,6 @@ import Navbar from "../components/navbar/NavBar.astro";
 import AnnouncementBar from "../components/ui/AnnouncementBar.astro";
 import Footer from "../components/footer/Footer.astro";
 import ToasterComponent from "../components/ui/ToasterComponent";
-import CartDrawer from "../components/cart/CartDrawer.astro";
 
 const { title } = Astro.props;
 const pageTitle = typeof title === "string" && title.trim().length > 0 ? title : "UFV Shares";
@@ -27,7 +26,6 @@ const pageTitle = typeof title === "string" && title.trim().length > 0 ? title :
 			<slot />
 		</main>
 		<Footer />
-		<CartDrawer />
 		<ToasterComponent client:load />
 	</body>
 </html>

@@ -54,23 +54,6 @@ import Links from "./Links.astro";
                         >
                     </div>
                 </a>
-                <button
-                    id="nav-cart-btn"
-                    class="btn btn-ghost btn-circle hover:bg-primary/10 transition-colors"
-                    aria-label="Carrito"
-                >
-                    <div class="indicator">
-                        <Icon
-                            name="lucide:shopping-cart"
-                            class="w-6 h-6 hover:text-primary transition-colors"
-                        />
-                        <span
-                            id="nav-cart-count"
-                            class="badge badge-sm badge-primary indicator-item border-none hidden"
-                            >0</span
-                        >
-                    </div>
-                </button>
                 <a
                     href="/profile"
                     class="btn btn-ghost btn-circle hover:bg-primary/10 transition-colors"
@@ -89,13 +72,10 @@ import Links from "./Links.astro";
 
 <script>
     import { totalFavorites } from "../../store/favoriteStore";
-    import { totalItems, openCart } from "../../store/cartStore";
 
     let lastScrollY = window.scrollY;
     const navbar = document.getElementById("main-navbar");
     const navFavCount = document.getElementById("nav-fav-count");
-    const navCartCount = document.getElementById("nav-cart-count");
-    const navCartBtn = document.getElementById("nav-cart-btn");
     const navAuthLinks = document.getElementById("nav-auth-links");
 
     // Auth-aware nav links
@@ -138,20 +118,6 @@ import Links from "./Links.astro";
             renderGuest();
         }
     }
-
-    // Open cart on click
-    navCartBtn?.addEventListener("click", openCart);
-
-    // Update cart count in navbar
-    totalItems.subscribe((count) => {
-        if (!navCartCount) return;
-        if (count > 0) {
-            navCartCount.classList.remove("hidden");
-            navCartCount.textContent = String(count);
-        } else {
-            navCartCount.classList.add("hidden");
-        }
-    });
 
     // Update favorites count in navbar
     totalFavorites.subscribe((count) => {
