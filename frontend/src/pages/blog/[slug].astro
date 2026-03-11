@@ -21,7 +21,7 @@ const relatedPosts = blogPosts.filter((p) => p.slug !== post.slug).slice(0, 2);
     <div class="mb-8">
       <Breadcrumbs
         items={[
-          { label: "Inicio", href: "/" },
+          { label: "Inicio", href: "/app" },
           { label: "Blog", href: "/blog" },
           {
             label: post.title.substring(0, 20) + "...",

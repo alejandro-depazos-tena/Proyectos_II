@@ -8,7 +8,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
     <nav aria-label="Breadcrumb" class="bg-white border-b border-slate-100 py-3">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <ol id="breadcrumb-list" class="flex items-center gap-2 text-sm text-slate-500">
-                <li><a href="/" class="hover:text-primary font-medium">Inicio</a></li>
+                <li><a href="/app" class="hover:text-primary font-medium">Inicio</a></li>
                 <li class="text-slate-300">/</li>
                 <li id="bc-category" class="text-slate-300">—</li>
                 <li class="text-slate-300">/</li>
@@ -143,7 +143,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             <!-- Not found -->
             <div id="product-not-found" class="hidden text-center py-32 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 mt-4">
                 <p class="text-slate-400 font-bold uppercase tracking-widest text-lg">Producto no encontrado</p>
-                <a href="/" class="btn btn-primary mt-6">Volver al inicio</a>
+                <a href="/app" class="btn btn-primary mt-6">Volver al inicio</a>
             </div>
 
         </div>
