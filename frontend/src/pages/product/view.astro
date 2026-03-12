@@ -327,7 +327,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             const res = await fetch(`${API_BASE}/productos/${id}`, { headers });
             if (!res.ok) { showNotFound(); return; }
             const p = await res.json();
-            renderProduct(p, token);
+            await renderProduct(p, token);
 
             // Cargar detalles de transacción activa si el producto no está disponible
             if (p.estadoProducto === 'VENDIDO' || p.estadoProducto === 'ALQUILADO' || p.estadoProducto === 'NO_DISPONIBLE') {
@@ -407,7 +407,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         document.getElementById('product-not-found')?.classList.remove('hidden');
     }
 
-    function renderProduct(p, token) {
+    async function renderProduct(p, token) {
         const fallbackImg = getImageUrl(p);
         const title = p.titulo || 'Sin título';
         const price = (p.precio == null || Number(p.precio) === 0) ? 'Gratis' : new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Number(p.precio));
@@ -531,14 +531,14 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             if (sellerContactQuick) sellerContactQuick.href = '/chats';
         }
 
-        // Show detail
+        // Load photos before showing the detail (elements exist in DOM even when hidden)
+        await loadPhotos(id, token, fallbackImg);
+
+        // Show detail only once photos are ready — avoids the placeholder flash
         document.getElementById('product-loading')?.classList.add('hidden');
         const detail = document.getElementById('product-detail');
         detail?.classList.remove('hidden');
         detail?.classList.add('grid');
-
-        // Load photos (must be after detail is visible so elements exist)
-        loadPhotos(id, token, fallbackImg);
 
         // Reinit favorites listeners
         document.dispatchEvent(new CustomEvent('view:product-loaded'));
