@@ -161,7 +161,6 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
             <p id="edit-ok-msg" class="text-sm text-base-content/60 mt-1"></p>
           </div>
           <button id="btn-edit-ok-close" class="btn btn-primary btn-sm rounded-full mt-2">Entendido</button>
-          <p class="text-error text-xs font-bold mt-1">&#9888; FALTA POR IMPLEMENTAR</p>
         </div>
 
       </div>
@@ -429,20 +428,34 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
     }
   }
 
-  $('avatar-input')?.addEventListener('change', (e) => {
+  $('avatar-input')?.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const base64 = ev.target.result;
-      setAvatarImg(base64);
-      const meId = localStorage.getItem('ufvshares_id') ?? 'me';
-      localStorage.setItem('ufvshares_avatar_' + meId, base64);
-      showToast('Foto de perfil actualizada');
-    };
-    reader.readAsDataURL(file);
     e.target.value = '';
+
+    const uploadingEl = $('avatar-uploading');
+    uploadingEl?.classList.remove('hidden');
+    uploadingEl?.classList.add('flex');
+
+    const formData = new FormData();
+    formData.append('foto', file);
+    try {
+      const res = await fetch(API_BASE + '/me/foto-perfil', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
+        body: formData,
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      const src = BACKEND_BASE + data.fotoPerfil;
+      setAvatarImg(src);
+      showToast('Foto de perfil actualizada');
+    } catch {
+      showToast('No se pudo subir la foto', 'error');
+    } finally {
+      uploadingEl?.classList.add('hidden');
+      uploadingEl?.classList.remove('flex');
+    }
   });
 
   // ── Toast ────────────────────────────────────────────────────
@@ -518,9 +531,11 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
     if (e.target === $('edit-profile-overlay')) closeEditDrawer();
   });
 
-  $('btn-edit-submit')?.addEventListener('click', () => {
+  $('btn-edit-submit')?.addEventListener('click', async () => {
     const valor = $('edit-valor').value.trim();
+    const campo = $('edit-campo').value;
     const errorEl = $('edit-error');
+    const btn = $('btn-edit-submit');
     errorEl.classList.add('hidden');
 
     if (!valor) {
@@ -529,11 +544,33 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       return;
     }
 
-    // Mostrar pantalla de éxito (envío real pendiente de implementar)
-    $('edit-step-form').classList.add('hidden');
-    $('edit-ok-msg').textContent =
-      'Se enviaría un enlace de confirmación a tu correo. Tienes 30 minutos para confirmar el cambio.';
-    $('edit-step-ok').classList.remove('hidden');
+    btn.disabled = true;
+    const origHtml = btn.innerHTML;
+    btn.innerHTML = '<span class="loading loading-spinner loading-xs"></span> Enviando…';
+    try {
+      const res = await fetch(API_BASE + '/me/solicitar-cambio', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ campo, valor }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        errorEl.textContent = err.message ?? 'Error al enviar la solicitud';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      const data = await res.json();
+      $('edit-step-form').classList.add('hidden');
+      $('edit-ok-msg').textContent =
+        'Hemos enviado un enlace de confirmación a ' + data.correo + '. Tienes 30 minutos para confirmar el cambio.';
+      $('edit-step-ok').classList.remove('hidden');
+    } catch {
+      errorEl.textContent = 'No se pudo conectar con el servidor';
+      errorEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    }
   });
 
   const tipoLabel = { VENTA: "Venta", ALQUILER: "Alquiler", PRESTAMO: "Préstamo" };
@@ -588,20 +625,57 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
               ${vistasHtml}
               <span class="font-bold text-primary ml-auto">${precio}</span>
             </div>
+            <div class="flex gap-2 pt-3 mt-2 border-t border-base-200">
+              <button type="button" data-action="delete" data-id="${p.idProducto}"
+                class="btn btn-outline btn-error btn-xs flex-1">Eliminar</button>
+              <a href="/product/edit?id=${p.idProducto}" onclick="event.stopPropagation()"
+                class="btn btn-outline btn-xs flex-1 text-center">Editar</a>
+            </div>
           </div>
         </div>
       `);
     });
   }
 
-  // ── Navegar a página de edición al clicar una tarjeta ────────
-  $('products-grid')?.addEventListener('click', (e) => {
+  // ── Eliminar producto ────────────────────────────────────────
+  async function deleteProduct(id, btn) {
+    if (!confirm('¿Seguro que quieres eliminar este anuncio? Esta acción no se puede deshacer.')) return;
+    btn.disabled = true;
+    btn.textContent = '…';
+    try {
+      const res = await fetch(API_BASE + '/me/productos/' + id, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token },
+      });
+      if (!res.ok && res.status !== 204) throw new Error('HTTP ' + res.status);
+      showToast('Anuncio eliminado');
+      const prodRes = await fetch(API_BASE + '/me/productos', { headers });
+      const prods = await prodRes.json();
+      renderProducts(prods);
+      $('profile-prods-count').textContent = prods.length;
+    } catch {
+      showToast('No se pudo eliminar el anuncio', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Eliminar';
+    }
+  }
+
+  // ── Navegar al ver/editar producto al clicar una tarjeta ──────
+  $('products-grid')?.addEventListener('click', async (e) => {
+    const delBtn = e.target.closest('[data-action="delete"]');
+    if (delBtn) {
+      e.stopPropagation();
+      await deleteProduct(delBtn.dataset.id, delBtn);
+      return;
+    }
     const card = e.target.closest('[data-product]');
     if (!card) return;
+    // Don't navigate if clicking the edit link
+    if (e.target.closest('a[href]')) return;
     try {
       const p = JSON.parse(card.dataset.product);
       const id = p.idProducto ?? p.id_producto;
-      if (id) window.location.href = '/product/edit?id=' + id;
+      if (id) window.location.href = '/product/view?id=' + id;
     } catch {}
   });
 

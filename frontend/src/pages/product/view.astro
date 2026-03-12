@@ -496,7 +496,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         const sellerContactQuick = document.getElementById('seller-contact-quick');
         if (contactBtnLabel) contactBtnLabel.textContent = `Contactar al ${p.tipoTransaccion === 'ALQUILER' ? 'arrendador' : 'vendedor'}`;
 
-        // Fetch owner info
+        // Fetch owner info (fire-and-forget – button wiring happens below regardless)
         if (p.idPropietario) {
             const ownerHeaders = token ? { 'Authorization': 'Bearer ' + token } : {};
             fetch(`${API_BASE}/usuarios/${p.idPropietario}/public`, { headers: ownerHeaders })
@@ -515,20 +515,80 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                         avatarImg.classList.remove('hidden');
                         avatarPlaceholder?.classList.add('hidden');
                     }
-                    const mailHref = owner.correo
-                        ? `mailto:${owner.correo}?subject=${encodeURIComponent('Interés en: ' + title)}`
-                        : '/chats';
-                    if (contactBtn) contactBtn.href = mailHref;
-                    if (sellerContactQuick) sellerContactQuick.href = mailHref;
                     sellerCard?.classList.remove('hidden');
                 })
-                .catch(() => {
-                    if (contactBtn) contactBtn.href = '/chats';
-                    if (sellerContactQuick) sellerContactQuick.href = '/chats';
-                });
-        } else {
-            if (contactBtn) contactBtn.href = '/chats';
-            if (sellerContactQuick) sellerContactQuick.href = '/chats';
+                .catch(() => {});
+        }
+
+        // Wire up contact buttons – always, regardless of whether owner info loaded
+        if (p.idPropietario && contactBtn && !contactBtn.hasAttribute('disabled')) {
+            contactBtn.removeAttribute('href');
+            contactBtn.addEventListener('click', async function handleContact(e) {
+                e.preventDefault();
+                if (!token) { window.location.href = '/auth'; return; }
+                const btn = e.currentTarget;
+                btn.setAttribute('aria-disabled', 'true');
+                const labelEl = document.getElementById('contact-btn-label');
+                const prevLabel = labelEl ? labelEl.textContent : '';
+                if (labelEl) labelEl.textContent = 'Abriendo…';
+                try {
+                    const res = await fetch(API_BASE + '/chats', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idProducto: id, idOtroUsuario: p.idPropietario })
+                    });
+                    if (res.ok) {
+                        const conv = await res.json();
+                        window.location.href = '/chats?conv=' + conv.idConversacion;
+                    } else if (res.status === 401) {
+                        window.location.href = '/auth';
+                    } else if (res.status === 400) {
+                        alert('No puedes contactar con tu propio anuncio.');
+                        btn.removeAttribute('aria-disabled');
+                        if (labelEl) labelEl.textContent = prevLabel;
+                    } else {
+                        const errText = await res.text().catch(() => res.status);
+                        console.error('Chat API error', res.status, errText);
+                        alert('Error al abrir el chat (' + res.status + '). Revisa la consola del navegador.');
+                        btn.removeAttribute('aria-disabled');
+                        if (labelEl) labelEl.textContent = prevLabel;
+                    }
+                } catch (err) {
+                    console.error('Chat fetch error', err);
+                    alert('No se pudo conectar con el servidor: ' + err.message);
+                    btn.removeAttribute('aria-disabled');
+                    if (labelEl) labelEl.textContent = prevLabel;
+                }
+            });
+        }
+        if (p.idPropietario && sellerContactQuick && !sellerContactQuick.hasAttribute('disabled')) {
+            sellerContactQuick.removeAttribute('href');
+            sellerContactQuick.addEventListener('click', async function handleContactQuick(e) {
+                e.preventDefault();
+                if (!token) { window.location.href = '/auth'; return; }
+                try {
+                    const res = await fetch(API_BASE + '/chats', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idProducto: id, idOtroUsuario: p.idPropietario })
+                    });
+                    if (res.ok) {
+                        const conv = await res.json();
+                        window.location.href = '/chats?conv=' + conv.idConversacion;
+                    } else if (res.status === 401) {
+                        window.location.href = '/auth';
+                    } else if (res.status === 400) {
+                        alert('No puedes contactar con tu propio anuncio.');
+                    } else {
+                        const errText = await res.text().catch(() => '');
+                        console.error('Chat API error', res.status, errText);
+                        alert('Error al abrir el chat (' + res.status + '). Revisa la consola.');
+                    }
+                } catch (err) {
+                    console.error('Chat fetch error', err);
+                    alert('No se pudo conectar con el servidor.');
+                }
+            });
         }
 
         // Load photos before showing the detail (elements exist in DOM even when hidden)

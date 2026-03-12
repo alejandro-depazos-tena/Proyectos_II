@@ -136,3 +136,50 @@ CREATE TABLE reporte_producto (
         ON UPDATE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS conversacion (
+    id_conversacion      BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_usuario1          BIGINT UNSIGNED NOT NULL,
+    id_usuario2          BIGINT UNSIGNED NOT NULL,
+    id_producto          BIGINT UNSIGNED NOT NULL,
+    fecha_creacion       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ultimo_mensaje       VARCHAR(500),
+    fecha_ultimo_msg     DATETIME,
+
+    CONSTRAINT fk_conv_usuario1
+        FOREIGN KEY (id_usuario1)
+        REFERENCES usuario(id_usuario)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT fk_conv_usuario2
+        FOREIGN KEY (id_usuario2)
+        REFERENCES usuario(id_usuario)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT fk_conv_producto
+        FOREIGN KEY (id_producto)
+        REFERENCES producto(id_producto)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS mensaje (
+    id_mensaje           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_conversacion      BIGINT UNSIGNED NOT NULL,
+    id_remitente         BIGINT UNSIGNED NOT NULL,
+    contenido            TEXT NOT NULL,
+    fecha_envio          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    leido                BOOLEAN NOT NULL DEFAULT FALSE,
+
+    CONSTRAINT fk_msg_conv
+        FOREIGN KEY (id_conversacion)
+        REFERENCES conversacion(id_conversacion)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT fk_msg_remitente
+        FOREIGN KEY (id_remitente)
+        REFERENCES usuario(id_usuario)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    INDEX idx_msg_conv (id_conversacion),
+    INDEX idx_msg_poll (id_conversacion, id_mensaje)
+);
+

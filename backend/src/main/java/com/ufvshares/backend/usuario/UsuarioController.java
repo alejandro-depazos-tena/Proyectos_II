@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ufvshares.backend.producto.ProductoRepository;
+
 import jakarta.validation.Valid;
 
 @RestController
@@ -20,9 +22,11 @@ import jakarta.validation.Valid;
 public class UsuarioController {
 
   private final UsuarioService service;
+  private final ProductoRepository productoRepository;
 
-  public UsuarioController(UsuarioService service) {
+  public UsuarioController(UsuarioService service, ProductoRepository productoRepository) {
     this.service = service;
+    this.productoRepository = productoRepository;
   }
 
   @GetMapping
@@ -38,7 +42,8 @@ public class UsuarioController {
   @GetMapping("/{id}/public")
   public UsuarioPublicDto getPublicById(@PathVariable Long id) {
     Usuario u = service.findById(id);
-    return new UsuarioPublicDto(u.getIdUsuario(), u.getNombre(), u.getApellidos(), u.getCorreo(), u.getFotoPerfil());
+    int numAnuncios = productoRepository.findByIdPropietario(u.getIdUsuario()).size();
+    return new UsuarioPublicDto(u.getIdUsuario(), u.getNombre(), u.getApellidos(), u.getTelefono(), u.getFotoPerfil(), numAnuncios);
   }
 
   @PostMapping

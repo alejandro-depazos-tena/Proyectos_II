@@ -3,347 +3,902 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout title="Chats | UFV Shares">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <div class="flex items-center gap-3 mb-6">
-      <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      </div>
-      <h1 class="text-2xl font-bold text-base-content">Mis chats</h1>
-    </div>
+  <div class="px-2 sm:px-4 py-2" style="height: calc(100vh - 110px); min-height: 560px;">
+    <div class="flex h-full overflow-hidden rounded-2xl border border-base-200 shadow-lg">
 
-    <div class="bg-base-100 rounded-2xl shadow border border-base-200 overflow-hidden" style="height: calc(100vh - 200px); min-height: 500px;">
-      <div class="flex h-full">
-
-        <!-- Sidebar: conversation list -->
-        <div id="chat-sidebar" class="w-full sm:w-80 lg:w-96 border-r border-base-200 flex flex-col shrink-0">
-
-          <!-- Search -->
-          <div class="p-3 border-b border-base-200">
-            <div class="relative">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-              <input id="chat-search" type="text" placeholder="Buscar conversación…"
-                class="input input-sm w-full pl-8 bg-base-200 border-none focus:outline-none rounded-xl" />
-            </div>
+      <!-- ══ SIDEBAR ══ -->
+      <div id="chat-sidebar" class="flex flex-col w-full sm:w-[340px] lg:w-[380px] shrink-0 bg-base-100 border-r border-base-200">
+        <!-- Cabecera -->
+        <div class="flex items-center gap-3 px-4 py-3.5 bg-[#f0f2f5] border-b border-base-200 shrink-0">
+          <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </div>
-
-          <!-- Conv list -->
-          <div id="conv-list" class="flex-1 overflow-y-auto divide-y divide-base-200">
-            <!-- filled by JS -->
+          <h2 class="flex-1 font-bold text-[1.05rem] text-base-content">Chats</h2>
+          <button id="refresh-btn" class="btn btn-ghost btn-circle btn-sm text-base-content/50" title="Actualizar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </button>
+        </div>
+        <!-- Buscador -->
+        <div class="px-3 py-2 bg-base-100 border-b border-base-200 shrink-0">
+          <div class="relative">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input id="chat-search" type="text" placeholder="Buscar o empezar un chat" class="input input-sm w-full pl-9 bg-[#f0f2f5] border-none rounded-full text-sm focus:outline-none" />
           </div>
         </div>
+        <!-- Lista -->
+        <div id="conv-list" class="flex-1 overflow-y-auto">
+          <div id="conv-skeleton">
+            <div class="flex items-center gap-3 px-4 py-4 border-b border-base-200/50 animate-pulse"><div class="w-12 h-12 rounded-full bg-base-300 shrink-0"></div><div class="flex-1 space-y-2"><div class="h-3.5 bg-base-300 rounded w-2/3"></div><div class="h-2.5 bg-base-300 rounded w-1/2"></div></div></div>
+            <div class="flex items-center gap-3 px-4 py-4 border-b border-base-200/50 animate-pulse"><div class="w-12 h-12 rounded-full bg-base-300 shrink-0"></div><div class="flex-1 space-y-2"><div class="h-3.5 bg-base-300 rounded w-3/4"></div><div class="h-2.5 bg-base-300 rounded w-1/3"></div></div></div>
+            <div class="flex items-center gap-3 px-4 py-4 border-b border-base-200/50 animate-pulse"><div class="w-12 h-12 rounded-full bg-base-300 shrink-0"></div><div class="flex-1 space-y-2"><div class="h-3.5 bg-base-300 rounded w-1/2"></div><div class="h-2.5 bg-base-300 rounded w-2/5"></div></div></div>
+          </div>
+        </div>
+      </div>
 
-        <!-- Main chat area -->
-        <div id="chat-main" class="hidden sm:flex flex-1 flex-col">
-
-          <!-- Chat header -->
-          <div id="chat-header" class="flex items-center gap-3 px-5 py-3 border-b border-base-200 bg-base-50 shrink-0">
-            <div id="chat-header-avatar" class="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-sm font-black text-primary">?</div>
+      <!-- ══ AREA PRINCIPAL ══ -->
+      <div id="chat-main" class="hidden sm:flex flex-1 flex-col min-w-0">
+        <!-- Cabecera del chat -->
+        <div id="chat-header" class="flex items-center gap-3 px-3 py-2.5 bg-[#f0f2f5] border-b border-base-200 shrink-0 z-10">
+          <button id="back-btn" class="btn btn-ghost btn-circle btn-sm sm:hidden text-base-content/70 mr-0.5" aria-label="Volver">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <div id="chat-header-avatar" class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-black text-primary shrink-0 cursor-pointer">?</div>
+          <div class="flex-1 min-w-0 cursor-pointer">
+            <p id="chat-header-name" class="font-semibold text-[15px] text-base-content leading-snug truncate">Selecciona una conversacion</p>
+            <p id="chat-header-product" class="text-xs text-base-content/50 truncate leading-snug mt-px"></p>
+          </div>
+          <div class="flex items-center gap-0.5 shrink-0">
+            <button class="btn btn-ghost btn-circle btn-sm text-base-content/50" title="Buscar en el chat">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </button>
+            <button class="btn btn-ghost btn-circle btn-sm text-base-content/50" title="Mas opciones">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </button>
+          </div>
+        </div>
+        <!-- Mensajes (fondo beige WhatsApp) -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto flex flex-col px-[4%] md:px-[8%] lg:px-[14%] py-4 gap-px chat-bg">
+          <div id="chat-empty-state" class="flex flex-col items-center justify-center h-full gap-4 py-20 text-center flex-1">
+            <div class="w-20 h-20 rounded-full bg-white/80 shadow-sm flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
             <div>
-              <p id="chat-header-name" class="font-semibold text-sm text-base-content">Selecciona una conversación</p>
-              <p id="chat-header-product" class="text-xs text-base-content/50"></p>
+              <p class="font-bold text-[#3b4a54] text-lg">UFV Shares</p>
+              <p class="text-sm text-[#667781] mt-1 max-w-xs">Selecciona una conversacion de la lista o contacta con el vendedor de un producto.</p>
             </div>
-            <!-- Online dot -->
-            <div id="chat-status" class="ml-auto hidden flex items-center gap-1.5 text-xs text-success font-medium">
-              <span class="w-2 h-2 rounded-full bg-success inline-block"></span>
-              En línea
-            </div>
-          </div>
-
-          <!-- Messages area -->
-          <div id="chat-messages" class="flex-1 overflow-y-auto p-5 flex flex-col gap-3">
-            <!-- Empty state -->
-            <div id="chat-empty-state" class="flex-1 flex flex-col items-center justify-center gap-3 py-16 text-center">
-              <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-primary/60"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              </div>
-              <p class="font-semibold text-base-content/70">Ninguna conversación seleccionada</p>
-              <p class="text-sm text-base-content/40 max-w-xs">Elige una conversación de la lista o inicia una nueva desde la página de un producto.</p>
-            </div>
-          </div>
-
-          <!-- Input -->
-          <div id="chat-input-area" class="hidden shrink-0 border-t border-base-200 p-3 bg-base-50">
-            <form id="chat-form" class="flex items-end gap-2">
-              <textarea id="msg-input" rows="1"
-                placeholder="Escribe un mensaje…"
-                class="textarea textarea-bordered flex-1 resize-none text-sm rounded-2xl min-h-[42px] max-h-32 focus:outline-primary"
-              ></textarea>
-              <button type="submit"
-                class="btn btn-primary btn-sm rounded-2xl h-[42px] px-4 gap-1.5 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                Enviar
-              </button>
-            </form>
           </div>
         </div>
-
-        <!-- No conversations at all -->
-        <div id="no-convs-state" class="hidden flex-1 flex-col items-center justify-center gap-4 py-16 text-center px-8">
-          <div class="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-primary/60"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <!-- Input -->
+        <div id="chat-input-area" class="hidden shrink-0 bg-[#f0f2f5] border-t border-base-200 px-3 py-2.5 relative">
+          <!-- Picker de emojis -->
+          <div id="emoji-picker" class="hidden absolute bottom-16 left-3 z-50 bg-base-100 border border-base-200 rounded-2xl shadow-xl p-3 w-72">
+            <div id="emoji-grid" class="grid grid-cols-8 gap-1 max-h-52 overflow-y-auto"></div>
           </div>
-          <div>
-            <p class="font-bold text-lg text-base-content/70">Aún no tienes mensajes</p>
-            <p class="text-sm text-base-content/40 mt-1 max-w-xs">Cuando contactes con el vendedor de un producto, la conversación aparecerá aquí.</p>
-          </div>
-          <a href="/app" class="btn btn-primary btn-sm rounded-xl mt-2 gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            Explorar productos
-          </a>
+          <form id="chat-form" class="flex items-end gap-2">
+            <button type="button" id="emoji-btn" class="btn btn-ghost btn-circle btn-sm text-base-content/50 shrink-0 mb-1" aria-label="Emojis">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </button>
+            <button type="button" id="loc-btn" class="btn btn-ghost btn-circle btn-sm text-base-content/50 shrink-0 mb-1" aria-label="Enviar ubicación">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </button>
+            <div class="flex-1 bg-white rounded-3xl px-4 py-2.5 shadow-sm flex items-end min-h-[44px]">
+              <textarea id="msg-input" rows="1" placeholder="Escribe un mensaje" aria-label="Escribe un mensaje" class="w-full resize-none bg-transparent text-sm leading-relaxed max-h-32 focus:outline-none text-base-content placeholder:text-base-content/40"></textarea>
+            </div>
+            <button type="submit" id="send-btn" class="btn btn-primary btn-circle w-11 h-11 min-h-0 shrink-0 shadow-sm mb-0.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </form>
         </div>
-
       </div>
+
+      <!-- ══ SIN CONVERSACIONES ══ -->
+      <div id="no-convs-state" class="hidden flex-1 flex-col items-center justify-center gap-5 text-center px-8 chat-bg">
+        <div class="w-24 h-24 rounded-full bg-white shadow flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div>
+          <p class="font-bold text-xl text-[#3b4a54]">Sin mensajes todavia</p>
+          <p class="text-sm text-[#667781] mt-1.5 max-w-xs leading-relaxed">Cuando contactes con un vendedor desde la pagina de un producto, la conversacion aparecera aqui.</p>
+        </div>
+        <a href="/app" class="btn btn-primary btn-sm rounded-full gap-2 mt-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          Explorar productos
+        </a>
+      </div>
+
     </div>
   </div>
+<!-- Modal perfil usuario -->
+<div id="profile-modal" class="hidden fixed inset-0 z-[100] bg-black/50 items-center justify-center p-4">
+  <div class="bg-base-100 rounded-2xl shadow-2xl w-full max-w-sm flex flex-col overflow-hidden">
+    <!-- Banner + avatar -->
+    <div class="relative">
+      <div class="h-24 bg-gradient-to-r from-[#128C7E] to-[#25d366]"></div>
+      <div id="pm-avatar" class="absolute left-1/2 -translate-x-1/2 -bottom-8 w-16 h-16 rounded-full border-4 border-base-100 bg-primary/20 flex items-center justify-center text-xl font-black text-primary shrink-0 overflow-hidden shadow"></div>
+    </div>
+    <!-- Contenido -->
+    <div class="pt-12 pb-5 px-5 flex flex-col gap-4">
+      <div class="text-center">
+        <p id="pm-name" class="font-bold text-lg text-base-content"></p>
+        <p id="pm-apellidos" class="text-sm text-base-content/60"></p>
+      </div>
+      <div class="flex justify-center gap-8 py-3 bg-base-200/50 rounded-xl">
+        <div class="text-center">
+          <p id="pm-anuncios" class="font-bold text-xl text-[#128C7E]">-</p>
+          <p class="text-[11px] text-base-content/50 mt-0.5">Anuncios</p>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2.5">
+        <div id="pm-phone-row" class="hidden flex items-center gap-3 bg-base-200/50 rounded-xl px-4 py-3">
+          <div class="w-9 h-9 rounded-full bg-[#128C7E]/10 flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#128C7E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.59 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-[11px] text-base-content/50 leading-none mb-1">Teléfono</p>
+            <p id="pm-phone" class="text-sm font-semibold text-base-content"></p>
+          </div>
+          <a id="pm-phone-link" href="#" class="btn btn-ghost btn-circle btn-sm text-[#128C7E]" title="Llamar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.59 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </a>
+        </div>
+        <div id="pm-product-row" class="hidden items-center gap-3 bg-base-200/50 rounded-xl px-4 py-3">
+          <div class="w-9 h-9 rounded-full bg-[#128C7E]/10 flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#128C7E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          </div>
+          <div class="flex-1">
+            <p class="text-[11px] text-base-content/50 leading-none mb-1">Anuncios activos</p>
+            <p id="pm-product-count" class="text-sm font-semibold text-base-content"></p>
+          </div>
+        </div>
+      </div>
+      <button id="profile-modal-close" class="btn btn-ghost rounded-xl w-full mt-1">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal ubicacion -->
+<div id="loc-modal" class="hidden fixed inset-0 z-[100] bg-black/50 items-center justify-center p-4">
+  <div class="bg-base-100 rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden" style="max-height:90vh">
+    <!-- Cabecera -->
+    <div class="flex items-center gap-3 px-5 py-4 border-b border-base-200 shrink-0">
+      <div class="w-9 h-9 rounded-full bg-[#128C7E]/10 flex items-center justify-center text-lg shrink-0">📍</div>
+      <h3 class="font-bold text-base-content text-base flex-1">Compartir ubicación</h3>
+      <button id="loc-cancel" class="btn btn-ghost btn-circle btn-sm text-base-content/50" aria-label="Cerrar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <!-- Tabs -->
+    <div class="flex border-b border-base-200 shrink-0">
+      <button id="loc-tab-current" class="flex-1 py-2.5 text-sm font-semibold border-b-2 border-[#128C7E] text-[#128C7E] transition-colors">📵 Mi ubicación</button>
+      <button id="loc-tab-search" class="flex-1 py-2.5 text-sm font-medium border-b-2 border-transparent text-base-content/50 transition-colors">🔍 Buscar lugar</button>
+    </div>
+    <!-- Panel: ubicacion actual -->
+    <div id="loc-panel-current" class="flex flex-col gap-3 px-5 py-4 overflow-y-auto flex-1">
+      <p id="loc-status" class="text-sm text-base-content/60 text-center min-h-[20px]"></p>
+      <div id="loc-preview" class="rounded-xl overflow-hidden border border-base-200"></div>
+      <p id="loc-addr" class="text-sm text-base-content leading-snug"></p>
+      <button id="loc-retry" class="btn btn-outline btn-sm rounded-xl hidden">Reintentar</button>
+    </div>
+    <!-- Panel: buscar lugar -->
+    <div id="loc-panel-search" class="hidden flex-col gap-3 px-5 py-4 overflow-y-auto flex-1">
+      <div class="relative">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="loc-search-input" type="text" placeholder="Nombre, dirección, ciudad..." class="input input-sm w-full pl-9 rounded-full border-base-200 focus:outline-none" />
+      </div>
+      <div id="loc-search-results" class="flex flex-col gap-1 max-h-36 overflow-y-auto"></div>
+      <div id="loc-search-preview" class="rounded-xl overflow-hidden border border-base-200"></div>
+      <p id="loc-search-addr" class="text-sm text-base-content leading-snug"></p>
+    </div>
+    <!-- Footer -->
+    <div class="flex gap-3 px-5 py-4 border-t border-base-200 shrink-0">
+      <button id="loc-send" class="btn btn-primary flex-1 rounded-xl gap-2" disabled>
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Enviar ubicación
+      </button>
+    </div>
+  </div>
+</div>
+
 </Layout>
 
+<style is:global>
+  .chat-bg { background-color: #efeae2; }
+
+  /* Ocultar sidebar solo en movil cuando hay chat abierto */
+  .sidebar-chat-open { display: none; }
+  @media (min-width: 640px) { .sidebar-chat-open { display: flex !important; flex-direction: column; } }
+
+  /* Burbuja enviada con cola abajo-derecha */
+  .bubble-me {
+    position: relative;
+    background: #d9fdd3;
+    color: #111b21;
+    border-radius: 7.5px 7.5px 0 7.5px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.10);
+  }
+  .bubble-me::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: -7px;
+    width: 0; height: 0;
+    border-top: 8px solid #d9fdd3;
+    border-right: 7px solid transparent;
+  }
+
+  /* Burbuja recibida con cola abajo-izquierda */
+  .bubble-other {
+    position: relative;
+    background: #ffffff;
+    color: #111b21;
+    border-radius: 7.5px 7.5px 7.5px 0;
+    box-shadow: 0 1px 1px rgba(0,0,0,.10);
+  }
+  .bubble-other::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: -7px;
+    width: 0; height: 0;
+    border-top: 8px solid #ffffff;
+    border-left: 7px solid transparent;
+  }
+
+  /* Continuacion mismo emisor (sin cola) */
+  .bubble-me-cont    { background: #d9fdd3; color: #111b21; border-radius: 7.5px; box-shadow: 0 1px 1px rgba(0,0,0,.10); }
+  .bubble-other-cont { background: #ffffff; color: #111b21; border-radius: 7.5px; box-shadow: 0 1px 1px rgba(0,0,0,.10); }
+
+  /* Separador de fecha */
+  .date-sep {
+    background: #e1f2fb; color: #54656f;
+    font-size: 11.5px; font-weight: 500;
+    padding: 3px 12px; border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.08);
+    user-select: none;
+  }
+
+  /* Item activo del sidebar */
+  .conv-item-active { background-color: #f0f2f5; border-left: 3px solid hsl(var(--p)); }
+
+  /* Scrollbars */
+  #chat-messages::-webkit-scrollbar { width: 5px; }
+  #chat-messages::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); border-radius: 3px; }
+  #conv-list::-webkit-scrollbar { width: 4px; }
+  #conv-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,.10); border-radius: 2px; }
+</style>
+
 <script>
-  // ── Types ──────────────────────────────────────────────────
-  interface Message { id: number; from: 'me' | 'other'; text: string; ts: string; }
-  interface Conv {
-    id: number; name: string; productName: string; productId: number;
-    avatar: string; unread: number; lastMsg: string; lastTs: string;
-    messages: Message[];
+  const API_BASE     = (import.meta as any).env.PUBLIC_API_BASE ?? 'http://localhost:8080/api';
+  const BACKEND_BASE = (() => { try { return new URL(API_BASE).origin; } catch { return 'http://localhost:8080'; } })();
+  const token        = localStorage.getItem('ufvshares_token');
+
+  interface ApiConv {
+    idConversacion: number; otroUsuarioId: number;
+    otroUsuarioNombre: string; otroUsuarioIniciales: string; otroUsuarioFoto: string | null;
+    idProducto: number; productoTitulo: string;
+    ultimoMensaje: string | null; fechaUltimoMsg: string | null; noLeidos: number;
+  }
+  interface ApiMsg {
+    idMensaje: number; from: 'me' | 'other';
+    contenido: string; fechaEnvio: string; leido: boolean;
   }
 
-  // ── Demo data (replace with real API calls) ────────────────
-  const API_BASE = (import.meta as any).env.PUBLIC_API_BASE ?? 'http://localhost:8080/api';
-  const token = localStorage.getItem('ufvshares_token');
+  let conversations:  ApiConv[] = [];
+  let filteredConvs:  ApiConv[] = [];
+  let activeConvId:   number | null = null;
+  let lastMsgId       = 0;
+  let pollTimer:      ReturnType<typeof setTimeout> | null = null;
+  let lastMsgDateStr  = '';
+  let lastMsgSender:  'me' | 'other' | null = null;
 
-  // Load conversations – currently uses demo data while backend chat is not yet implemented.
-  // TODO: replace with real endpoint:  GET /api/chats  (returns Conv[])
-  let conversations: Conv[] = [];
-
-  async function loadConversations(): Promise<Conv[]> {
-    // Uncomment when backend is ready:
-    // const res = await fetch(API_BASE + '/chats', { headers: { Authorization: 'Bearer ' + token } });
-    // if (res.ok) return res.json();
-    // return [];
-
-    // Demo data for now
-    return [
-      {
-        id: 1, name: 'Carlos López', avatar: 'CL', unread: 2, productId: 101,
-        productName: 'MacBook Pro 14"',
-        lastMsg: '¿Sigue disponible para esta tarde?', lastTs: '10:42',
-        messages: [
-          { id: 1, from: 'other', text: 'Hola! Vi tu anuncio del MacBook, ¿sigue disponible?', ts: '10:30' },
-          { id: 2, from: 'me',    text: 'Hola Carlos, sí, todavía está disponible.', ts: '10:35' },
-          { id: 3, from: 'other', text: '¿Sigue disponible para esta tarde?', ts: '10:42' },
-        ]
-      },
-      {
-        id: 2, name: 'Ana García', avatar: 'AG', unread: 0, productId: 205,
-        productName: 'Cálculo I – Stewart',
-        lastMsg: 'Perfecto, nos vemos el viernes en la cafetería 👍', lastTs: 'Ayer',
-        messages: [
-          { id: 1, from: 'me',    text: 'Hola Ana, te vendo el Cálculo I por 12 €.', ts: 'Ayer 16:00' },
-          { id: 2, from: 'other', text: '¡Genial! ¿Puede ser el viernes?', ts: 'Ayer 16:15' },
-          { id: 3, from: 'me',    text: 'Sí, en la cafetería a las 13:00.', ts: 'Ayer 16:20' },
-          { id: 4, from: 'other', text: 'Perfecto, nos vemos el viernes en la cafetería 👍', ts: 'Ayer 16:22' },
-        ]
-      },
-      {
-        id: 3, name: 'Marcos Ruiz', avatar: 'MR', unread: 1, productId: 310,
-        productName: 'Bicicleta de montaña',
-        lastMsg: '¿Cuánto pides por ella?', lastTs: 'Lu.',
-        messages: [
-          { id: 1, from: 'other', text: '¿Cuánto pides por ella?', ts: 'Lu. 09:10' },
-        ]
-      },
-    ];
-  }
-
-  // ── State ──────────────────────────────────────────────────
-  let activeConvId: number | null = null;
-  let filteredConvs: Conv[] = [];
-
-  // ── DOM refs ───────────────────────────────────────────────
-  const convList       = document.getElementById('conv-list')!;
-  const chatMessages   = document.getElementById('chat-messages')!;
-  const chatEmptyState = document.getElementById('chat-empty-state')!;
-  const chatInputArea  = document.getElementById('chat-input-area')!;
-  const chatHeaderName = document.getElementById('chat-header-name')!;
+  const convList          = document.getElementById('conv-list')!;
+  const convSkeleton      = document.getElementById('conv-skeleton')!;
+  const chatMessages      = document.getElementById('chat-messages')!;
+  const chatEmptyState    = document.getElementById('chat-empty-state')!;
+  const chatInputArea     = document.getElementById('chat-input-area')!;
+  const chatHeaderName    = document.getElementById('chat-header-name')!;
   const chatHeaderProduct = document.getElementById('chat-header-product')!;
   const chatHeaderAvatar  = document.getElementById('chat-header-avatar')!;
-  const noConvsState   = document.getElementById('no-convs-state')!;
-  const chatMain       = document.getElementById('chat-main')!;
-  const chatSidebar    = document.getElementById('chat-sidebar')!;
-  const chatSearch     = document.getElementById('chat-search') as HTMLInputElement;
-  const chatForm       = document.getElementById('chat-form') as HTMLFormElement;
-  const msgInput       = document.getElementById('msg-input') as HTMLTextAreaElement;
+  const noConvsState      = document.getElementById('no-convs-state')!;
+  const chatMain          = document.getElementById('chat-main')!;
+  const chatSidebar       = document.getElementById('chat-sidebar')!;
+  const chatSearch        = document.getElementById('chat-search')    as HTMLInputElement;
+  const chatForm          = document.getElementById('chat-form')      as HTMLFormElement;
+  const msgInput          = document.getElementById('msg-input')      as HTMLTextAreaElement;
 
-  // ── Helpers ────────────────────────────────────────────────
-  function timeAgo(ts: string) { return ts; }
-
-  function renderConvItem(conv: Conv, active: boolean): string {
-    const unreadBadge = conv.unread > 0
-      ? `<span class="badge badge-sm badge-primary border-none shrink-0">${conv.unread}</span>` : '';
-    const activeCls = active ? 'bg-primary/10' : 'hover:bg-base-200';
-    return `
-      <button data-id="${conv.id}"
-        class="conv-item w-full flex items-start gap-3 px-4 py-3 text-left transition-colors ${activeCls}">
-        <div class="w-10 h-10 rounded-full bg-primary/20 text-primary font-black text-sm flex items-center justify-center shrink-0">
-          ${conv.avatar}
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center justify-between gap-1">
-            <p class="font-semibold text-sm truncate text-base-content">${conv.name}</p>
-            <span class="text-[10px] text-base-content/40 shrink-0">${conv.lastTs}</span>
-          </div>
-          <p class="text-xs text-base-content/50 truncate">${conv.productName}</p>
-          <div class="flex items-center justify-between gap-1 mt-0.5">
-            <p class="text-xs text-base-content/60 truncate">${conv.lastMsg}</p>
-            ${unreadBadge}
-          </div>
-        </div>
-      </button>`;
+  // Helpers de fecha
+  function formatTs(iso: string): string {
+    const d = new Date(iso);
+    return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+  }
+  function dateLabel(iso: string): string {
+    const d = new Date(iso); const now = new Date();
+    if (d.toDateString() === now.toDateString()) return 'HOY';
+    const y = new Date(now); y.setDate(now.getDate()-1);
+    if (d.toDateString() === y.toDateString()) return 'AYER';
+    const lbl = d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+    return lbl.charAt(0).toUpperCase() + lbl.slice(1);
+  }
+  function formatLastTs(iso: string | null): string {
+    if (!iso) return '';
+    const d = new Date(iso); const now = new Date();
+    if (d.toDateString() === now.toDateString())
+      return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+    const y = new Date(now); y.setDate(now.getDate()-1);
+    if (d.toDateString() === y.toDateString()) return 'Ayer';
+    const days = ['Dom.','Lu.','Ma.','Mi.','Ju.','Vi.','Sa.'];
+    if ((now.getTime()-d.getTime())/86400000 < 7) return days[d.getDay()];
+    return d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'});
   }
 
-  function renderMessages(conv: Conv) {
-    // Clear old messages (keep empty state node but hide it)
-    chatEmptyState.classList.add('hidden');
-    const msgs = chatMessages.querySelectorAll('.msg-bubble');
-    msgs.forEach(m => m.remove());
+  // Ticks de lectura (doble check estilo WhatsApp)
+  function ticksSvg(leido: boolean): string {
+    const c = leido ? '#53bdeb' : '#8696a0';
+    return '<svg class="inline-block ml-0.5 shrink-0 align-middle" width="16" height="11" viewBox="0 0 18 12" fill="none">'
+      + '<path d="M1 6L4.5 10L11 2" stroke="' + c + '" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>'
+      + '<path d="M6 6L9.5 10L16 2" stroke="' + c + '" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>'
+      + '</svg>';
+  }
 
-    conv.messages.forEach(msg => {
-      const isMe = msg.from === 'me';
-      const bubble = document.createElement('div');
-      bubble.className = `msg-bubble flex ${isMe ? 'justify-end' : 'justify-start'}`;
-      bubble.innerHTML = `
-        <div class="max-w-[70%] flex flex-col ${isMe ? 'items-end' : 'items-start'} gap-0.5">
-          <div class="px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm
-            ${isMe ? 'bg-primary text-primary-content rounded-br-sm' : 'bg-base-200 text-base-content rounded-bl-sm'}">
-            ${msg.text}
-          </div>
-          <span class="text-[10px] text-base-content/40 px-1">${msg.ts}</span>
-        </div>`;
-      chatMessages.appendChild(bubble);
-    });
+  // Avatar
+  function avatarHtml(conv: ApiConv, sz = 'w-12 h-12 text-base'): string {
+    if (conv.otroUsuarioFoto)
+      return '<img src="' + BACKEND_BASE + conv.otroUsuarioFoto + '" alt="" class="' + sz + ' rounded-full object-cover shrink-0"/>';
+    return '<div class="' + sz + ' rounded-full bg-primary/20 text-primary font-black flex items-center justify-center shrink-0">' + conv.otroUsuarioIniciales + '</div>';
+  }
 
-    // Scroll to bottom
+  // Item de conversacion (estilo WhatsApp)
+  function renderConvItem(conv: ApiConv, active: boolean): string {
+    const activeCls = active ? 'conv-item-active' : 'hover:bg-[#f5f6f6]';
+    const tsColor   = conv.noLeidos > 0 ? 'text-[#25d366] font-semibold' : 'text-[#667781]';
+    const badge     = conv.noLeidos > 0
+      ? '<span class="w-5 h-5 rounded-full bg-[#25d366] text-white text-[11px] font-bold flex items-center justify-center shrink-0 leading-none">' + (conv.noLeidos > 99 ? '99' : conv.noLeidos) + '</span>'
+      : '';
+    const lastMsg = conv.ultimoMensaje ?? conv.productoTitulo;
+    return '<button data-id="' + conv.idConversacion + '" class="conv-item w-full flex items-center gap-3 px-4 py-3 text-left transition-colors border-b border-base-200/50 ' + activeCls + '">'
+      + '<div class="shrink-0">' + avatarHtml(conv) + '</div>'
+      + '<div class="flex-1 min-w-0">'
+      + '<div class="flex items-baseline justify-between gap-2 mb-0.5">'
+      + '<p class="font-semibold text-[15px] text-base-content truncate">' + conv.otroUsuarioNombre + '</p>'
+      + '<span class="text-xs ' + tsColor + ' shrink-0">' + formatLastTs(conv.fechaUltimoMsg) + '</span>'
+      + '</div>'
+      + '<div class="flex items-center justify-between gap-2">'
+      + '<p class="text-sm text-[#667781] truncate flex-1">' + lastMsg + '</p>'
+      + badge
+      + '</div></div></button>';
+  }
+
+  // Separador de fecha
+  function maybeInsertDateSep(fechaEnvio: string) {
+    const key = new Date(fechaEnvio).toDateString();
+    if (key === lastMsgDateStr) return;
+    lastMsgDateStr = key;
+    const sep = document.createElement('div');
+    sep.className = 'msg-date-sep flex justify-center my-3 sticky top-2 z-10';
+    sep.innerHTML = '<span class="date-sep">' + dateLabel(fechaEnvio) + '</span>';
+    chatMessages.appendChild(sep);
+  }
+
+  // Ubicacion helpers
+  const LOC_PREFIX = 'UFVLOC:';
+  function parseLocMsg(c: string): {lat:number,lng:number,addr:string} | null {
+    try { return JSON.parse(c.slice(LOC_PREFIX.length)); } catch { return null; }
+  }
+  function renderLocCard(lat: number, lng: number, addr: string, _isMe: boolean): string {
+    const url  = 'https://www.google.com/maps?q=' + lat + ',' + lng;
+    const safe = addr.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const mapSrc = 'https://www.openstreetmap.org/export/embed.html?bbox='
+      + (lng-0.005) + ',' + (lat-0.003) + ',' + (lng+0.005) + ',' + (lat+0.003)
+      + '&layer=mapnik&marker=' + lat + ',' + lng;
+    return '<div class="rounded-xl overflow-hidden border border-black/10" style="width:240px">'
+      + '<!-- mapa -->'
+      + '<div class="relative" style="height:150px">'
+      + '<iframe src="' + mapSrc + '" class="w-full h-full border-0 pointer-events-none" loading="lazy"></iframe>'
+      + '<!-- capa transparente para capturar el click -->'
+      + '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="absolute inset-0" aria-label="Ver en Google Maps" onclick="event.stopPropagation()"></a>'
+      + '</div>'
+      + '<!-- pie -->'
+      + '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3 py-2 bg-[#128C7E] no-underline" onclick="event.stopPropagation()">'
+      + '<span class="text-white text-base leading-none shrink-0">📍</span>'
+      + '<span class="text-white text-xs font-medium leading-snug line-clamp-2 flex-1">' + safe + '</span>'
+      + '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'
+      + '</a></div>';
+  }
+
+  // Burbuja de mensaje
+  function appendMessage(msg: ApiMsg) {
+    maybeInsertDateSep(msg.fechaEnvio);
+    const isMe   = msg.from === 'me';
+    const isCont = lastMsgSender === msg.from;
+    lastMsgSender = msg.from;
+    const isLoc = msg.contenido.startsWith(LOC_PREFIX);
+    let innerContent: string;
+    if (isLoc) {
+      const loc = parseLocMsg(msg.contenido);
+      innerContent = loc ? renderLocCard(loc.lat, loc.lng, loc.addr, isMe) : '📍 Ubicación';
+    } else {
+      innerContent = msg.contenido
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\n/g,'<br>');
+    }
+    const bubbleCls = isMe
+      ? (isCont ? 'bubble-me-cont' : 'bubble-me')
+      : (isCont ? 'bubble-other-cont' : 'bubble-other');
+    const wrapper = document.createElement('div');
+    wrapper.className = 'msg-bubble flex ' + (isMe ? 'justify-end' : 'justify-start') + ' ' + (isCont ? 'mt-0.5' : 'mt-2');
+    wrapper.dataset.msgId = String(msg.idMensaje);
+    const pad = isLoc ? 'p-1.5' : 'px-3 pt-2 pb-1.5';
+    wrapper.innerHTML = '<div class="' + bubbleCls + ' ' + pad + ' max-w-[75%] min-w-[180px] text-sm leading-relaxed overflow-hidden">'
+      + '<div>' + innerContent + '</div>'
+      + (!isLoc ? '<div class="flex items-center justify-end gap-1 mt-0.5">'
+        + '<span class="text-[10px] text-[#8696a0] whitespace-nowrap">' + formatTs(msg.fechaEnvio) + '</span>'
+        + (isMe ? ticksSvg(msg.leido) : '')
+        + '</div>' : '')
+      + '</div>';
+    chatMessages.appendChild(wrapper);
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
-  function openConversation(conv: Conv) {
-    activeConvId = conv.id;
-    // Clear unread
-    conv.unread = 0;
-
-    // Update header
-    chatHeaderAvatar.textContent = conv.avatar;
-    chatHeaderName.textContent = conv.name;
-    chatHeaderProduct.textContent = conv.productName;
-
-    // Show input
-    chatInputArea.classList.remove('hidden');
-    chatInputArea.classList.add('flex');
-
-    // Render messages
-    renderMessages(conv);
-
-    // Re-render sidebar to remove unread badge
-    renderConvList();
-
-    // On mobile: hide sidebar, show chat
-    chatSidebar.classList.add('hidden');
-    chatMain.classList.remove('hidden');
-    chatMain.classList.add('flex');
+  // Limpiar mensajes
+  function clearMessages() {
+    lastMsgDateStr = ''; lastMsgSender = null;
+    chatEmptyState.classList.add('hidden');
+    chatMessages.querySelectorAll('.msg-bubble, .msg-date-sep').forEach(el => el.remove());
   }
 
+  // Render lista de conversaciones
   function renderConvList() {
+    convSkeleton?.remove();
     convList.innerHTML = filteredConvs.length === 0
-      ? `<div class="p-6 text-center text-sm text-base-content/40">Sin resultados</div>`
-      : filteredConvs.map(c => renderConvItem(c, c.id === activeConvId)).join('');
-
+      ? '<div class="flex flex-col items-center justify-center py-16 gap-2 text-center px-6"><p class="text-sm text-base-content/40">Sin resultados</p></div>'
+      : filteredConvs.map(c => renderConvItem(c, c.idConversacion === activeConvId)).join('');
     convList.querySelectorAll<HTMLButtonElement>('.conv-item').forEach(btn => {
       btn.addEventListener('click', () => {
-        const id = Number(btn.dataset.id);
-        const conv = conversations.find(c => c.id === id);
+        const conv = conversations.find(c => c.idConversacion === Number(btn.dataset.id));
         if (conv) openConversation(conv);
       });
     });
   }
 
-  // ── Init ───────────────────────────────────────────────────
-  (async () => {
-    conversations = await loadConversations();
-    filteredConvs = [...conversations];
+  // API helpers
+  function checkAuth(s: number) { if (s === 401) window.location.href = '/auth'; }
 
-    if (conversations.length === 0) {
-      // Show empty state centered across full area
+  async function fetchConversations(): Promise<ApiConv[]> {
+    if (!token) return [];
+    const res = await fetch(API_BASE + '/chats', { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) { checkAuth(res.status); return []; }
+    return res.json();
+  }
+  async function fetchMessages(convId: number, since = 0): Promise<ApiMsg[]> {
+    if (!token) return [];
+    const url = API_BASE + '/chats/' + convId + '/messages' + (since > 0 ? '?since=' + since : '');
+    const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) { checkAuth(res.status); return []; }
+    return res.json();
+  }
+  async function sendMessage(convId: number, contenido: string): Promise<ApiMsg | null> {
+    if (!token) return null;
+    const res = await fetch(API_BASE + '/chats/' + convId + '/messages', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contenido })
+    });
+    if (!res.ok) { checkAuth(res.status); return null; }
+    return res.json();
+  }
+
+  // Abrir conversacion
+  async function openConversation(conv: ApiConv) {
+    if (pollTimer) clearTimeout(pollTimer);
+    activeConvId = conv.idConversacion; lastMsgId = 0; conv.noLeidos = 0;
+    chatHeaderAvatar.innerHTML = conv.otroUsuarioFoto
+      ? '<img src="' + BACKEND_BASE + conv.otroUsuarioFoto + '" alt="" class="w-10 h-10 rounded-full object-cover"/>'
+      : conv.otroUsuarioIniciales;
+    chatHeaderName.textContent    = conv.otroUsuarioNombre;
+    chatHeaderProduct.textContent = '\u{1F4E6} ' + conv.productoTitulo;
+    chatInputArea.classList.remove('hidden');
+    clearMessages();
+    const msgs = await fetchMessages(conv.idConversacion);
+    msgs.forEach(m => { appendMessage(m); if (m.idMensaje > lastMsgId) lastMsgId = m.idMensaje; });
+    renderConvList();
+    chatSidebar.classList.add('sidebar-chat-open');
+    chatMain.classList.remove('hidden');
+    chatMain.classList.add('flex');
+    // Store current user info in dataset so the single header listener always has fresh data
+    chatHeaderAvatar.dataset.userId    = String(conv.otroUsuarioId);
+    chatHeaderAvatar.dataset.fotoUrl   = conv.otroUsuarioFoto ?? '';
+    chatHeaderAvatar.dataset.iniciales = conv.otroUsuarioIniciales;
+    setTimeout(() => msgInput?.focus(), 60);
+    schedulePoll();
+  }
+
+  // Polling (3 s)
+  function schedulePoll() {
+    if (pollTimer) clearTimeout(pollTimer);
+    pollTimer = setTimeout(async () => {
+      if (activeConvId === null) return;
+      const newMsgs = await fetchMessages(activeConvId, lastMsgId);
+      if (newMsgs.length > 0) {
+        newMsgs.forEach(m => { appendMessage(m); if (m.idMensaje > lastMsgId) lastMsgId = m.idMensaje; });
+        const updated = await fetchConversations();
+        if (updated.length > 0) { conversations = updated; filteredConvs = applyFilter(conversations); renderConvList(); }
+      }
+      schedulePoll();
+    }, 3000);
+  }
+
+  function applyFilter(convs: ApiConv[]): ApiConv[] {
+    const q = chatSearch?.value.toLowerCase() ?? '';
+    if (!q) return [...convs];
+    return convs.filter(c =>
+      c.otroUsuarioNombre.toLowerCase().includes(q) ||
+      c.productoTitulo.toLowerCase().includes(q) ||
+      (c.ultimoMensaje ?? '').toLowerCase().includes(q));
+  }
+
+  // Init
+  (async () => {
+    if (!token) { window.location.href = '/auth'; return; }
+    conversations = await fetchConversations();
+    filteredConvs = [...conversations];
+    const urlConvId = new URLSearchParams(window.location.search).get('conv');
+    if (conversations.length === 0 && !urlConvId) {
       chatSidebar.classList.add('hidden');
       chatMain.classList.add('hidden');
       noConvsState.classList.remove('hidden');
       noConvsState.classList.add('flex');
+      convSkeleton?.remove();
     } else {
       noConvsState.classList.add('hidden');
       renderConvList();
+      if (urlConvId) {
+        let target = conversations.find(c => String(c.idConversacion) === urlConvId);
+        if (!target) {
+          conversations = await fetchConversations();
+          filteredConvs = [...conversations];
+          renderConvList();
+          target = conversations.find(c => String(c.idConversacion) === urlConvId);
+        }
+        if (target) openConversation(target);
+      }
     }
   })();
 
-  // ── Search filter ──────────────────────────────────────────
-  chatSearch?.addEventListener('input', () => {
-    const q = chatSearch.value.toLowerCase();
-    filteredConvs = conversations.filter(c =>
-      c.name.toLowerCase().includes(q) ||
-      c.productName.toLowerCase().includes(q) ||
-      c.lastMsg.toLowerCase().includes(q)
-    );
+  chatSearch?.addEventListener('input', () => { filteredConvs = applyFilter(conversations); renderConvList(); });
+
+  document.getElementById('refresh-btn')?.addEventListener('click', async () => {
+    conversations = await fetchConversations();
+    filteredConvs = applyFilter(conversations);
     renderConvList();
   });
 
-  // ── Send message ───────────────────────────────────────────
-  chatForm?.addEventListener('submit', (e) => {
+  chatForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const text = msgInput.value.trim();
     if (!text || activeConvId === null) return;
-
-    const conv = conversations.find(c => c.id === activeConvId);
-    if (!conv) return;
-
-    const now = new Date();
-    const ts = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-    const newMsg: Message = { id: Date.now(), from: 'me', text, ts };
-
-    conv.messages.push(newMsg);
-    conv.lastMsg = text;
-    conv.lastTs = ts;
-
-    // TODO: POST /api/chats/{convId}/messages  { text }
-
-    msgInput.value = '';
-    msgInput.style.height = 'auto';
-    renderMessages(conv);
-    renderConvList();
+    const sendBtn = document.getElementById('send-btn') as HTMLButtonElement;
+    sendBtn.disabled = true;
+    msgInput.value = ''; msgInput.style.height = 'auto';
+    const sent = await sendMessage(activeConvId, text);
+    if (sent) {
+      appendMessage(sent);
+      if (sent.idMensaje > lastMsgId) lastMsgId = sent.idMensaje;
+      const conv = conversations.find(c => c.idConversacion === activeConvId);
+      if (conv) { conv.ultimoMensaje = text; conv.fechaUltimoMsg = sent.fechaEnvio; renderConvList(); }
+    }
+    sendBtn.disabled = false;
+    msgInput.focus();
   });
 
-  // Auto-resize textarea
   msgInput?.addEventListener('input', () => {
     msgInput.style.height = 'auto';
     msgInput.style.height = Math.min(msgInput.scrollHeight, 128) + 'px';
   });
-
-  // Enter to send (Shift+Enter for newline)
   msgInput?.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      chatForm.requestSubmit();
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); chatForm.requestSubmit(); }
+  });
+
+  document.getElementById('back-btn')?.addEventListener('click', () => {
+    if (pollTimer) clearTimeout(pollTimer);
+    activeConvId = null;
+    chatSidebar.classList.remove('sidebar-chat-open');
+    chatMain.classList.add('hidden');
+    chatMain.classList.remove('flex');
+  });
+
+  // ── Emoji picker ──
+  const EMOJIS = [
+    '😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','🥰','😘','😗',
+    '😙','😚','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😣','😥','😮','🤐','😯',
+    '😪','😫','🥱','😴','😌','😛','😜','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲',
+    '☹️','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱',
+    '🥵','🥶','😳','🤪','😵','🥴','😷','🤒','🤕','🤢','🤮','🤧','🥳','🤠','😈','👿',
+    '👍','👎','👌','🤌','✌️','🤞','🤟','🤘','👏','🙌','🤲','🤝','🙏','✊','👊','🤛',
+    '❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖',
+    '⭐','🌟','✨','🎉','🎊','🥂','🍾','🎈','🎁','🏆','🥇','🔥','💯','👀','💪','🦋',
+  ];
+
+  const emojiBtn    = document.getElementById('emoji-btn');
+  const emojiPicker = document.getElementById('emoji-picker');
+  const emojiGrid   = document.getElementById('emoji-grid');
+
+  if (emojiGrid) {
+    EMOJIS.forEach(em => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = em;
+      btn.className = 'text-xl leading-none p-1 rounded hover:bg-base-200 transition-colors cursor-pointer';
+      btn.addEventListener('click', () => {
+        const ta = msgInput;
+        if (!ta) return;
+        const start = ta.selectionStart ?? ta.value.length;
+        const end   = ta.selectionEnd   ?? ta.value.length;
+        ta.value = ta.value.slice(0, start) + em + ta.value.slice(end);
+        ta.selectionStart = ta.selectionEnd = start + em.length;
+        ta.dispatchEvent(new Event('input'));
+        ta.focus();
+        emojiPicker?.classList.add('hidden');
+      });
+      emojiGrid.appendChild(btn);
+    });
+  }
+
+  emojiBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    emojiPicker?.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!emojiPicker?.contains(e.target as Node) && e.target !== emojiBtn) {
+      emojiPicker?.classList.add('hidden');
     }
   });
 
-  // ── Mobile back button ─────────────────────────────────────
-  // Inject "back" button in header for mobile
-  const chatHeader = document.getElementById('chat-header')!;
-  const backBtn = document.createElement('button');
-  backBtn.className = 'btn btn-ghost btn-circle btn-xs mr-1 sm:hidden';
-  backBtn.setAttribute('aria-label', 'Volver');
-  backBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>`;
-  backBtn.addEventListener('click', () => {
-    chatSidebar.classList.remove('hidden');
-    chatMain.classList.add('hidden');
-    chatMain.classList.remove('flex');
-    activeConvId = null;
+  // ── Location picker ──
+  const locBtn         = document.getElementById('loc-btn');
+  const locModal       = document.getElementById('loc-modal');
+  const locCancel      = document.getElementById('loc-cancel');
+  const locSend        = document.getElementById('loc-send') as HTMLButtonElement | null;
+  const locStatus      = document.getElementById('loc-status');
+  const locPreview     = document.getElementById('loc-preview');
+  const locAddrEl      = document.getElementById('loc-addr');
+  const locRetry       = document.getElementById('loc-retry');
+  const locTabCurrent  = document.getElementById('loc-tab-current');
+  const locTabSearch   = document.getElementById('loc-tab-search');
+  const locPanelCurrent = document.getElementById('loc-panel-current');
+  const locPanelSearch = document.getElementById('loc-panel-search');
+  const locSearchInput = document.getElementById('loc-search-input') as HTMLInputElement | null;
+  const locSearchRes   = document.getElementById('loc-search-results');
+  const locSearchPrev  = document.getElementById('loc-search-preview');
+  const locSearchAddr  = document.getElementById('loc-search-addr');
+  let pendingLoc: {lat: number, lng: number, addr: string} | null = null;
+  let searchTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function setLocMap(container: HTMLElement | null, lat: number, lng: number) {
+    if (!container) return;
+    container.innerHTML =
+      '<iframe src="https://www.openstreetmap.org/export/embed.html?bbox='
+      + (lng-0.005) + ',' + (lat-0.003) + ',' + (lng+0.005) + ',' + (lat+0.003)
+      + '&layer=mapnik&marker=' + lat + ',' + lng
+      + '" class="w-full border-0" style="height:180px" loading="lazy"></iframe>';
+  }
+
+  function selectLoc(lat: number, lng: number, addr: string) {
+    pendingLoc = { lat, lng, addr };
+    if (locSend) locSend.disabled = false;
+  }
+
+  // Pestaña: ubicacion actual
+  function loadCurrentLocation() {
+    pendingLoc = null;
+    if (locSend)    locSend.disabled = true;
+    if (locStatus)  locStatus.textContent = 'Obteniendo tu ubicación...';
+    if (locPreview) locPreview.innerHTML  = '';
+    if (locAddrEl)  locAddrEl.textContent = '';
+    locRetry?.classList.add('hidden');
+    if (!navigator.geolocation) {
+      if (locStatus) locStatus.textContent = 'Geolocalización no disponible en este navegador.';
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        if (locStatus) locStatus.textContent = 'Buscando dirección...';
+        let addr = lat.toFixed(5) + ', ' + lng.toFixed(5);
+        try {
+          const r = await fetch(
+            'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng,
+            { headers: { 'Accept-Language': 'es', 'User-Agent': 'UFVShares/1.0' } }
+          );
+          if (r.ok) { const d = await r.json(); addr = d.display_name ?? addr; }
+        } catch {}
+        if (locStatus)  locStatus.textContent = '';
+        if (locAddrEl)  locAddrEl.textContent  = '📍 ' + addr;
+        setLocMap(locPreview, lat, lng);
+        selectLoc(lat, lng, addr);
+      },
+      () => {
+        if (locStatus) locStatus.textContent = 'No se pudo obtener la ubicación. Comprueba los permisos.';
+        locRetry?.classList.remove('hidden');
+      },
+      { timeout: 12000 }
+    );
+  }
+
+  // Tabs
+  function showTab(tab: 'current' | 'search') {
+    pendingLoc = null;
+    if (locSend) locSend.disabled = true;
+    if (tab === 'current') {
+      locTabCurrent?.classList.add('border-[#128C7E]', 'text-[#128C7E]');
+      locTabCurrent?.classList.remove('border-transparent', 'text-base-content/50');
+      locTabSearch?.classList.remove('border-[#128C7E]', 'text-[#128C7E]');
+      locTabSearch?.classList.add('border-transparent', 'text-base-content/50');
+      locPanelCurrent?.classList.remove('hidden');
+      locPanelCurrent?.classList.add('flex');
+      locPanelSearch?.classList.add('hidden');
+      locPanelSearch?.classList.remove('flex');
+      loadCurrentLocation();
+    } else {
+      locTabSearch?.classList.add('border-[#128C7E]', 'text-[#128C7E]');
+      locTabSearch?.classList.remove('border-transparent', 'text-base-content/50');
+      locTabCurrent?.classList.remove('border-[#128C7E]', 'text-[#128C7E]');
+      locTabCurrent?.classList.add('border-transparent', 'text-base-content/50');
+      locPanelSearch?.classList.remove('hidden');
+      locPanelSearch?.classList.add('flex');
+      locPanelCurrent?.classList.add('hidden');
+      locPanelCurrent?.classList.remove('flex');
+      if (locSearchRes) locSearchRes.innerHTML = '';
+      if (locSearchPrev) locSearchPrev.innerHTML = '';
+      if (locSearchAddr) locSearchAddr.textContent = '';
+      setTimeout(() => locSearchInput?.focus(), 60);
+    }
+  }
+
+  // Busqueda por texto
+  async function doSearch(q: string) {
+    if (!q.trim()) { if (locSearchRes) locSearchRes.innerHTML = ''; return; }
+    if (locSearchRes) locSearchRes.innerHTML = '<p class="text-xs text-base-content/50 text-center py-2">Buscando...</p>';
+    try {
+      const r = await fetch(
+        'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(q) + '&limit=6&addressdetails=1',
+        { headers: { 'Accept-Language': 'es', 'User-Agent': 'UFVShares/1.0' } }
+      );
+      const results: any[] = r.ok ? await r.json() : [];
+      if (!locSearchRes) return;
+      if (results.length === 0) {
+        locSearchRes.innerHTML = '<p class="text-xs text-base-content/50 text-center py-2">Sin resultados</p>';
+        return;
+      }
+      locSearchRes.innerHTML = '';
+      results.forEach((item: any) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'flex items-start gap-2 text-left px-3 py-2 rounded-xl hover:bg-base-200 transition-colors w-full';
+        const name = item.display_name as string;
+        btn.innerHTML = '<span class="text-base shrink-0 mt-0.5">📍</span>'
+          + '<span class="text-sm text-base-content leading-snug line-clamp-2">' + name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</span>';
+        btn.addEventListener('click', () => {
+          const lat = parseFloat(item.lat);
+          const lng = parseFloat(item.lon);
+          if (locSearchAddr) locSearchAddr.textContent = '📍 ' + name;
+          setLocMap(locSearchPrev, lat, lng);
+          selectLoc(lat, lng, name);
+          // Highlight seleccionado
+          locSearchRes?.querySelectorAll('button').forEach(b => b.classList.remove('bg-base-200'));
+          btn.classList.add('bg-base-200');
+        });
+        locSearchRes.appendChild(btn);
+      });
+    } catch {
+      if (locSearchRes) locSearchRes.innerHTML = '<p class="text-xs text-base-content/50 text-center py-2">Error al buscar</p>';
+    }
+  }
+
+  locSearchInput?.addEventListener('input', () => {
+    if (searchTimer) clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => doSearch(locSearchInput.value), 400);
   });
-  chatHeader.prepend(backBtn);
+  locSearchInput?.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Enter') { e.preventDefault(); if (searchTimer) clearTimeout(searchTimer); doSearch(locSearchInput.value); }
+  });
+
+  locTabCurrent?.addEventListener('click', () => showTab('current'));
+  locTabSearch?.addEventListener('click',  () => showTab('search'));
+  locRetry?.addEventListener('click', loadCurrentLocation);
+
+  function openLocModal() {
+    locModal?.classList.remove('hidden');
+    locModal?.classList.add('flex');
+    showTab('current');
+  }
+
+  locBtn?.addEventListener('click', openLocModal);
+  locCancel?.addEventListener('click', () => {
+    locModal?.classList.add('hidden');
+    locModal?.classList.remove('flex');
+  });
+  locSend?.addEventListener('click', async () => {
+    if (!pendingLoc || activeConvId === null) return;
+    locModal?.classList.add('hidden');
+    locModal?.classList.remove('flex');
+    const content = LOC_PREFIX + JSON.stringify(pendingLoc);
+    const sent = await sendMessage(activeConvId, content);
+    if (sent) {
+      appendMessage(sent);
+      if (sent.idMensaje > lastMsgId) lastMsgId = sent.idMensaje;
+      const conv = conversations.find(c => c.idConversacion === activeConvId);
+      if (conv) { conv.ultimoMensaje = '📍 Ubicación'; conv.fechaUltimoMsg = sent.fechaEnvio; renderConvList(); }
+    }
+  });
+
+  // ── Profile modal ──
+  const profileModal      = document.getElementById('profile-modal');
+  const pmAvatar          = document.getElementById('pm-avatar');
+  const pmName            = document.getElementById('pm-name');
+  const pmApellidos       = document.getElementById('pm-apellidos');
+  const pmAnuncios        = document.getElementById('pm-anuncios');
+  const pmPhoneRow        = document.getElementById('pm-phone-row');
+  const pmPhone           = document.getElementById('pm-phone');
+  const pmPhoneLink       = document.getElementById('pm-phone-link') as HTMLAnchorElement | null;
+  const pmProductRow      = document.getElementById('pm-product-row');
+  const pmProductCount    = document.getElementById('pm-product-count');
+  const profileModalClose = document.getElementById('profile-modal-close');
+
+  async function openProfileModal(userId: number, fotoUrl: string | null, iniciales: string) {
+    // Mostrar con datos básicos inmediatamente
+    if (pmAvatar) {
+      pmAvatar.innerHTML = fotoUrl
+        ? '<img src="' + BACKEND_BASE + fotoUrl + '" alt="" class="w-full h-full object-cover"/>'
+        : iniciales;
+    }
+    if (pmName)        pmName.textContent      = '';
+    if (pmApellidos)   pmApellidos.textContent  = '';
+    if (pmAnuncios)    pmAnuncios.textContent   = '...';
+    pmPhoneRow?.classList.add('hidden');
+    pmProductRow?.classList.add('hidden');
+    profileModal?.classList.remove('hidden');
+    profileModal?.classList.add('flex');
+
+    try {
+      const res = await fetch(API_BASE + '/usuarios/' + userId + '/public');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (pmName)        pmName.textContent      = data.nombre ?? '';
+      if (pmApellidos)   pmApellidos.textContent  = data.apellidos ?? '';
+      if (pmAnuncios)    pmAnuncios.textContent   = String(data.numAnuncios ?? 0);
+      if (data.telefono) {
+        if (pmPhone)     pmPhone.textContent = data.telefono;
+        if (pmPhoneLink) pmPhoneLink.href    = 'tel:' + data.telefono;
+        pmPhoneRow?.classList.remove('hidden');
+        pmPhoneRow?.classList.add('flex');
+      }
+      if (data.numAnuncios > 0) {
+        if (pmProductCount) pmProductCount.textContent = data.numAnuncios + ' anuncio' + (data.numAnuncios !== 1 ? 's' : '');
+        pmProductRow?.classList.remove('hidden');
+        pmProductRow?.classList.add('flex');
+      }
+    } catch {}
+  }
+
+  profileModalClose?.addEventListener('click', () => {
+    profileModal?.classList.add('hidden');
+    profileModal?.classList.remove('flex');
+  });
+  profileModal?.addEventListener('click', (e) => {
+    if (e.target === profileModal) {
+      profileModal.classList.add('hidden');
+      profileModal.classList.remove('flex');
+    }
+  });
+
+  // Single one-time listeners — read current user from dataset set by openConversation
+  function openProfileFromHeader() {
+    const userId = parseInt(chatHeaderAvatar.dataset.userId ?? '0', 10);
+    const fotoUrl = chatHeaderAvatar.dataset.fotoUrl || null;
+    const iniciales = chatHeaderAvatar.dataset.iniciales ?? '';
+    if (userId) openProfileModal(userId, fotoUrl, iniciales);
+  }
+  [chatHeaderAvatar, chatHeaderName, chatHeaderProduct].forEach(el => {
+    el?.addEventListener('click', openProfileFromHeader);
+  });
 </script>
