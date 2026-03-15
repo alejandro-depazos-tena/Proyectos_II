@@ -45,8 +45,8 @@ import "../styles/global.css";
         </a>
       </div>
       <div class="navbar-end gap-2">
-        <a href="/auth?mode=login&next=%2Fapp" class="btn btn-ghost btn-sm hidden sm:flex">Iniciar sesión</a>
-        <a href="/auth?mode=register&next=%2Fapp" class="btn btn-primary btn-sm rounded-full px-5 shadow">Registrarse</a>
+        <a href="/auth?mode=login&next=%2Fapp&src=nav" class="btn btn-ghost btn-sm hidden sm:flex">Iniciar sesión</a>
+        <a href="/auth?mode=register&next=%2Fapp&src=nav" class="btn btn-primary btn-sm rounded-full px-5 shadow">Registrarse</a>
       </div>
     </header>
 
@@ -79,12 +79,12 @@ import "../styles/global.css";
           </p>
 
           <div class="flex flex-col sm:flex-row gap-4 anim-fade-d3">
-            <a href="/auth?mode=register&next=%2Fapp"
+            <a href="/auth?mode=register&next=%2Fapp&src=hero-primary"
               class="btn btn-warning btn-lg rounded-full px-10 font-bold shadow-2xl hover:scale-105 transition-transform text-lg gap-2">
               Empezar gratis
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
             </a>
-            <a href="/auth?mode=login&next=%2Fapp"
+            <a href="/auth?mode=login&next=%2Fapp&src=hero-secondary"
               class="btn btn-ghost btn-lg rounded-full px-10 text-white border-white/25 hover:bg-white/10 hover:border-white text-lg">
               Ya tengo cuenta
             </a>
@@ -128,7 +128,7 @@ import "../styles/global.css";
                 <div class="text-yellow-300 font-black text-lg">850€</div>
               </div>
               <div class="flex items-center gap-1 pt-1">
-                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center text-white text-[9px] font-bold">A</div>
+                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center text-white text-xs font-bold">A</div>
                 <span class="text-white/50 text-xs">Ana García · UFV Madrid</span>
               </div>
               <button class="w-full mt-1 py-2 rounded-xl bg-yellow-400 text-yellow-900 text-xs font-bold hover:bg-yellow-300 transition-colors">Contactar</button>
@@ -155,7 +155,7 @@ import "../styles/global.css";
               </div>
               <div>
                 <div class="text-white text-xs font-semibold">Calculadora Casio</div>
-                <div class="text-white/50 text-[10px]">Alquiler · 3€/sem</div>
+                <div class="text-white/50 text-xs">Alquiler · 3€/sem</div>
               </div>
             </div>
           </div>
@@ -163,7 +163,7 @@ import "../styles/global.css";
           <!-- notification dot -->
           <div class="absolute top-12 right-6 flex items-center gap-2 bg-success/20 backdrop-blur-sm rounded-full px-3 py-1.5 border border-success/30">
             <div class="w-2 h-2 rounded-full bg-success animate-pulse"></div>
-            <span class="text-success text-[10px] font-bold uppercase tracking-wide">3 nuevos hoy</span>
+            <span class="text-success text-xs font-bold uppercase tracking-wide">3 nuevos hoy</span>
           </div>
         </div>
 
@@ -196,7 +196,7 @@ import "../styles/global.css";
             </div>
             <h3 class="text-2xl font-black mb-2 text-base-content">Compra</h3>
             <p class="text-base-content/60 leading-relaxed mb-6 max-w-sm">Apuntes, calculadoras, libros de texto… Encuentra lo que necesitas para el semestre publicado por estudiantes de tu misma facultad.</p>
-            <a href="/auth?mode=register&next=%2Fapp" class="btn btn-primary btn-sm rounded-full px-6 gap-2">
+            <a href="/auth?mode=register&next=%2Fapp&src=features-compra" class="btn btn-primary btn-sm rounded-full px-6 gap-2">
               Explorar
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
             </a>
@@ -322,7 +322,7 @@ import "../styles/global.css";
             <h2 class="text-4xl font-black">Explora por categoría</h2>
             <p class="text-base-content/50 mt-2">Todo lo que necesitas para el semestre.</p>
           </div>
-          <a href="/auth?mode=register&next=%2Fapp" class="btn btn-outline btn-primary rounded-full gap-2 self-start md:self-auto">
+          <a href="/auth?mode=register&next=%2Fapp%3Fview%3Dcategorias" class="btn btn-outline btn-primary rounded-full gap-2 self-start md:self-auto">
             Ver todo
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
           </a>
@@ -330,7 +330,7 @@ import "../styles/global.css";
 
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           <!-- Libros -->
-          <a href="/auth?mode=register&next=%2Fapp"
+          <a href="/auth?mode=register&next=%2Fapp%3Fcategoria%3DLIBROS"
             class="group flex flex-col items-center gap-3 p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 card-hover text-center">
             <div class="w-12 h-12 rounded-xl bg-blue-100 group-hover:bg-blue-200 transition-colors flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v13M12 7c-1.8-1.2-4.2-1.7-7-1.7v11c2.8 0 5.2.5 7 1.7M12 7c1.8-1.2 4.2-1.7 7-1.7v11c-2.8 0-5.2.5-7 1.7"/></svg>
@@ -339,7 +339,7 @@ import "../styles/global.css";
           </a>
 
           <!-- Electrónica -->
-          <a href="/auth?mode=register&next=%2Fapp"
+          <a href="/auth?mode=register&next=%2Fapp%3Fcategoria%3DELECTRONICA"
             class="group flex flex-col items-center gap-3 p-5 rounded-2xl bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-100 card-hover text-center">
             <div class="w-12 h-12 rounded-xl bg-violet-100 group-hover:bg-violet-200 transition-colors flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17a2 2 0 01-2-2V6a1 1 0 011-1h14a1 1 0 011 1v9a2 2 0 01-2 2H5z"/></svg>
@@ -348,7 +348,7 @@ import "../styles/global.css";
           </a>
 
           <!-- Deporte -->
-          <a href="/auth?mode=register&next=%2Fapp"
+          <a href="/auth?mode=register&next=%2Fapp%3Fcategoria%3DDEPORTE"
             class="group flex flex-col items-center gap-3 p-5 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 card-hover text-center">
             <div class="w-12 h-12 rounded-xl bg-green-100 group-hover:bg-green-200 transition-colors flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M4.58 15a8.003 8.003 0 0011.838 3.442M8.5 8.5L5 5m7.5 7.5l3.5 3.5M15 5l-3.5 3.5M9 19l-1-3M15 5l1 3"/></svg>
@@ -357,7 +357,7 @@ import "../styles/global.css";
           </a>
 
           <!-- Material -->
-          <a href="/auth?mode=register&next=%2Fapp"
+          <a href="/auth?mode=register&next=%2Fapp%3Fcategoria%3DMATERIAL"
             class="group flex flex-col items-center gap-3 p-5 rounded-2xl bg-gradient-to-br from-yellow-50 to-amber-50 border border-yellow-100 card-hover text-center">
             <div class="w-12 h-12 rounded-xl bg-yellow-100 group-hover:bg-yellow-200 transition-colors flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
@@ -366,7 +366,7 @@ import "../styles/global.css";
           </a>
 
           <!-- Hogar -->
-          <a href="/auth?mode=register&next=%2Fapp"
+          <a href="/auth?mode=register&next=%2Fapp%3Fcategoria%3DHOGAR"
             class="group flex flex-col items-center gap-3 p-5 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100 card-hover text-center">
             <div class="w-12 h-12 rounded-xl bg-rose-100 group-hover:bg-rose-200 transition-colors flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 11l9-7 9 7M5 10v10h14V10"/></svg>
@@ -375,7 +375,7 @@ import "../styles/global.css";
           </a>
 
           <!-- Idiomas -->
-          <a href="/auth?mode=register&next=%2Fapp"
+          <a href="/auth?mode=register&next=%2Fapp%3Fcategoria%3DIDIOMAS"
             class="group flex flex-col items-center gap-3 p-5 rounded-2xl bg-gradient-to-br from-cyan-50 to-teal-50 border border-cyan-100 card-hover text-center">
             <div class="w-12 h-12 rounded-xl bg-cyan-100 group-hover:bg-cyan-200 transition-colors flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
@@ -434,11 +434,11 @@ import "../styles/global.css";
           Crea tu cuenta en segundos y empieza a comprar, vender y alquilar con tus compañeros de la UFV.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <a href="/auth?mode=register&next=%2Fapp"
+          <a href="/auth?mode=register&next=%2Fapp&src=final-cta"
             class="btn btn-primary btn-lg rounded-full px-12 font-bold shadow-2xl hover:scale-105 transition-transform text-lg">
             Crear cuenta gratis
           </a>
-          <a href="/auth?mode=login&next=%2Fapp"
+          <a href="/auth?mode=login&next=%2Fapp&src=final-cta"
             class="btn btn-ghost btn-lg rounded-full px-12 text-base-content/70 border-base-300 hover:border-base-content/30 text-lg">
             Iniciar sesión
           </a>
@@ -459,8 +459,8 @@ import "../styles/global.css";
         </div>
         <p>© {new Date().getFullYear()} UFV Shares · Marketplace universitario</p>
         <div class="flex gap-4">
-          <a href="/auth?mode=login&next=%2Fapp" class="link link-hover">Acceder</a>
-          <a href="/auth?mode=register&next=%2Fapp" class="link link-hover">Registrarse</a>
+          <a href="/auth?mode=login&next=%2Fapp&src=footer" class="link link-hover">Acceder</a>
+          <a href="/auth?mode=register&next=%2Fapp&src=footer" class="link link-hover">Registrarse</a>
           <a href="/contact" class="link link-hover">Contacto</a>
         </div>
       </div>
