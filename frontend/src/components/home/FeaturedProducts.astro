@@ -32,7 +32,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         <!-- Mobile header -->
         <div class="flex items-center justify-between md:hidden">
           <span class="font-black text-lg">Filtros</span>
-          <button id="close-filter-btn" class="btn btn-ghost btn-circle btn-sm">
+          <button id="close-filter-btn" type="button" aria-label="Cerrar filtros" class="btn btn-ghost btn-circle btn-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
             </svg>
@@ -45,6 +45,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         <!-- BÚSQUEDA -->
         <div>
           <p class="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2">Búsqueda</p>
+          <label for="sidebar-search" class="sr-only">Buscar anuncios</label>
           <div class="relative">
             <input id="sidebar-search" type="text" placeholder="Busca productos…"
               class="input input-sm input-bordered w-full rounded-xl text-sm pr-8" autocomplete="off"/>
@@ -205,9 +206,11 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         <div>
           <p class="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-3">Precio (€)</p>
           <div class="flex gap-2 items-center">
+            <label for="price-min" class="sr-only">Precio mínimo</label>
             <input id="price-min" type="number" min="0" step="0.01" placeholder="Mín"
               class="input input-sm input-bordered w-full rounded-xl text-sm"/>
             <span class="text-base-content/30 font-bold shrink-0">–</span>
+            <label for="price-max" class="sr-only">Precio máximo</label>
             <input id="price-max" type="number" min="0" step="0.01" placeholder="Máx"
               class="input input-sm input-bordered w-full rounded-xl text-sm"/>
           </div>
@@ -219,6 +222,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         <!-- ORDENAR POR -->
         <div>
           <p class="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2">Ordenar por</p>
+          <label for="sort-select" class="sr-only">Ordenar anuncios por</label>
           <select id="sort-select" class="select select-sm select-bordered w-full rounded-xl text-sm">
             <option value="recent">Más reciente</option>
             <option value="price-asc">Precio: menor → mayor</option>

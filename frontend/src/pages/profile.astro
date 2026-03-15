@@ -22,6 +22,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
                    flex items-center justify-center cursor-pointer shadow-md
                    hover:scale-110 transition-transform"
             title="Cambiar foto">
+            <span class="sr-only">Cambiar foto de perfil</span>
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none"
               viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round"
@@ -116,7 +117,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
           </p>
 
           <div>
-            <label class="label pb-1"><span class="label-text font-semibold">Campo a cambiar</span></label>
+            <label for="edit-campo" class="label pb-1"><span class="label-text font-semibold">Campo a cambiar</span></label>
             <select id="edit-campo" class="select select-bordered w-full">
               <option value="nombre">Nombre</option>
               <option value="apellidos">Apellidos</option>
@@ -125,7 +126,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
           </div>
 
           <div>
-            <label class="label pb-1">
+            <label for="edit-valor" class="label pb-1">
               <span class="label-text font-semibold">Nuevo valor</span>
             </label>
             <input id="edit-valor" type="text" class="input input-bordered w-full"
@@ -195,18 +196,18 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
         <h3 class="font-bold text-lg mb-4">Nuevo anuncio</h3>
         <form id="publish-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="sm:col-span-2">
-            <label class="label"><span class="label-text font-semibold">T&iacute;tulo</span></label>
-            <input name="titulo" type="text" required maxlength="150"
+            <label for="pub-titulo" class="label"><span class="label-text font-semibold">T&iacute;tulo</span></label>
+            <input id="pub-titulo" name="titulo" type="text" required maxlength="150"
               class="input input-bordered w-full" placeholder="Ej: Libro de &Aacute;lgebra 3ª ed." />
           </div>
           <div class="sm:col-span-2">
-            <label class="label"><span class="label-text font-semibold">Descripci&oacute;n</span></label>
-            <textarea name="descripcion" required rows="3"
+            <label for="pub-descripcion" class="label"><span class="label-text font-semibold">Descripci&oacute;n</span></label>
+            <textarea id="pub-descripcion" name="descripcion" required rows="3"
               class="textarea textarea-bordered w-full" placeholder="Estado, detalles, forma de entrega..."></textarea>
           </div>
           <div>
-            <label class="label"><span class="label-text font-semibold">Categor&iacute;a</span></label>
-            <select name="categoria" required class="select select-bordered w-full">
+            <label for="pub-categoria" class="label"><span class="label-text font-semibold">Categor&iacute;a</span></label>
+            <select id="pub-categoria" name="categoria" required class="select select-bordered w-full">
               <option value="">Elige una...</option>
               <option value="LIBROS">Libros</option>
               <option value="ELECTRONICA">Electr&oacute;nica</option>
@@ -216,8 +217,8 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
             </select>
           </div>
           <div>
-            <label class="label"><span class="label-text font-semibold">Tipo</span></label>
-            <select name="tipoTransaccion" required class="select select-bordered w-full">
+            <label for="pub-tipo-transaccion" class="label"><span class="label-text font-semibold">Tipo</span></label>
+            <select id="pub-tipo-transaccion" name="tipoTransaccion" required class="select select-bordered w-full">
               <option value="">Elige uno...</option>
               <option value="VENTA">Venta</option>
               <option value="ALQUILER">Alquiler</option>
@@ -233,6 +234,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
                 <span class="text-xs text-blue-500 ml-auto hidden sm:inline">Rellena el t&iacute;tulo y descripci&oacute;n autom&aacute;ticamente</span>
               </div>
               <div class="flex gap-2">
+                <label for="books-query" class="sr-only">Buscar libro por ISBN o t&iacute;tulo</label>
                 <input id="books-query" type="text"
                   placeholder="ISBN (ej. 9788420412337) o t&iacute;tulo del libro…"
                   class="input input-sm input-bordered flex-1 bg-white text-sm" />
@@ -256,7 +258,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
 
           <div>
             <div class="flex items-center justify-between mb-1">
-              <label class="label py-0"><span class="label-text font-semibold">Precio (&euro;)</span></label>
+              <label for="precio-input" class="label py-0"><span class="label-text font-semibold">Precio (&euro;)</span></label>
               <label class="flex items-center gap-2 cursor-pointer select-none">
                 <input type="checkbox" id="precio-gratis-cb" class="checkbox checkbox-primary checkbox-sm" />
                 <span class="text-sm font-semibold text-primary">Gratis</span>
@@ -266,8 +268,8 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
               class="input input-bordered w-full" placeholder="0.00" />
           </div>
           <div>
-            <label class="label"><span class="label-text font-semibold">Condici&oacute;n del art&iacute;culo</span></label>
-            <select name="condicion" required class="select select-bordered w-full">
+            <label for="pub-condicion" class="label"><span class="label-text font-semibold">Condici&oacute;n del art&iacute;culo</span></label>
+            <select id="pub-condicion" name="condicion" required class="select select-bordered w-full">
               <option value="">Elige una...</option>
               <option value="NUEVO">Nuevo</option>
               <option value="COMO_NUEVO">Como nuevo</option>
@@ -278,19 +280,19 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
           </div>
           <!-- Fotos -->
           <div class="sm:col-span-2">
-            <label class="label">
+            <label for="foto-input" class="label">
               <span class="label-text font-semibold">Fotos del producto <span class="text-error">*</span></span>
               <span class="label-text-alt text-base-content/50">M&iacute;nimo 1 &middot; JPG / PNG / WebP &middot; m&aacute;x. 10 MB por foto</span>
             </label>
             <!-- Drop zone (gallery / files) -->
-            <label id="foto-label"
+            <div id="foto-label" role="button" tabindex="0" aria-controls="foto-input" aria-label="Seleccionar fotos del producto"
               class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-base-300 rounded-xl cursor-pointer hover:border-primary hover:bg-base-200/50 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-base-content/40 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V19a2 2 0 002 2h14a2 2 0 002-2v-2.5M16 10l-4-4m0 0L8 10m4-4v12" />
               </svg>
               <span id="foto-label-text" class="text-sm text-base-content/50">Haz clic o arrastra im&aacute;genes aqu&iacute;</span>
-              <input id="foto-input" type="file" multiple accept="image/*" class="hidden" />
-            </label>
+            </div>
+            <input id="foto-input" type="file" multiple accept="image/*" class="hidden" />
             <!-- Camera button -->
             <button type="button" id="btn-camera"
               class="btn btn-outline btn-sm rounded-full mt-3 gap-2">
@@ -333,7 +335,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
           <span class="font-bold text-lg">Tomar foto</span>
           <button id="btn-camera-close" type="button" class="btn btn-ghost btn-sm btn-circle">&times;</button>
         </div>
-        <video id="camera-stream" autoplay playsinline class="w-full rounded-xl bg-black max-h-72 object-cover"></video>
+        <video id="camera-stream" autoplay playsinline muted aria-label="Vista previa de la c&aacute;mara para capturar foto" class="w-full rounded-xl bg-black max-h-72 object-cover"></video>
         <p id="camera-error" class="text-error text-sm hidden">No se pudo acceder a la c&aacute;mara. Comprueba los permisos del navegador.</p>
         <div class="flex gap-3">
           <button id="btn-camera-switch" type="button" class="btn btn-outline btn-sm rounded-full gap-2">
@@ -751,6 +753,15 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
   });
 
   // Gallery / drop-zone input
+  $("foto-label")?.addEventListener("click", () => {
+    $("foto-input")?.click();
+  });
+  $("foto-label")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      $("foto-input")?.click();
+    }
+  });
   $("foto-input")?.addEventListener("change", function () {
     addFiles(this.files);
     this.value = "";
