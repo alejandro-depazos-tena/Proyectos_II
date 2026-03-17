@@ -136,6 +136,12 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                             </svg>
                             <span id="contact-btn-label">Contactar al vendedor</span>
                         </a>
+                        <button id="reserve-btn" class="btn btn-outline btn-accent flex-1 gap-2 text-base font-bold">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Reservar artículo
+                        </button>
                         <button id="add-fav-btn" class="btn btn-outline flex-1 gap-2 text-base font-bold" data-favorite="">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -181,6 +187,35 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         <img id="lightbox-img" src="" alt="" class="max-h-[90vh] max-w-[90vw] object-contain rounded-xl shadow-2xl" />
         <p id="lightbox-counter" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm font-medium"></p>
     </div>
+
+    <!-- Reserva: confirmación -->
+    <div id="reserve-confirm-modal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 bg-black/55">
+        <div class="w-full max-w-md rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-100">
+                <p class="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-2">Confirmar reserva</p>
+                <h3 class="text-lg font-black text-slate-900">¿Quieres reservar este artículo?</h3>
+                <p class="text-sm text-slate-600 mt-2">Al confirmar, el artículo quedará marcado como reservado y no estará disponible para otros usuarios.</p>
+            </div>
+            <div class="px-6 py-4 flex justify-end gap-3 bg-slate-50/70">
+                <button id="reserve-confirm-cancel" type="button" class="btn btn-ghost btn-sm rounded-full">Cancelar</button>
+                <button id="reserve-confirm-accept" type="button" class="btn btn-primary btn-sm rounded-full">Sí, reservar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reserva: resultado -->
+    <div id="reserve-feedback-modal" class="fixed inset-0 z-[61] hidden items-center justify-center p-4 bg-black/55">
+        <div class="w-full max-w-md rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-100">
+                <p id="reserve-feedback-tag" class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-2">Información</p>
+                <h3 id="reserve-feedback-title" class="text-lg font-black text-slate-900">Estado de la reserva</h3>
+                <p id="reserve-feedback-message" class="text-sm text-slate-600 mt-2"></p>
+            </div>
+            <div class="px-6 py-4 flex justify-end bg-slate-50/70">
+                <button id="reserve-feedback-close" type="button" class="btn btn-primary btn-sm rounded-full">Aceptar</button>
+            </div>
+        </div>
+    </div>
 </Layout>
 
 <script define:vars={{ API_BASE }}>
@@ -199,6 +234,81 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
 
     function chip(label, value, colorClass) {
         return `<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${colorClass}">${label}: <span class="font-bold">${value}</span></span>`;
+    }
+
+    function openReserveConfirmModal() {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('reserve-confirm-modal');
+            const btnCancel = document.getElementById('reserve-confirm-cancel');
+            const btnAccept = document.getElementById('reserve-confirm-accept');
+            if (!modal || !btnCancel || !btnAccept) {
+                resolve(false);
+                return;
+            }
+
+            const close = (accepted) => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                btnCancel.onclick = null;
+                btnAccept.onclick = null;
+                modal.onclick = null;
+                resolve(accepted);
+            };
+
+            btnCancel.onclick = () => close(false);
+            btnAccept.onclick = () => close(true);
+            modal.onclick = (e) => {
+                if (e.target === modal) close(false);
+            };
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        });
+    }
+
+    function showReserveFeedbackModal(message, kind = 'info') {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('reserve-feedback-modal');
+            const tag = document.getElementById('reserve-feedback-tag');
+            const title = document.getElementById('reserve-feedback-title');
+            const text = document.getElementById('reserve-feedback-message');
+            const btnClose = document.getElementById('reserve-feedback-close');
+            if (!modal || !tag || !title || !text || !btnClose) {
+                resolve();
+                return;
+            }
+
+            if (kind === 'success') {
+                tag.textContent = 'Reserva realizada';
+                tag.className = 'text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-2';
+                title.textContent = 'Reserva confirmada';
+            } else if (kind === 'error') {
+                tag.textContent = 'No se pudo reservar';
+                tag.className = 'text-[10px] font-black uppercase tracking-[0.3em] text-red-500 mb-2';
+                title.textContent = 'Ha ocurrido un problema';
+            } else {
+                tag.textContent = 'Información';
+                tag.className = 'text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-2';
+                title.textContent = 'Estado de la reserva';
+            }
+
+            text.textContent = message;
+
+            const close = () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                btnClose.onclick = null;
+                modal.onclick = null;
+                resolve();
+            };
+
+            btnClose.onclick = close;
+            modal.onclick = (e) => {
+                if (e.target === modal) close();
+            };
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        });
     }
 
     // ── Gallery & lightbox ───────────────────────────────────────────────────
@@ -392,13 +502,17 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
 
     function disableCtaButtons() {
         const contactBtn = document.getElementById('contact-btn');
-        const favBtn = document.getElementById('add-fav-btn');
+        const reserveBtn = document.getElementById('reserve-btn');
         if (contactBtn) {
             contactBtn.removeAttribute('href');
             contactBtn.setAttribute('disabled', 'true');
             contactBtn.className = contactBtn.className.replace('btn-primary', 'btn-disabled');
             const label = document.getElementById('contact-btn-label');
             if (label) label.textContent = 'No disponible';
+        }
+        if (reserveBtn) {
+            reserveBtn.setAttribute('disabled', 'true');
+            reserveBtn.classList.add('btn-disabled');
         }
     }
 
@@ -494,7 +608,62 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         const contactBtn = document.getElementById('contact-btn');
         const contactBtnLabel = document.getElementById('contact-btn-label');
         const sellerContactQuick = document.getElementById('seller-contact-quick');
+        const reserveBtn = document.getElementById('reserve-btn');
         if (contactBtnLabel) contactBtnLabel.textContent = `Contactar al ${p.tipoTransaccion === 'ALQUILER' ? 'arrendador' : 'vendedor'}`;
+
+        if (reserveBtn) {
+            reserveBtn.classList.toggle('hidden', noDisponible);
+            reserveBtn.onclick = async () => {
+                if (!token) {
+                    window.location.href = '/auth?mode=login&next=' + encodeURIComponent(window.location.pathname + window.location.search);
+                    return;
+                }
+                const confirmed = await openReserveConfirmModal();
+                if (!confirmed) return;
+
+                reserveBtn.setAttribute('disabled', 'true');
+                const prevText = reserveBtn.textContent;
+                reserveBtn.textContent = 'Reservando...';
+                try {
+                    const res = await fetch(API_BASE + '/solicitudes/reservar/' + id, {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    });
+                    if (res.ok) {
+                        await showReserveFeedbackModal('El artículo ha quedado marcado como reservado y ya no aparece disponible para otros usuarios.', 'success');
+                        window.location.reload();
+                        return;
+                    }
+
+                    const raw = await res.text().catch(() => '');
+                    let msg = 'No se pudo completar la reserva.';
+                    if (res.status === 401) {
+                        msg = 'Tu sesión ha caducado. Vuelve a iniciar sesión.';
+                    } else if (res.status === 409) {
+                        msg = 'Este artículo ya no está disponible para reservar.';
+                    } else if (res.status === 404) {
+                        msg = 'No se encontró el endpoint de reservas en el backend. Reinicia el backend y vuelve a intentarlo.';
+                    }
+
+                    if (raw) {
+                        try {
+                            const parsed = JSON.parse(raw);
+                            msg = parsed?.message ?? parsed?.error ?? msg;
+                        } catch {
+                            if (raw.includes('No static resource')) {
+                                msg = 'El backend no tiene cargado el endpoint de reservas. Reinicia la API y vuelve a probar.';
+                            }
+                        }
+                    }
+                    await showReserveFeedbackModal(msg, 'error');
+                } catch {
+                    await showReserveFeedbackModal('No se pudo conectar con el servidor para completar la reserva.', 'error');
+                } finally {
+                    reserveBtn.removeAttribute('disabled');
+                    reserveBtn.textContent = prevText;
+                }
+            };
+        }
 
         // Fetch owner info (fire-and-forget – button wiring happens below regardless)
         if (p.idPropietario) {

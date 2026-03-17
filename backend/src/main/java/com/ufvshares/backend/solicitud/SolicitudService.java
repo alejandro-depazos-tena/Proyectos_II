@@ -1,10 +1,13 @@
 package com.ufvshares.backend.solicitud;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.ufvshares.backend.common.NotFoundException;
 import com.ufvshares.backend.producto.EstadoProducto;
@@ -52,6 +55,41 @@ public class SolicitudService {
     existing.setFechaFin(data.getFechaFin());
     existing.setEstadoSolicitud(data.getEstadoSolicitud());
     return repository.save(existing);
+  }
+
+  @Transactional
+  public Solicitud reservar(Long idProducto, Long idSolicitante) {
+    Producto producto = productoRepository.findById(idProducto)
+        .orElseThrow(() -> new NotFoundException("PRODUCTO_NOT_FOUND"));
+
+    if (producto.getIdPropietario().equals(idSolicitante)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "NO_PUEDES_RESERVAR_TU_PROPIO_PRODUCTO");
+    }
+
+    if (producto.getEstadoProducto() != EstadoProducto.DISPONIBLE) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "PRODUCTO_NO_DISPONIBLE");
+    }
+
+    List<Solicitud> existentes = repository.findByIdProductoAndIdSolicitanteAndEstadoSolicitudIn(
+        idProducto,
+        idSolicitante,
+        Arrays.asList(EstadoSolicitud.PENDIENTE, EstadoSolicitud.ACEPTADA));
+    if (!existentes.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "YA_TIENES_UNA_RESERVA_PARA_ESTE_PRODUCTO");
+    }
+
+    Solicitud solicitud = new Solicitud();
+    solicitud.setIdProducto(idProducto);
+    solicitud.setIdSolicitante(idSolicitante);
+    solicitud.setTipoTransaccion(producto.getTipoTransaccion());
+    solicitud.setEstadoSolicitud(EstadoSolicitud.ACEPTADA);
+    solicitud.setFechaSolicitud(LocalDateTime.now());
+    solicitud = repository.save(solicitud);
+
+    producto.setEstadoProducto(EstadoProducto.RESERVADO);
+    productoRepository.save(producto);
+
+    return solicitud;
   }
 
   @Transactional
