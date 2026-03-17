@@ -40,6 +40,9 @@ import com.ufvshares.backend.fotoproducto.FotoProducto;
 import com.ufvshares.backend.fotoproducto.FotoProductoRepository;
 import com.ufvshares.backend.producto.Producto;
 import com.ufvshares.backend.producto.ProductoRepository;
+import com.ufvshares.backend.solicitud.EstadoSolicitud;
+import com.ufvshares.backend.solicitud.Solicitud;
+import com.ufvshares.backend.solicitud.SolicitudRepository;
 import com.ufvshares.backend.usuario.Usuario;
 import com.ufvshares.backend.usuario.UsuarioRepository;
 
@@ -58,6 +61,7 @@ public class MeController {
   private final UsuarioRepository usuarios;
   private final ProductoRepository productos;
   private final FotoProductoRepository fotosRepo;
+  private final SolicitudRepository solicitudes;
   private final PendingCambioRepository pendingRepo;
   private final EmailService emailService;
 
@@ -69,11 +73,13 @@ public class MeController {
 
   public MeController(SessionRepository sessions, UsuarioRepository usuarios,
       ProductoRepository productos, FotoProductoRepository fotosRepo,
+      SolicitudRepository solicitudes,
       PendingCambioRepository pendingRepo, EmailService emailService) {
     this.sessions = sessions;
     this.usuarios = usuarios;
     this.productos = productos;
     this.fotosRepo = fotosRepo;
+    this.solicitudes = solicitudes;
     this.pendingRepo = pendingRepo;
     this.emailService = emailService;
   }
@@ -137,6 +143,45 @@ public class MeController {
       m.put("fotos", fotosInfo);
       result.add(m);
     }
+    return result;
+  }
+
+  @GetMapping("/reservas")
+  public List<Map<String, Object>> getMisReservas(@RequestHeader("Authorization") String auth) {
+    Usuario u = resolveUser(auth);
+    List<Solicitud> reservas = solicitudes.findByIdSolicitanteAndEstadoSolicitud(
+        u.getIdUsuario(),
+        EstadoSolicitud.ACEPTADA);
+
+    List<Map<String, Object>> result = new ArrayList<>();
+    for (Solicitud s : reservas) {
+      Producto p = productos.findById(s.getIdProducto()).orElse(null);
+      if (p == null) continue;
+
+      Map<String, Object> m = new LinkedHashMap<>();
+      m.put("idSolicitud", s.getIdSolicitud());
+      m.put("fechaSolicitud", s.getFechaSolicitud());
+      m.put("tipoTransaccion", s.getTipoTransaccion());
+      m.put("estadoSolicitud", s.getEstadoSolicitud());
+
+      m.put("idProducto", p.getIdProducto());
+      m.put("titulo", p.getTitulo());
+      m.put("descripcion", p.getDescripcion());
+      m.put("categoria", p.getCategoria());
+      m.put("precio", p.getPrecio());
+      m.put("estadoProducto", p.getEstadoProducto());
+      m.put("condicion", p.getCondicion());
+      m.put("ubicacion", p.getUbicacion());
+      m.put("imagenUrl", p.getImagenUrl());
+
+      List<FotoProducto> fotos = fotosRepo.findByIdProductoOrderByEsPrincipalDesc(p.getIdProducto());
+      if (!fotos.isEmpty()) {
+        m.put("fotoUrl", fotos.get(0).getUrlFoto());
+      }
+
+      result.add(m);
+    }
+
     return result;
   }
 
