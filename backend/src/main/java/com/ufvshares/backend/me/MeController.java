@@ -165,12 +165,28 @@ public class MeController {
     for (Solicitud s : reservas) {
       Producto p = productos.findById(s.getIdProducto()).orElse(null);
       if (p == null) continue;
+      Transaccion t = transacciones.findByIdSolicitud(s.getIdSolicitud()).orElse(null);
+      if (t != null && t.getEstadoTransaccion() == EstadoTransaccion.CANCELADA) continue;
+
+      LocalDateTime inicio = s.getFechaInicio() != null ? s.getFechaInicio() : (t != null ? t.getFechaInicioReal() : null);
+      LocalDateTime fin = s.getFechaFin() != null ? s.getFechaFin() : (t != null ? t.getFechaFinReal() : null);
 
       Map<String, Object> m = new LinkedHashMap<>();
       m.put("idSolicitud", s.getIdSolicitud());
       m.put("fechaSolicitud", s.getFechaSolicitud());
       m.put("tipoTransaccion", s.getTipoTransaccion());
       m.put("estadoSolicitud", s.getEstadoSolicitud());
+      m.put("fechaInicio", inicio);
+      m.put("fechaFin", fin);
+      if (t != null) {
+        m.put("idTransaccion", t.getIdTransaccion());
+        m.put("estadoTransaccion", t.getEstadoTransaccion());
+      }
+      if (s.getTipoTransaccion() != null && s.getTipoTransaccion().name().equals("ALQUILER")
+          && inicio != null && fin != null) {
+        long dias = ChronoUnit.DAYS.between(inicio.toLocalDate(), fin.toLocalDate());
+        m.put("diasAlquiler", Math.max(dias, 0));
+      }
 
       m.put("idProducto", p.getIdProducto());
       m.put("titulo", p.getTitulo());

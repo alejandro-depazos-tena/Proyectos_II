@@ -335,13 +335,19 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
     <!-- Sección: Artículos reservados -->
     <section id="section-reservas" class="profile-section hidden">
       <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-black uppercase tracking-tighter">Artículos reservados</h2>
+        <h2 class="text-xl font-black uppercase tracking-tighter">Reservas y compras</h2>
+      </div>
+
+      <div id="reserved-filter-bar" class="hidden mb-5 p-3 rounded-2xl border border-base-200 bg-base-100 flex flex-wrap gap-2">
+        <button type="button" data-reserved-filter="ALL" class="btn btn-xs rounded-full btn-primary">Todo (<span id="reserved-count-all">0</span>)</button>
+        <button type="button" data-reserved-filter="RESERVA" class="btn btn-xs rounded-full btn-ghost">Reservas (<span id="reserved-count-reservas">0</span>)</button>
+        <button type="button" data-reserved-filter="COMPRA" class="btn btn-xs rounded-full btn-ghost">Compras (<span id="reserved-count-compras">0</span>)</button>
       </div>
 
       <div id="reserved-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
 
       <div id="no-reserved" class="hidden text-center py-12 bg-base-100 border border-base-200 rounded-2xl">
-        <p class="text-base-content/60">Aún no tienes artículos reservados.</p>
+        <p id="no-reserved-text" class="text-base-content/60">Aún no tienes artículos reservados ni compras.</p>
       </div>
     </section>
 
@@ -709,25 +715,82 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
   }
 
   function renderReserved(items) {
+    reservedItemsCache = Array.isArray(items) ? items : [];
+    renderReservedCurrentFilter();
+  }
+
+  function parseDate(raw) {
+    if (!raw) return null;
+    const d = new Date(raw);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  function formatEsDate(raw) {
+    const d = parseDate(raw);
+    if (!d) return "-";
+    return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  let reservedItemsCache = [];
+  let reservedFilter = 'ALL';
+
+  function updateReservedFiltersUi(total, reservas, compras) {
+    const bar = $('reserved-filter-bar');
+    const allCount = $('reserved-count-all');
+    const reservasCount = $('reserved-count-reservas');
+    const comprasCount = $('reserved-count-compras');
+
+    if (allCount) allCount.textContent = String(total);
+    if (reservasCount) reservasCount.textContent = String(reservas);
+    if (comprasCount) comprasCount.textContent = String(compras);
+
+    if (bar) {
+      if (total > 0) bar.classList.remove('hidden');
+      else bar.classList.add('hidden');
+    }
+
+    document.querySelectorAll('[data-reserved-filter]').forEach((btn) => {
+      const active = btn.getAttribute('data-reserved-filter') === reservedFilter;
+      btn.classList.toggle('btn-primary', active);
+      btn.classList.toggle('btn-ghost', !active);
+    });
+  }
+
+  function renderReservedCurrentFilter() {
     const grid = $("reserved-grid");
     const empty = $("no-reserved");
+    const emptyText = $('no-reserved-text');
     if (!grid || !empty) return;
 
+    const compras = reservedItemsCache.filter((item) => item?.tipoTransaccion === 'VENTA');
+    const reservas = reservedItemsCache.filter((item) => item?.tipoTransaccion !== 'VENTA');
+    updateReservedFiltersUi(reservedItemsCache.length, reservas.length, compras.length);
+
+    let visibleItems = reservedItemsCache;
+    if (reservedFilter === 'COMPRA') visibleItems = compras;
+    if (reservedFilter === 'RESERVA') visibleItems = reservas;
+
     grid.innerHTML = "";
-    if (!Array.isArray(items) || items.length === 0) {
+    if (!Array.isArray(visibleItems) || visibleItems.length === 0) {
+      if (emptyText) {
+        if (reservedFilter === 'COMPRA') emptyText.textContent = 'Aún no tienes compras.';
+        else if (reservedFilter === 'RESERVA') emptyText.textContent = 'Aún no tienes artículos reservados.';
+        else emptyText.textContent = 'Aún no tienes artículos reservados ni compras.';
+      }
       empty.classList.remove("hidden");
       return;
     }
 
     empty.classList.add("hidden");
-    items.forEach((p) => {
+    visibleItems.forEach((p) => {
+      const isCompra = p.tipoTransaccion === 'VENTA';
       const badge = tipoLabel[p.tipoTransaccion] ?? p.tipoTransaccion;
       const cat = categoriaLabel[p.categoria] ?? p.categoria;
       const precio = (p.precio == null || Number(p.precio) === 0) ? "Gratis" : parseFloat(p.precio).toFixed(2) + " €";
       const estClss = estadoClass[p.estadoProducto] ?? "badge-ghost";
       const estTxt = estadoTxt[p.estadoProducto] ?? p.estadoProducto;
       const imgSrc = p.fotoUrl ? BACKEND_BASE + p.fotoUrl : (p.imagenUrl ?? null);
-      const fechaReserva = p.fechaSolicitud ? new Date(p.fechaSolicitud).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+      const fechaReserva = formatEsDate(p.fechaSolicitud);
       const imgHtml = imgSrc
         ? `<img src="${imgSrc}" alt="${p.titulo}" class="w-full h-40 object-cover rounded-t-2xl" />`
         : `<div class="w-full h-40 bg-base-200 rounded-t-2xl flex items-center justify-center text-base-content/30 text-sm">Sin foto</div>`;
@@ -741,9 +804,10 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
               <h3 class="font-bold leading-tight">${p.titulo}</h3>
               <span class="badge badge-primary shrink-0">${badge}</span>
             </div>
-            <p class="text-xs text-base-content/50 mt-1">Reservado el ${fechaReserva}</p>
+            <p class="text-xs text-base-content/50 mt-1">${isCompra ? `Comprado el ${fechaReserva}` : `Reservado el ${fechaReserva}`}</p>
             <div class="flex flex-wrap items-center gap-2 mt-3">
               <span class="text-xs bg-base-200 px-2 py-1 rounded-full">${cat}</span>
+              <span class="badge badge-sm ${isCompra ? 'badge-success' : 'badge-info'} border-none">${isCompra ? 'Compra' : 'Reserva'}</span>
               <span class="badge badge-sm ${estClss} border-none">${estTxt}</span>
             </div>
             <div class="flex items-center justify-end mt-2">
@@ -754,6 +818,13 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       `);
     });
   }
+
+  document.querySelectorAll('[data-reserved-filter]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      reservedFilter = btn.getAttribute('data-reserved-filter') || 'ALL';
+      renderReservedCurrentFilter();
+    });
+  });
 
   function renderHistory(items) {
     const grid = $("history-grid");
