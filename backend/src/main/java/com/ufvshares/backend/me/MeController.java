@@ -45,6 +45,7 @@ import com.ufvshares.backend.producto.ProductoRepository;
 import com.ufvshares.backend.solicitud.EstadoSolicitud;
 import com.ufvshares.backend.solicitud.Solicitud;
 import com.ufvshares.backend.solicitud.SolicitudRepository;
+import com.ufvshares.backend.solicitud.SolicitudService;
 import com.ufvshares.backend.transaccion.EstadoTransaccion;
 import com.ufvshares.backend.transaccion.Transaccion;
 import com.ufvshares.backend.transaccion.TransaccionRepository;
@@ -67,6 +68,7 @@ public class MeController {
   private final ProductoRepository productos;
   private final FotoProductoRepository fotosRepo;
   private final SolicitudRepository solicitudes;
+  private final SolicitudService solicitudService;
   private final TransaccionRepository transacciones;
   private final PendingCambioRepository pendingRepo;
   private final EmailService emailService;
@@ -80,6 +82,7 @@ public class MeController {
   public MeController(SessionRepository sessions, UsuarioRepository usuarios,
       ProductoRepository productos, FotoProductoRepository fotosRepo,
       SolicitudRepository solicitudes,
+      SolicitudService solicitudService,
       TransaccionRepository transacciones,
       PendingCambioRepository pendingRepo, EmailService emailService) {
     this.sessions = sessions;
@@ -87,6 +90,7 @@ public class MeController {
     this.productos = productos;
     this.fotosRepo = fotosRepo;
     this.solicitudes = solicitudes;
+    this.solicitudService = solicitudService;
     this.transacciones = transacciones;
     this.pendingRepo = pendingRepo;
     this.emailService = emailService;
@@ -101,6 +105,29 @@ public class MeController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sesión inválida"));
     return usuarios.findByCorreoIgnoreCase(email)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no encontrado"));
+  }
+
+  private Map<String, Object> buildSolicitudResumen(Solicitud s, Producto p) {
+    Map<String, Object> m = new LinkedHashMap<>();
+    m.put("idSolicitud", s.getIdSolicitud());
+    m.put("fechaSolicitud", s.getFechaSolicitud());
+    m.put("tipoTransaccion", s.getTipoTransaccion());
+    m.put("estadoSolicitud", s.getEstadoSolicitud());
+    m.put("fechaInicio", s.getFechaInicio());
+    m.put("fechaFin", s.getFechaFin());
+
+    Map<String, Object> prod = new LinkedHashMap<>();
+    prod.put("idProducto", p.getIdProducto());
+    prod.put("titulo", p.getTitulo());
+    prod.put("categoria", p.getCategoria());
+    prod.put("precio", p.getPrecio());
+    prod.put("estadoProducto", p.getEstadoProducto());
+    prod.put("imagenUrl", p.getImagenUrl());
+    List<FotoProducto> fotos = fotosRepo.findByIdProductoOrderByEsPrincipalDesc(p.getIdProducto());
+    if (!fotos.isEmpty()) prod.put("fotoUrl", fotos.get(0).getUrlFoto());
+    m.put("producto", prod);
+
+    return m;
   }
 
   @GetMapping
@@ -207,6 +234,109 @@ public class MeController {
     }
 
     return result;
+  }
+
+  @GetMapping("/solicitudes/enviadas")
+  public List<Map<String, Object>> getSolicitudesEnviadas(@RequestHeader("Authorization") String auth) {
+    Usuario u = resolveUser(auth);
+    List<Solicitud> list = solicitudes.findByIdSolicitanteOrderByFechaSolicitudDesc(u.getIdUsuario());
+
+    List<Map<String, Object>> result = new ArrayList<>();
+    for (Solicitud s : list) {
+      Producto p = productos.findById(s.getIdProducto()).orElse(null);
+      if (p == null) continue;
+
+      Map<String, Object> m = buildSolicitudResumen(s, p);
+
+      Usuario propietario = usuarios.findById(p.getIdPropietario()).orElse(null);
+      if (propietario != null) {
+        Map<String, Object> persona = new LinkedHashMap<>();
+        persona.put("idUsuario", propietario.getIdUsuario());
+        persona.put("nombre", propietario.getNombre());
+        persona.put("apellidos", propietario.getApellidos());
+        persona.put("correo", propietario.getCorreo());
+        m.put("propietario", persona);
+      }
+
+      result.add(m);
+    }
+    return result;
+  }
+
+  @GetMapping("/solicitudes/recibidas")
+  public List<Map<String, Object>> getSolicitudesRecibidas(@RequestHeader("Authorization") String auth) {
+    Usuario u = resolveUser(auth);
+    List<Producto> prods = productos.findByIdPropietario(u.getIdUsuario());
+    List<Map<String, Object>> result = new ArrayList<>();
+
+    for (Producto p : prods) {
+      List<Solicitud> list = solicitudes.findByIdProducto(p.getIdProducto());
+      for (Solicitud s : list) {
+        Map<String, Object> m = buildSolicitudResumen(s, p);
+
+        Usuario solicitante = usuarios.findById(s.getIdSolicitante()).orElse(null);
+        if (solicitante != null) {
+          Map<String, Object> persona = new LinkedHashMap<>();
+          persona.put("idUsuario", solicitante.getIdUsuario());
+          persona.put("nombre", solicitante.getNombre());
+          persona.put("apellidos", solicitante.getApellidos());
+          persona.put("correo", solicitante.getCorreo());
+          m.put("solicitante", persona);
+        }
+
+        result.add(m);
+      }
+    }
+
+    result.sort(Comparator.comparing(
+        m -> (LocalDateTime) m.get("fechaSolicitud"),
+        Comparator.nullsLast(Comparator.reverseOrder())));
+
+    return result;
+  }
+
+  @PutMapping("/solicitudes/{id}/aceptar")
+  public Map<String, Object> aceptarSolicitud(@RequestHeader("Authorization") String auth, @PathVariable Long id) {
+    Usuario u = resolveUser(auth);
+    Solicitud s = solicitudes.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "SOLICITUD_NOT_FOUND"));
+    Producto p = productos.findById(s.getIdProducto())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "PRODUCTO_NOT_FOUND"));
+
+    if (!u.getIdUsuario().equals(p.getIdPropietario())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "NO_PUEDES_GESTIONAR_ESTA_SOLICITUD");
+    }
+    if (s.getEstadoSolicitud() != EstadoSolicitud.PENDIENTE) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "SOLICITUD_YA_PROCESADA");
+    }
+
+    Solicitud updated = solicitudService.aceptar(id);
+    Map<String, Object> response = new LinkedHashMap<>();
+    response.put("idSolicitud", updated.getIdSolicitud());
+    response.put("estadoSolicitud", updated.getEstadoSolicitud());
+    return response;
+  }
+
+  @PutMapping("/solicitudes/{id}/rechazar")
+  public Map<String, Object> rechazarSolicitud(@RequestHeader("Authorization") String auth, @PathVariable Long id) {
+    Usuario u = resolveUser(auth);
+    Solicitud s = solicitudes.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "SOLICITUD_NOT_FOUND"));
+    Producto p = productos.findById(s.getIdProducto())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "PRODUCTO_NOT_FOUND"));
+
+    if (!u.getIdUsuario().equals(p.getIdPropietario())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "NO_PUEDES_GESTIONAR_ESTA_SOLICITUD");
+    }
+    if (s.getEstadoSolicitud() != EstadoSolicitud.PENDIENTE) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "SOLICITUD_YA_PROCESADA");
+    }
+
+    Solicitud updated = solicitudService.rechazar(id);
+    Map<String, Object> response = new LinkedHashMap<>();
+    response.put("idSolicitud", updated.getIdSolicitud());
+    response.put("estadoSolicitud", updated.getEstadoSolicitud());
+    return response;
   }
 
   @GetMapping("/historial")

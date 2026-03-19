@@ -8,6 +8,7 @@ public interface SolicitudRepository extends JpaRepository<Solicitud, Long> {
   List<Solicitud> findByIdProducto(Long idProducto);
   List<Solicitud> findByIdProductoAndEstadoSolicitud(Long idProducto, EstadoSolicitud estadoSolicitud);
   List<Solicitud> findByIdSolicitanteAndEstadoSolicitud(Long idSolicitante, EstadoSolicitud estadoSolicitud);
+  List<Solicitud> findByIdSolicitanteOrderByFechaSolicitudDesc(Long idSolicitante);
   List<Solicitud> findByIdProductoAndIdSolicitanteAndEstadoSolicitudIn(
       Long idProducto,
       Long idSolicitante,

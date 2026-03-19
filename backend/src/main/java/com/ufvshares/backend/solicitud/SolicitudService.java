@@ -75,21 +75,16 @@ public class SolicitudService {
         idSolicitante,
         Arrays.asList(EstadoSolicitud.PENDIENTE, EstadoSolicitud.ACEPTADA));
     if (!existentes.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "YA_TIENES_UNA_RESERVA_PARA_ESTE_PRODUCTO");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "YA_TIENES_UNA_SOLICITUD_ACTIVA_PARA_ESTE_PRODUCTO");
     }
 
     Solicitud solicitud = new Solicitud();
     solicitud.setIdProducto(idProducto);
     solicitud.setIdSolicitante(idSolicitante);
     solicitud.setTipoTransaccion(producto.getTipoTransaccion());
-    solicitud.setEstadoSolicitud(EstadoSolicitud.ACEPTADA);
+    solicitud.setEstadoSolicitud(EstadoSolicitud.PENDIENTE);
     solicitud.setFechaSolicitud(LocalDateTime.now());
-    solicitud = repository.save(solicitud);
-
-    producto.setEstadoProducto(EstadoProducto.RESERVADO);
-    productoRepository.save(producto);
-
-    return solicitud;
+    return repository.save(solicitud);
   }
 
   @Transactional

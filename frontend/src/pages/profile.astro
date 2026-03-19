@@ -186,6 +186,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
     <div class="mb-8 bg-base-100 border border-base-200 rounded-2xl p-3 flex flex-wrap gap-2">
       <button type="button" data-section-btn="productos" class="btn btn-sm rounded-full">Mis productos</button>
       <button type="button" data-section-btn="reservas" class="btn btn-sm rounded-full btn-ghost">Reservas</button>
+      <button type="button" data-section-btn="solicitudes" class="btn btn-sm rounded-full btn-ghost">Solicitudes</button>
       <button type="button" data-section-btn="historial" class="btn btn-sm rounded-full btn-ghost">Historial</button>
     </div>
 
@@ -332,6 +333,27 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       </div>
     </section>
 
+    <!-- Sección: Solicitudes -->
+    <section id="section-solicitudes" class="profile-section hidden">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-black uppercase tracking-tighter">Solicitudes</h2>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div class="bg-base-100 border border-base-200 rounded-2xl p-4">
+          <h3 class="font-bold text-base mb-3">Recibidas (como vendedor)</h3>
+          <div id="requests-received-grid" class="space-y-3"></div>
+          <p id="no-requests-received" class="hidden text-sm text-base-content/60 py-6 text-center">No tienes solicitudes recibidas.</p>
+        </div>
+
+        <div class="bg-base-100 border border-base-200 rounded-2xl p-4">
+          <h3 class="font-bold text-base mb-3">Enviadas (como comprador)</h3>
+          <div id="requests-sent-grid" class="space-y-3"></div>
+          <p id="no-requests-sent" class="hidden text-sm text-base-content/60 py-6 text-center">No has enviado solicitudes.</p>
+        </div>
+      </div>
+    </section>
+
     <!-- Sección: Artículos reservados -->
     <section id="section-reservas" class="profile-section hidden">
       <div class="flex items-center justify-between mb-6">
@@ -438,11 +460,13 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
 
   async function loadProfile() {
     try {
-      const [meRes, prodRes, reservasRes, historyRes] = await Promise.all([
+      const [meRes, prodRes, reservasRes, historyRes, sentReqRes, receivedReqRes] = await Promise.all([
         fetch(API_BASE + "/me", { headers }),
         fetch(API_BASE + "/me/productos", { headers }),
         fetch(API_BASE + "/me/reservas", { headers }),
         fetch(API_BASE + "/me/historial", { headers }),
+        fetch(API_BASE + "/me/solicitudes/enviadas", { headers }),
+        fetch(API_BASE + "/me/solicitudes/recibidas", { headers }),
       ]);
 
       if (!meRes.ok) { clearSession(); window.location.href = "/auth?mode=login&next=" + encodeURIComponent("/profile"); return; }
@@ -451,6 +475,8 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       const prods = await prodRes.json();
       const reservas = reservasRes.ok ? await reservasRes.json() : [];
       const historial = historyRes.ok ? await historyRes.json() : [];
+      const sentRequests = sentReqRes.ok ? await sentReqRes.json() : [];
+      const receivedRequests = receivedReqRes.ok ? await receivedReqRes.json() : [];
 
       // Guardar id para el caché de avatar
       if (me.idUsuario) localStorage.setItem('ufvshares_id', me.idUsuario);
@@ -464,6 +490,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       $('loading').classList.add('hidden');
       renderProducts(prods);
       renderReserved(reservas);
+      renderRequests({ sent: sentRequests, received: receivedRequests });
       renderHistory(historial);
     } catch (e) {
       $("loading").classList.add("hidden");
@@ -473,7 +500,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
 
   // Activar sección inicial
   const initialSection = (location.hash || '').replace('#', '') || 'productos';
-  if (['productos', 'reservas', 'historial'].includes(initialSection)) {
+  if (['productos', 'reservas', 'solicitudes', 'historial'].includes(initialSection)) {
     setActiveSection(initialSection);
   } else {
     setActiveSection('productos');
@@ -824,6 +851,117 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       reservedFilter = btn.getAttribute('data-reserved-filter') || 'ALL';
       renderReservedCurrentFilter();
     });
+  });
+
+  function estadoSolicitudBadge(estado) {
+    const cls = {
+      PENDIENTE: 'badge-warning',
+      ACEPTADA: 'badge-success',
+      RECHAZADA: 'badge-error',
+      CANCELADA: 'badge-neutral',
+    }[estado] ?? 'badge-ghost';
+    const txt = {
+      PENDIENTE: 'Pendiente',
+      ACEPTADA: 'Aceptada',
+      RECHAZADA: 'Rechazada',
+      CANCELADA: 'Cancelada',
+    }[estado] ?? (estado || '—');
+    return `<span class="badge badge-sm ${cls} border-none">${txt}</span>`;
+  }
+
+  function renderRequests({ sent, received }) {
+    const sentGrid = $('requests-sent-grid');
+    const receivedGrid = $('requests-received-grid');
+    const noSent = $('no-requests-sent');
+    const noReceived = $('no-requests-received');
+    if (!sentGrid || !receivedGrid || !noSent || !noReceived) return;
+
+    const sentItems = Array.isArray(sent) ? sent : [];
+    const receivedItems = Array.isArray(received) ? received : [];
+
+    sentGrid.innerHTML = '';
+    receivedGrid.innerHTML = '';
+
+    if (sentItems.length === 0) noSent.classList.remove('hidden');
+    else noSent.classList.add('hidden');
+
+    if (receivedItems.length === 0) noReceived.classList.remove('hidden');
+    else noReceived.classList.add('hidden');
+
+    sentItems.forEach((item) => {
+      const prod = item.producto || {};
+      const owner = item.propietario || {};
+      const fecha = formatEsDate(item.fechaSolicitud);
+      sentGrid.insertAdjacentHTML('beforeend', `
+        <article class="rounded-xl border border-base-200 p-3 bg-base-50">
+          <div class="flex items-start justify-between gap-2">
+            <h4 class="font-semibold leading-tight">${prod.titulo ?? 'Producto'}</h4>
+            ${estadoSolicitudBadge(item.estadoSolicitud)}
+          </div>
+          <p class="text-xs text-base-content/60 mt-1">Solicitud enviada el ${fecha}</p>
+          <p class="text-xs text-base-content/60 mt-1">Vendedor: ${(owner.nombre || owner.apellidos) ? `${owner.nombre ?? ''} ${owner.apellidos ?? ''}`.trim() : '—'}</p>
+        </article>
+      `);
+    });
+
+    receivedItems.forEach((item) => {
+      const prod = item.producto || {};
+      const buyer = item.solicitante || {};
+      const fecha = formatEsDate(item.fechaSolicitud);
+      const pending = item.estadoSolicitud === 'PENDIENTE';
+      receivedGrid.insertAdjacentHTML('beforeend', `
+        <article class="rounded-xl border border-base-200 p-3 bg-base-50" data-request-id="${item.idSolicitud}">
+          <div class="flex items-start justify-between gap-2">
+            <h4 class="font-semibold leading-tight">${prod.titulo ?? 'Producto'}</h4>
+            ${estadoSolicitudBadge(item.estadoSolicitud)}
+          </div>
+          <p class="text-xs text-base-content/60 mt-1">Comprador: ${(buyer.nombre || buyer.apellidos) ? `${buyer.nombre ?? ''} ${buyer.apellidos ?? ''}`.trim() : '—'}</p>
+          <p class="text-xs text-base-content/60 mt-1">Recibida el ${fecha}</p>
+          ${pending ? `
+            <div class="flex gap-2 mt-3">
+              <button type="button" class="btn btn-xs btn-success rounded-full" data-request-action="accept">Aceptar</button>
+              <button type="button" class="btn btn-xs btn-error rounded-full" data-request-action="reject">Rechazar</button>
+            </div>
+          ` : ''}
+        </article>
+      `);
+    });
+  }
+
+  $('requests-received-grid')?.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-request-action]');
+    if (!btn) return;
+
+    const card = e.target.closest('[data-request-id]');
+    const id = card?.getAttribute('data-request-id');
+    const action = btn.getAttribute('data-request-action');
+    if (!id || !action) return;
+
+    const isAccept = action === 'accept';
+    btn.disabled = true;
+    const old = btn.textContent;
+    btn.textContent = isAccept ? 'Aceptando...' : 'Rechazando...';
+
+    try {
+      const res = await fetch(API_BASE + `/me/solicitudes/${id}/${isAccept ? 'aceptar' : 'rechazar'}`, {
+        method: 'PUT',
+        headers,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.message ?? 'No se pudo actualizar la solicitud', 'error');
+        return;
+      }
+
+      showToast(isAccept ? 'Solicitud aceptada' : 'Solicitud rechazada');
+      await loadProfile();
+      setActiveSection('solicitudes');
+    } catch {
+      showToast('No se pudo conectar con el servidor', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = old;
+    }
   });
 
   function renderHistory(items) {

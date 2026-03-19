@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.ufvshares.backend.auth.SessionRepository;
+import com.ufvshares.backend.producto.Producto;
+import com.ufvshares.backend.producto.ProductoRepository;
 import com.ufvshares.backend.usuario.UsuarioRepository;
 
 import jakarta.validation.Valid;
@@ -27,11 +29,14 @@ public class SolicitudController {
   private final SolicitudService service;
   private final SessionRepository sessions;
   private final UsuarioRepository usuarios;
+  private final ProductoRepository productos;
 
-  public SolicitudController(SolicitudService service, SessionRepository sessions, UsuarioRepository usuarios) {
+  public SolicitudController(SolicitudService service, SessionRepository sessions, UsuarioRepository usuarios,
+      ProductoRepository productos) {
     this.service = service;
     this.sessions = sessions;
     this.usuarios = usuarios;
+    this.productos = productos;
   }
 
   private Long resolveUserId(String auth) {
@@ -78,13 +83,27 @@ public class SolicitudController {
 
   /** Acepta una solicitud: actualiza el estado del producto y crea la transacción. */
   @PutMapping("/{id}/aceptar")
-  public Solicitud aceptar(@PathVariable Long id) {
+  public Solicitud aceptar(@RequestHeader("Authorization") String auth, @PathVariable Long id) {
+    Long actorId = resolveUserId(auth);
+    Solicitud solicitud = service.findById(id);
+    Producto producto = productos.findById(solicitud.getIdProducto())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "PRODUCTO_NOT_FOUND"));
+    if (!producto.getIdPropietario().equals(actorId)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "NO_PUEDES_GESTIONAR_ESTA_SOLICITUD");
+    }
     return service.aceptar(id);
   }
 
   /** Rechaza una solicitud pendiente. */
   @PutMapping("/{id}/rechazar")
-  public Solicitud rechazar(@PathVariable Long id) {
+  public Solicitud rechazar(@RequestHeader("Authorization") String auth, @PathVariable Long id) {
+    Long actorId = resolveUserId(auth);
+    Solicitud solicitud = service.findById(id);
+    Producto producto = productos.findById(solicitud.getIdProducto())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "PRODUCTO_NOT_FOUND"));
+    if (!producto.getIdPropietario().equals(actorId)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "NO_PUEDES_GESTIONAR_ESTA_SOLICITUD");
+    }
     return service.rechazar(id);
   }
 
