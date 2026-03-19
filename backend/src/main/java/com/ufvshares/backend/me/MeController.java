@@ -5,7 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +45,9 @@ import com.ufvshares.backend.producto.ProductoRepository;
 import com.ufvshares.backend.solicitud.EstadoSolicitud;
 import com.ufvshares.backend.solicitud.Solicitud;
 import com.ufvshares.backend.solicitud.SolicitudRepository;
+import com.ufvshares.backend.transaccion.EstadoTransaccion;
+import com.ufvshares.backend.transaccion.Transaccion;
+import com.ufvshares.backend.transaccion.TransaccionRepository;
 import com.ufvshares.backend.usuario.Usuario;
 import com.ufvshares.backend.usuario.UsuarioRepository;
 
@@ -62,6 +67,7 @@ public class MeController {
   private final ProductoRepository productos;
   private final FotoProductoRepository fotosRepo;
   private final SolicitudRepository solicitudes;
+  private final TransaccionRepository transacciones;
   private final PendingCambioRepository pendingRepo;
   private final EmailService emailService;
 
@@ -74,12 +80,14 @@ public class MeController {
   public MeController(SessionRepository sessions, UsuarioRepository usuarios,
       ProductoRepository productos, FotoProductoRepository fotosRepo,
       SolicitudRepository solicitudes,
+      TransaccionRepository transacciones,
       PendingCambioRepository pendingRepo, EmailService emailService) {
     this.sessions = sessions;
     this.usuarios = usuarios;
     this.productos = productos;
     this.fotosRepo = fotosRepo;
     this.solicitudes = solicitudes;
+    this.transacciones = transacciones;
     this.pendingRepo = pendingRepo;
     this.emailService = emailService;
   }
@@ -181,6 +189,69 @@ public class MeController {
 
       result.add(m);
     }
+
+    return result;
+  }
+
+  @GetMapping("/historial")
+  public List<Map<String, Object>> getHistorial(@RequestHeader("Authorization") String auth) {
+    Usuario u = resolveUser(auth);
+    List<Producto> prods = productos.findByIdPropietario(u.getIdUsuario());
+    List<Map<String, Object>> result = new ArrayList<>();
+
+    for (Producto p : prods) {
+      List<Solicitud> list = solicitudes.findByIdProductoAndEstadoSolicitud(
+          p.getIdProducto(),
+          EstadoSolicitud.ACEPTADA);
+
+      for (Solicitud s : list) {
+        Transaccion t = transacciones.findByIdSolicitud(s.getIdSolicitud()).orElse(null);
+        if (t == null) continue;
+        if (t.getEstadoTransaccion() == EstadoTransaccion.CANCELADA) continue;
+
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("idTransaccion", t.getIdTransaccion());
+        m.put("estadoTransaccion", t.getEstadoTransaccion());
+        m.put("fechaTransaccion", t.getFechaCreacion());
+        m.put("tipoTransaccion", s.getTipoTransaccion());
+
+        LocalDateTime inicio = s.getFechaInicio() != null ? s.getFechaInicio() : t.getFechaInicioReal();
+        LocalDateTime fin = s.getFechaFin() != null ? s.getFechaFin() : t.getFechaFinReal();
+        m.put("fechaInicio", inicio);
+        m.put("fechaFin", fin);
+        if (s.getTipoTransaccion() != null && s.getTipoTransaccion().name().equals("ALQUILER")
+            && inicio != null && fin != null) {
+          long dias = ChronoUnit.DAYS.between(inicio.toLocalDate(), fin.toLocalDate());
+          m.put("diasAlquiler", Math.max(dias, 0));
+        }
+
+        Map<String, Object> prod = new LinkedHashMap<>();
+        prod.put("idProducto", p.getIdProducto());
+        prod.put("titulo", p.getTitulo());
+        prod.put("categoria", p.getCategoria());
+        prod.put("precio", p.getPrecio());
+        prod.put("imagenUrl", p.getImagenUrl());
+        List<FotoProducto> fotos = fotosRepo.findByIdProductoOrderByEsPrincipalDesc(p.getIdProducto());
+        if (!fotos.isEmpty()) prod.put("fotoUrl", fotos.get(0).getUrlFoto());
+        m.put("producto", prod);
+
+        Usuario solicitante = usuarios.findById(s.getIdSolicitante()).orElse(null);
+        if (solicitante != null) {
+          Map<String, Object> persona = new LinkedHashMap<>();
+          persona.put("idUsuario", solicitante.getIdUsuario());
+          persona.put("nombre", solicitante.getNombre());
+          persona.put("apellidos", solicitante.getApellidos());
+          persona.put("correo", solicitante.getCorreo());
+          m.put("persona", persona);
+        }
+
+        result.add(m);
+      }
+    }
+
+    result.sort(Comparator.comparing(
+        m -> (LocalDateTime) m.get("fechaTransaccion"),
+        Comparator.nullsLast(Comparator.reverseOrder())));
 
     return result;
   }

@@ -182,19 +182,27 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       </div>
     </div>
 
-    <!-- Mis productos -->
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-xl font-black uppercase tracking-tighter">Mis productos</h2>
-      <button id="btn-toggle-form" class="btn btn-primary btn-sm rounded-full hidden">
-        + Publicar producto
-      </button>
+    <!-- Navegación rápida de secciones -->
+    <div class="mb-8 bg-base-100 border border-base-200 rounded-2xl p-3 flex flex-wrap gap-2">
+      <button type="button" data-section-btn="productos" class="btn btn-sm rounded-full">Mis productos</button>
+      <button type="button" data-section-btn="reservas" class="btn btn-sm rounded-full btn-ghost">Reservas</button>
+      <button type="button" data-section-btn="historial" class="btn btn-sm rounded-full btn-ghost">Historial</button>
     </div>
 
-    <!-- Formulario publicar -->
-    <div id="publish-form-wrap" class="card bg-base-100 shadow-md border border-base-200 mb-8 hidden">
-      <div class="card-body">
-        <h3 class="font-bold text-lg mb-4">Nuevo anuncio</h3>
-        <form id="publish-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <!-- Sección: Mis productos -->
+    <section id="section-productos" class="profile-section">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-black uppercase tracking-tighter">Mis productos</h2>
+        <button id="btn-toggle-form" class="btn btn-primary btn-sm rounded-full hidden">
+          + Publicar producto
+        </button>
+      </div>
+
+      <!-- Formulario publicar -->
+      <div id="publish-form-wrap" class="card bg-base-100 shadow-md border border-base-200 mb-8 hidden">
+        <div class="card-body">
+          <h3 class="font-bold text-lg mb-4">Nuevo anuncio</h3>
+          <form id="publish-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="sm:col-span-2">
             <label for="pub-titulo" class="label"><span class="label-text font-semibold">T&iacute;tulo</span></label>
             <input id="pub-titulo" name="titulo" type="text" required maxlength="150"
@@ -310,29 +318,45 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
             <button type="submit" id="btn-submit" class="btn btn-primary btn-sm rounded-full">Publicar</button>
           </div>
           <p id="form-error" class="sm:col-span-2 text-error text-sm hidden"></p>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
 
-    <!-- Grid de productos -->
-    <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+      <!-- Grid de productos -->
+      <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
 
-    <!-- Estado vacío -->
-    <div id="no-products" class="hidden text-center py-16">
-      <p class="text-base-content/50 mb-4">Todav&iacute;a no tienes productos publicados.</p>
-      <button id="btn-empty-publish" class="btn btn-primary rounded-full">Publicar mi primer producto</button>
-    </div>
+      <!-- Estado vacío -->
+      <div id="no-products" class="hidden text-center py-16">
+        <p class="text-base-content/50 mb-4">Todav&iacute;a no tienes productos publicados.</p>
+        <button id="btn-empty-publish" class="btn btn-primary rounded-full">Publicar mi primer producto</button>
+      </div>
+    </section>
 
-    <!-- Artículos reservados -->
-    <div class="flex items-center justify-between mt-14 mb-6">
-      <h2 class="text-xl font-black uppercase tracking-tighter">Artículos reservados</h2>
-    </div>
+    <!-- Sección: Artículos reservados -->
+    <section id="section-reservas" class="profile-section hidden">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-black uppercase tracking-tighter">Artículos reservados</h2>
+      </div>
 
-    <div id="reserved-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+      <div id="reserved-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
 
-    <div id="no-reserved" class="hidden text-center py-12 bg-base-100 border border-base-200 rounded-2xl">
-      <p class="text-base-content/60">Aún no tienes artículos reservados.</p>
-    </div>
+      <div id="no-reserved" class="hidden text-center py-12 bg-base-100 border border-base-200 rounded-2xl">
+        <p class="text-base-content/60">Aún no tienes artículos reservados.</p>
+      </div>
+    </section>
+
+    <!-- Sección: Historial de ventas/alquileres -->
+    <section id="section-historial" class="profile-section hidden">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-black uppercase tracking-tighter">Historial de ventas y alquileres</h2>
+      </div>
+
+      <div id="history-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+
+      <div id="no-history" class="hidden text-center py-12 bg-base-100 border border-base-200 rounded-2xl">
+        <p class="text-base-content/60">Aún no tienes ventas ni alquileres.</p>
+      </div>
+    </section>
 
     <!-- Loading -->
     <div id="loading" class="flex justify-center py-20">
@@ -386,12 +410,33 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
 
   const $ = id => document.getElementById(id);
 
+  // ── Navegación de secciones ────────────────────────────────
+  const sectionButtons = Array.from(document.querySelectorAll('[data-section-btn]'));
+  const sections = Array.from(document.querySelectorAll('.profile-section'));
+
+  function setActiveSection(key) {
+    sections.forEach((s) => s.classList.add('hidden'));
+    const active = document.getElementById('section-' + key);
+    if (active) active.classList.remove('hidden');
+
+    sectionButtons.forEach((btn) => {
+      const isActive = btn.dataset.sectionBtn === key;
+      btn.classList.toggle('btn-primary', isActive);
+      btn.classList.toggle('btn-ghost', !isActive);
+    });
+  }
+
+  sectionButtons.forEach((btn) => {
+    btn.addEventListener('click', () => setActiveSection(btn.dataset.sectionBtn));
+  });
+
   async function loadProfile() {
     try {
-      const [meRes, prodRes, reservasRes] = await Promise.all([
+      const [meRes, prodRes, reservasRes, historyRes] = await Promise.all([
         fetch(API_BASE + "/me", { headers }),
         fetch(API_BASE + "/me/productos", { headers }),
         fetch(API_BASE + "/me/reservas", { headers }),
+        fetch(API_BASE + "/me/historial", { headers }),
       ]);
 
       if (!meRes.ok) { clearSession(); window.location.href = "/auth?mode=login&next=" + encodeURIComponent("/profile"); return; }
@@ -399,6 +444,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       const me = await meRes.json();
       const prods = await prodRes.json();
       const reservas = reservasRes.ok ? await reservasRes.json() : [];
+      const historial = historyRes.ok ? await historyRes.json() : [];
 
       // Guardar id para el caché de avatar
       if (me.idUsuario) localStorage.setItem('ufvshares_id', me.idUsuario);
@@ -412,10 +458,19 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       $('loading').classList.add('hidden');
       renderProducts(prods);
       renderReserved(reservas);
+      renderHistory(historial);
     } catch (e) {
       $("loading").classList.add("hidden");
       console.error(e);
     }
+  }
+
+  // Activar sección inicial
+  const initialSection = (location.hash || '').replace('#', '') || 'productos';
+  if (['productos', 'reservas', 'historial'].includes(initialSection)) {
+    setActiveSection(initialSection);
+  } else {
+    setActiveSection('productos');
   }
 
   function setAvatarImg(src) {
@@ -692,6 +747,75 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
               <span class="badge badge-sm ${estClss} border-none">${estTxt}</span>
             </div>
             <div class="flex items-center justify-end mt-2">
+              <span class="font-bold text-primary ml-auto">${precio}</span>
+            </div>
+          </div>
+        </div>
+      `);
+    });
+  }
+
+  function renderHistory(items) {
+    const grid = $("history-grid");
+    const empty = $("no-history");
+    if (!grid || !empty) return;
+
+    grid.innerHTML = "";
+    if (!Array.isArray(items) || items.length === 0) {
+      empty.classList.remove("hidden");
+      return;
+    }
+
+    empty.classList.add("hidden");
+
+    items.forEach((item) => {
+      const tipo = tipoLabel[item.tipoTransaccion] ?? item.tipoTransaccion ?? "—";
+      const prod = item.producto ?? {};
+      const persona = item.persona ?? {};
+      const precio = (prod.precio == null || Number(prod.precio) === 0) ? "Gratis" : parseFloat(prod.precio).toFixed(2) + " €";
+      const imgSrc = prod.fotoUrl ? BACKEND_BASE + prod.fotoUrl : (prod.imagenUrl ?? null);
+      const fecha = item.fechaTransaccion
+        ? new Date(item.fechaTransaccion).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+        : '—';
+      const inicio = item.fechaInicio
+        ? new Date(item.fechaInicio).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+        : null;
+      const fin = item.fechaFin
+        ? new Date(item.fechaFin).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+        : null;
+      const dias = item.diasAlquiler != null ? Number(item.diasAlquiler) : null;
+
+      const imgHtml = imgSrc
+        ? `<img src="${imgSrc}" alt="${prod.titulo ?? 'Producto'}" class="w-full h-40 object-cover rounded-t-2xl" />`
+        : `<div class="w-full h-40 bg-base-200 rounded-t-2xl flex items-center justify-center text-base-content/30 text-sm">Sin foto</div>`;
+
+      const personaNombre = (persona.nombre || persona.apellidos)
+        ? `${persona.nombre ?? ''} ${persona.apellidos ?? ''}`.trim()
+        : 'Usuario';
+      const personaEmail = persona.correo ? `<p class="text-xs text-base-content/50">${persona.correo}</p>` : '';
+
+      const alquilerHtml = (item.tipoTransaccion === 'ALQUILER' && (inicio || fin || dias != null))
+        ? `<div class="text-xs text-base-content/60 mt-2">
+             ${inicio && fin ? `Alquiler: ${inicio} → ${fin}` : inicio ? `Inicio: ${inicio}` : fin ? `Fin: ${fin}` : ''}
+             ${dias != null ? `<span class="ml-2 badge badge-sm">${dias} día${dias !== 1 ? 's' : ''}</span>` : ''}
+           </div>`
+        : '';
+
+      grid.insertAdjacentHTML("beforeend", `
+        <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow">
+          ${imgHtml}
+          <div class="card-body p-5">
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="font-bold leading-tight">${prod.titulo ?? 'Producto'}</h3>
+              <span class="badge badge-primary shrink-0">${tipo}</span>
+            </div>
+            <p class="text-xs text-base-content/50 mt-1">Fecha: ${fecha}</p>
+            <div class="mt-2">
+              <p class="text-sm font-semibold">${personaNombre}</p>
+              ${personaEmail}
+            </div>
+            ${alquilerHtml}
+            <div class="flex items-center justify-end mt-3">
               <span class="font-bold text-primary ml-auto">${precio}</span>
             </div>
           </div>
