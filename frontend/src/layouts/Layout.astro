@@ -147,7 +147,7 @@ const pageTitle = typeof title === "string" && title.trim().length > 0 ? title :
 		margin: 0;
 	}
 
-	.global-chat-toast-root {
+	:global(.global-chat-toast-root) {
 		position: fixed;
 		top: 12px;
 		left: 50%;
@@ -156,7 +156,7 @@ const pageTitle = typeof title === "string" && title.trim().length > 0 ? title :
 		z-index: 2100;
 		pointer-events: none;
 	}
-	.global-chat-toast {
+	:global(.global-chat-toast) {
 		pointer-events: auto;
 		display: flex;
 		align-items: center;
@@ -172,11 +172,11 @@ const pageTitle = typeof title === "string" && title.trim().length > 0 ? title :
 		opacity: 0;
 		transition: transform .2s ease, opacity .2s ease;
 	}
-	.global-chat-toast.show {
+	:global(.global-chat-toast.show) {
 		transform: translateY(0);
 		opacity: 1;
 	}
-	.global-chat-toast-logo {
+	:global(.global-chat-toast-logo) {
 		width: 30px;
 		height: 30px;
 		border-radius: 8px;
@@ -184,7 +184,7 @@ const pageTitle = typeof title === "string" && title.trim().length > 0 ? title :
 		box-shadow: 0 1px 4px rgba(0,0,0,.12);
 		flex: 0 0 auto;
 	}
-	.global-chat-toast-copy {
+	:global(.global-chat-toast-copy) {
 		min-width: 0;
 		flex: 1;
 		border: 0;
@@ -192,7 +192,7 @@ const pageTitle = typeof title === "string" && title.trim().length > 0 ? title :
 		padding: 0;
 		cursor: pointer;
 	}
-	.global-chat-toast-title {
+	:global(.global-chat-toast-title) {
 		font-size: 13px;
 		font-weight: 700;
 		color: #1f2937;
@@ -201,7 +201,7 @@ const pageTitle = typeof title === "string" && title.trim().length > 0 ? title :
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
-	.global-chat-toast-text {
+	:global(.global-chat-toast-text) {
 		margin-top: 2px;
 		font-size: 12px;
 		color: #4b5563;
@@ -210,7 +210,7 @@ const pageTitle = typeof title === "string" && title.trim().length > 0 ? title :
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
-	.global-chat-toast-close {
+	:global(.global-chat-toast-close) {
 		border: 0;
 		background: transparent;
 		color: #6b7280;
@@ -220,7 +220,7 @@ const pageTitle = typeof title === "string" && title.trim().length > 0 ? title :
 		cursor: pointer;
 		flex: 0 0 auto;
 	}
-	.global-chat-toast-close:hover {
+	:global(.global-chat-toast-close:hover) {
 		background: rgba(0,0,0,.06);
 	}
 </style>
