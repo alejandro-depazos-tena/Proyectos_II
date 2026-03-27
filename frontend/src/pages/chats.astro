@@ -4,15 +4,15 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout title="Chats | UFV Shares">
   <div class="px-2 sm:px-4 py-2" style="height: calc(100vh - 110px); min-height: 560px;">
-    <div class="flex h-full overflow-hidden rounded-2xl border border-base-200 shadow-lg">
+    <div id="chat-shell" class="flex h-full overflow-hidden rounded-2xl border border-base-200 shadow-lg">
 
       <!-- ══ SIDEBAR ══ -->
       <div id="chat-sidebar" class="flex flex-col w-full sm:w-[340px] lg:w-[380px] shrink-0 bg-base-100 border-r border-base-200">
         <!-- Cabecera -->
-        <div class="flex items-center gap-3 px-4 py-3.5 bg-[#f0f2f5] border-b border-base-200 shrink-0">
-          <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0">
+        <div id="chat-sidebar-header" class="flex items-center gap-3 px-4 py-3.5 bg-[#f0f2f5] border-b border-base-200 shrink-0">
+          <button id="sidebar-toggle-btn" type="button" class="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0" title="Comprimir/expandir panel de chats" aria-label="Comprimir/expandir panel de chats" aria-expanded="true">
             <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          </div>
+          </button>
           <h2 class="flex-1 font-bold text-[1.05rem] text-base-content">Chats</h2>
           <button id="refresh-btn" class="btn btn-ghost btn-circle btn-sm text-base-content/50" title="Actualizar">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
@@ -20,10 +20,10 @@ import Layout from "../layouts/Layout.astro";
         </div>
         <div id="chat-sidebar-tabs" class="px-3 py-2 bg-base-100 border-b border-base-200 shrink-0 flex items-center gap-2 overflow-x-auto scrollbar-none">
           <button type="button" data-view="all" class="chat-filter-tab chat-filter-tab-active">Todos</button>
-          <button type="button" data-view="unread" class="chat-filter-tab">No leidos</button>
+          <button type="button" data-view="unread" class="chat-filter-tab">No leidos <span id="unread-count" class="opacity-70">(0)</span></button>
           <button type="button" data-view="blocked" class="chat-filter-tab">Bloqueados <span id="blocked-count" class="opacity-70">(0)</span></button>
         </div>
-        <div class="px-3 pt-2 pb-1 bg-base-100 border-b border-base-200 shrink-0">
+        <div id="archived-shortcut-wrap" class="px-3 pt-2 pb-1 bg-base-100 border-b border-base-200 shrink-0">
           <button id="archived-shortcut" type="button" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl border border-base-200 hover:bg-base-200/60 transition-colors">
             <span class="w-8 h-8 rounded-full bg-base-200 flex items-center justify-center text-base-content/70">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="5" rx="1"></rect><path d="M4 8h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"></path><path d="M12 11v6"></path><path d="m9.5 14.5 2.5 2.5 2.5-2.5"></path></svg>
@@ -33,7 +33,7 @@ import Layout from "../layouts/Layout.astro";
           </button>
         </div>
         <!-- Buscador -->
-        <div class="px-3 py-2 bg-base-100 border-b border-base-200 shrink-0">
+        <div id="chat-search-wrap" class="px-3 py-2 bg-base-100 border-b border-base-200 shrink-0">
           <div class="relative">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             <input id="chat-search" type="text" placeholder="Buscar o empezar un chat" class="input input-sm w-full pl-9 bg-[#f0f2f5] border-none rounded-full text-sm focus:outline-none" />
@@ -46,6 +46,9 @@ import Layout from "../layouts/Layout.astro";
             <div class="flex items-center gap-3 px-4 py-4 border-b border-base-200/50 animate-pulse"><div class="w-12 h-12 rounded-full bg-base-300 shrink-0"></div><div class="flex-1 space-y-2"><div class="h-3.5 bg-base-300 rounded w-3/4"></div><div class="h-2.5 bg-base-300 rounded w-1/3"></div></div></div>
             <div class="flex items-center gap-3 px-4 py-4 border-b border-base-200/50 animate-pulse"><div class="w-12 h-12 rounded-full bg-base-300 shrink-0"></div><div class="flex-1 space-y-2"><div class="h-3.5 bg-base-300 rounded w-1/2"></div><div class="h-2.5 bg-base-300 rounded w-2/5"></div></div></div>
           </div>
+        </div>
+        <div id="collapsed-conv-rail" class="hidden flex-1 overflow-y-auto py-2 px-2">
+          <div id="collapsed-conv-list" class="flex flex-col items-center gap-2"></div>
         </div>
       </div>
 
@@ -431,6 +434,30 @@ import Layout from "../layouts/Layout.astro";
     color: #0f5132;
   }
 
+  @media (min-width: 640px) {
+    #chat-shell.sidebar-collapsed #chat-sidebar {
+      width: 74px;
+      min-width: 74px;
+      overflow: hidden;
+    }
+    #chat-shell.sidebar-collapsed #chat-sidebar-tabs,
+    #chat-shell.sidebar-collapsed #archived-shortcut-wrap,
+    #chat-shell.sidebar-collapsed #chat-search-wrap,
+    #chat-shell.sidebar-collapsed #conv-list,
+    #chat-shell.sidebar-collapsed #refresh-btn,
+    #chat-shell.sidebar-collapsed #chat-sidebar h2 {
+      display: none;
+    }
+    #chat-shell.sidebar-collapsed #chat-sidebar-header {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+    #chat-shell.sidebar-collapsed #collapsed-conv-rail {
+      display: block;
+    }
+  }
+
   .archived-shortcut-active {
     border-color: #cce8dd !important;
     background: #dff6ed !important;
@@ -448,6 +475,33 @@ import Layout from "../layouts/Layout.astro";
     font-weight: 700;
     color: #ffffff;
     background: #22c55e;
+  }
+
+  .collapsed-conv-item {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    display: grid;
+    place-items: center;
+    background: transparent;
+  }
+
+  .collapsed-conv-item-active {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 2px rgba(79,70,229,.15);
+  }
+
+  .collapsed-unread-dot {
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #ef4444;
+    border: 2px solid #ffffff;
   }
 </style>
 
@@ -505,6 +559,9 @@ import Layout from "../layouts/Layout.astro";
   let myUserIdCache: number | null | undefined = undefined;
 
   const convList          = document.getElementById('conv-list')!;
+  const collapsedConvList = document.getElementById('collapsed-conv-list');
+  const chatShell         = document.getElementById('chat-shell');
+  const sidebarToggleBtn  = document.getElementById('sidebar-toggle-btn') as HTMLButtonElement | null;
   const convSkeleton      = document.getElementById('conv-skeleton')!;
   const chatMessages      = document.getElementById('chat-messages')!;
   const chatEmptyState    = document.getElementById('chat-empty-state')!;
@@ -520,6 +577,7 @@ import Layout from "../layouts/Layout.astro";
   const msgInput          = document.getElementById('msg-input')      as HTMLTextAreaElement;
   const chatToastRoot     = document.getElementById('chat-toast-root');
   const sidebarTabs       = Array.from(document.querySelectorAll<HTMLButtonElement>('#chat-sidebar-tabs [data-view]'));
+  const unreadCountEl     = document.getElementById('unread-count');
   const blockedCountEl    = document.getElementById('blocked-count');
   const archivedCountEl   = document.getElementById('archived-count');
   const archivedShortcut  = document.getElementById('archived-shortcut');
@@ -540,6 +598,21 @@ import Layout from "../layouts/Layout.astro";
   const blockConfirmCancel = document.getElementById('block-confirm-cancel');
   const blockConfirmAccept = document.getElementById('block-confirm-accept') as HTMLButtonElement | null;
   let pendingBlockAction: { userId: number; blocked: boolean; userName: string } | null = null;
+  const SIDEBAR_COLLAPSED_KEY = 'ufvshares_chat_sidebar_collapsed';
+
+  function setSidebarCollapsed(collapsed: boolean) {
+    if (!chatShell) return;
+    if (window.innerWidth < 640) return;
+    chatShell.classList.toggle('sidebar-collapsed', collapsed);
+    sidebarToggleBtn?.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? '1' : '0');
+  }
+
+  function toggleSidebarCollapsed() {
+    if (!chatShell) return;
+    const collapsed = !chatShell.classList.contains('sidebar-collapsed');
+    setSidebarCollapsed(collapsed);
+  }
 
   function persistBlockedUsers() {
     localStorage.setItem(BLOCKED_USERS_KEY, JSON.stringify(Array.from(blockedUsers)));
@@ -674,6 +747,10 @@ import Layout from "../layouts/Layout.astro";
       .filter(conv => !isUserBlocked(conv.otroUsuarioId) && !isConversationArchived(conv.idConversacion))
       .reduce((sum, conv) => sum + (conv.noLeidos || 0), 0);
     window.dispatchEvent(new CustomEvent('ufvshares:chat-unread', { detail: { total: totalUnread } }));
+
+    if (unreadCountEl) {
+      unreadCountEl.textContent = '(' + totalUnread + ')';
+    }
 
     if (blockedCountEl) {
       const blockedTotal = convs.filter(c => isUserBlocked(c.otroUsuarioId)).length;
@@ -904,7 +981,35 @@ import Layout from "../layouts/Layout.astro";
   }
 
   // Render lista de conversaciones
+  function renderCollapsedConversationRail() {
+    if (!collapsedConvList) return;
+    const visible = conversations
+      .filter(c => !isUserBlocked(c.otroUsuarioId) && !isConversationArchived(c.idConversacion))
+      .slice(0, 30);
+
+    collapsedConvList.innerHTML = visible.map((conv) => {
+      const activeCls = conv.idConversacion === activeConvId ? 'collapsed-conv-item-active' : '';
+      const unreadDot = conv.noLeidos > 0 ? '<span class="collapsed-unread-dot" aria-hidden="true"></span>' : '';
+      const avatar = conv.otroUsuarioFoto
+        ? '<img src="' + BACKEND_BASE + conv.otroUsuarioFoto + '" alt="" class="w-9 h-9 rounded-full object-cover"/>'
+        : '<div class="w-9 h-9 rounded-full bg-primary/20 text-primary font-black flex items-center justify-center text-xs">' + conv.otroUsuarioIniciales + '</div>';
+      return '<button type="button" class="collapsed-conv-item ' + activeCls + '" data-collapsed-conv-id="' + conv.idConversacion + '" title="' + escapeHtml(conv.otroUsuarioNombre) + '">'
+        + avatar
+        + unreadDot
+        + '</button>';
+    }).join('');
+
+    collapsedConvList.querySelectorAll<HTMLButtonElement>('[data-collapsed-conv-id]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const convId = Number(btn.dataset.collapsedConvId);
+        const conv = conversations.find(c => c.idConversacion === convId);
+        if (conv) openConversation(conv);
+      });
+    });
+  }
+
   function renderConvList() {
+    renderCollapsedConversationRail();
     convSkeleton?.remove();
     if (filteredConvs.length === 0) {
       const emptyMsg = activeSidebarView === 'blocked'
@@ -1146,6 +1251,20 @@ import Layout from "../layouts/Layout.astro";
     renderConvList();
   });
 
+  sidebarToggleBtn?.addEventListener('click', () => {
+    toggleSidebarCollapsed();
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth < 640) {
+      chatShell?.classList.remove('sidebar-collapsed');
+      sidebarToggleBtn?.setAttribute('aria-expanded', 'true');
+      return;
+    }
+    const persisted = localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1';
+    setSidebarCollapsed(persisted);
+  });
+
   document.getElementById('refresh-btn')?.addEventListener('click', async () => {
     conversations = await fetchConversations();
     syncUnreadSnapshot(conversations);
@@ -1291,6 +1410,7 @@ import Layout from "../layouts/Layout.astro";
 
   refreshMoreMenu();
   refreshSidebarTabs();
+  setSidebarCollapsed(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1');
 
   // ── Emoji picker ──
   const EMOJIS = [
