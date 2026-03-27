@@ -364,6 +364,7 @@ import Layout from "../layouts/Layout.astro";
   let lastMsgSender:  'me' | 'other' | null = null;
   let toastHideTimer: ReturnType<typeof setTimeout> | null = null;
   const convUnreadSnapshot = new Map<number, number>();
+  const messageReadSnapshot = new Map<number, boolean>();
 
   const convList          = document.getElementById('conv-list')!;
   const convSkeleton      = document.getElementById('conv-skeleton')!;
@@ -557,16 +558,32 @@ import Layout from "../layouts/Layout.astro";
       + '<div>' + innerContent + '</div>'
       + (!isLoc ? '<div class="flex items-center justify-end gap-1 mt-0.5">'
         + '<span class="text-[10px] text-[#8696a0] whitespace-nowrap">' + formatTs(msg.fechaEnvio) + '</span>'
-        + (isMe ? ticksSvg(msg.leido) : '')
+        + (isMe ? '<span class="msg-status">' + ticksSvg(msg.leido) + '</span>' : '')
         + '</div>' : '')
       + '</div>';
     chatMessages.appendChild(wrapper);
+    if (isMe) messageReadSnapshot.set(msg.idMensaje, msg.leido);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function refreshReadReceipts(msgs: ApiMsg[]) {
+    msgs.forEach((msg) => {
+      if (msg.from !== 'me') return;
+      const prev = messageReadSnapshot.get(msg.idMensaje);
+      if (prev !== undefined && prev === msg.leido) return;
+
+      messageReadSnapshot.set(msg.idMensaje, msg.leido);
+      const statusEl = chatMessages.querySelector(
+        '.msg-bubble[data-msg-id="' + msg.idMensaje + '"] .msg-status'
+      ) as HTMLElement | null;
+      if (statusEl) statusEl.innerHTML = ticksSvg(msg.leido);
+    });
   }
 
   // Limpiar mensajes
   function clearMessages() {
     lastMsgDateStr = ''; lastMsgSender = null;
+    messageReadSnapshot.clear();
     chatEmptyState.classList.add('hidden');
     chatMessages.querySelectorAll('.msg-bubble, .msg-date-sep').forEach(el => el.remove());
   }
@@ -657,6 +674,10 @@ import Layout from "../layouts/Layout.astro";
             }
           });
         }
+
+        // Read state can change without new incoming messages.
+        const receiptMsgs = await fetchMessages(activeConvId);
+        refreshReadReceipts(receiptMsgs);
       }
 
       const updated = await fetchConversations();
