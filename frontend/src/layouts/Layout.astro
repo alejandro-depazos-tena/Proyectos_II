@@ -31,11 +31,109 @@ const pageTitle = typeof title === "string" && title.trim().length > 0 ? title :
 	<body class="bg-base-200 min-h-screen">
 		<AnnouncementBar />
 		<Navbar />
+		<div id="global-chat-toast-root" class="global-chat-toast-root" aria-live="polite" aria-atomic="true"></div>
 		<main>
 			<slot />
 		</main>
 		<Footer />
 		<ToasterComponent client:load />
+		<script>
+			const API_BASE = (import.meta as any).env.PUBLIC_API_BASE ?? 'http://localhost:8080/api';
+			const CHAT_POLL_MS = 3000;
+
+			interface LayoutChatConv {
+				idConversacion: number;
+				otroUsuarioNombre: string;
+				ultimoMensaje: string | null;
+				noLeidos: number;
+			}
+
+			const root = document.getElementById('global-chat-toast-root');
+			const token = localStorage.getItem('ufvshares_token');
+			let pollTimer: ReturnType<typeof setTimeout> | null = null;
+			let hideTimer: ReturnType<typeof setTimeout> | null = null;
+			let initialized = false;
+			const unreadSnapshot = new Map<number, number>();
+
+			function escapeHtml(s: string): string {
+				return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+			}
+
+			function toPreview(message: string): string {
+				const clean = message.startsWith('UFVLOC:') ? 'Te ha compartido su ubicacion' : message;
+				return clean.length > 72 ? clean.slice(0, 72) + '...' : clean;
+			}
+
+			function showToast(sender: string, text: string, convId: number) {
+				if (!root) return;
+				if (hideTimer) clearTimeout(hideTimer);
+				root.innerHTML = '';
+
+				const toast = document.createElement('div');
+				toast.className = 'global-chat-toast';
+				toast.innerHTML = '<img src="/Logo.png" alt="UFV Shares" class="global-chat-toast-logo"/>'
+					+ '<button type="button" class="global-chat-toast-copy text-left" aria-label="Abrir chat">'
+					+ '<p class="global-chat-toast-title">Nuevo mensaje de ' + escapeHtml(sender) + '</p>'
+					+ '<p class="global-chat-toast-text">' + escapeHtml(text) + '</p>'
+					+ '</button>'
+					+ '<button type="button" class="global-chat-toast-close" aria-label="Cerrar notificacion">✕</button>';
+
+				const closeToast = () => {
+					toast.classList.remove('show');
+					setTimeout(() => {
+						if (root.contains(toast)) root.innerHTML = '';
+					}, 180);
+				};
+
+				(toast.querySelector('.global-chat-toast-copy') as HTMLButtonElement | null)
+					?.addEventListener('click', () => {
+						location.href = '/chats?conv=' + encodeURIComponent(String(convId));
+					});
+				(toast.querySelector('.global-chat-toast-close') as HTMLButtonElement | null)
+					?.addEventListener('click', closeToast);
+
+				root.appendChild(toast);
+				requestAnimationFrame(() => toast.classList.add('show'));
+				hideTimer = setTimeout(closeToast, 4500);
+			}
+
+			function syncUnread(convs: LayoutChatConv[]) {
+				unreadSnapshot.clear();
+				convs.forEach(c => unreadSnapshot.set(c.idConversacion, c.noLeidos));
+			}
+
+			async function fetchConversations(): Promise<LayoutChatConv[]> {
+				if (!token) return [];
+				const res = await fetch(API_BASE + '/chats', { headers: { Authorization: 'Bearer ' + token } });
+				if (!res.ok) return [];
+				return res.json();
+			}
+
+			async function pollChats() {
+				const convs = await fetchConversations();
+				if (convs.length > 0) {
+					if (initialized) {
+						convs.forEach(conv => {
+							const prev = unreadSnapshot.get(conv.idConversacion) ?? conv.noLeidos;
+							if (conv.noLeidos > prev) {
+								showToast(
+									conv.otroUsuarioNombre,
+									toPreview(conv.ultimoMensaje ?? 'Te ha escrito'),
+									conv.idConversacion
+								);
+							}
+						});
+					}
+					syncUnread(convs);
+					initialized = true;
+				}
+				pollTimer = setTimeout(pollChats, CHAT_POLL_MS);
+			}
+
+			if (token && location.pathname !== '/chats') {
+				pollChats();
+			}
+		</script>
 	</body>
 </html>
 
@@ -43,5 +141,82 @@ const pageTitle = typeof title === "string" && title.trim().length > 0 ? title :
 	html,
 	body {
 		margin: 0;
+	}
+
+	.global-chat-toast-root {
+		position: fixed;
+		top: 12px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: min(92vw, 430px);
+		z-index: 2100;
+		pointer-events: none;
+	}
+	.global-chat-toast {
+		pointer-events: auto;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		width: 100%;
+		background: rgba(255,255,255,.96);
+		backdrop-filter: blur(8px);
+		border: 1px solid rgba(0,0,0,.08);
+		border-radius: 12px;
+		box-shadow: 0 10px 28px rgba(0,0,0,.14);
+		padding: 9px 11px;
+		transform: translateY(-10px);
+		opacity: 0;
+		transition: transform .2s ease, opacity .2s ease;
+	}
+	.global-chat-toast.show {
+		transform: translateY(0);
+		opacity: 1;
+	}
+	.global-chat-toast-logo {
+		width: 30px;
+		height: 30px;
+		border-radius: 8px;
+		object-fit: cover;
+		box-shadow: 0 1px 4px rgba(0,0,0,.12);
+		flex: 0 0 auto;
+	}
+	.global-chat-toast-copy {
+		min-width: 0;
+		flex: 1;
+		border: 0;
+		background: transparent;
+		padding: 0;
+		cursor: pointer;
+	}
+	.global-chat-toast-title {
+		font-size: 13px;
+		font-weight: 700;
+		color: #1f2937;
+		line-height: 1.2;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.global-chat-toast-text {
+		margin-top: 2px;
+		font-size: 12px;
+		color: #4b5563;
+		line-height: 1.25;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.global-chat-toast-close {
+		border: 0;
+		background: transparent;
+		color: #6b7280;
+		width: 24px;
+		height: 24px;
+		border-radius: 999px;
+		cursor: pointer;
+		flex: 0 0 auto;
+	}
+	.global-chat-toast-close:hover {
+		background: rgba(0,0,0,.06);
 	}
 </style>
