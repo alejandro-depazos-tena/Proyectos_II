@@ -393,6 +393,8 @@ import Layout from "../layouts/Layout.astro";
   function syncUnreadSnapshot(convs: ApiConv[]) {
     convUnreadSnapshot.clear();
     convs.forEach(c => convUnreadSnapshot.set(c.idConversacion, c.noLeidos));
+    const totalUnread = convs.reduce((sum, conv) => sum + (conv.noLeidos || 0), 0);
+    window.dispatchEvent(new CustomEvent('ufvshares:chat-unread', { detail: { total: totalUnread } }));
   }
 
   function showIncomingToast(senderName: string, text: string, onOpen?: () => void) {

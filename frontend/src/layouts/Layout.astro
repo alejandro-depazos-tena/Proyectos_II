@@ -102,6 +102,11 @@ const pageTitle = typeof title === "string" && title.trim().length > 0 ? title :
 				convs.forEach(c => unreadSnapshot.set(c.idConversacion, c.noLeidos));
 			}
 
+			function emitUnreadTotal(convs: LayoutChatConv[]) {
+				const total = convs.reduce((sum, conv) => sum + (conv.noLeidos || 0), 0);
+				window.dispatchEvent(new CustomEvent('ufvshares:chat-unread', { detail: { total } }));
+			}
+
 			async function fetchConversations(): Promise<LayoutChatConv[]> {
 				if (!token) return [];
 				const res = await fetch(API_BASE + '/chats', { headers: { Authorization: 'Bearer ' + token } });
@@ -111,22 +116,21 @@ const pageTitle = typeof title === "string" && title.trim().length > 0 ? title :
 
 			async function pollChats() {
 				const convs = await fetchConversations();
-				if (convs.length > 0) {
-					if (initialized) {
-						convs.forEach(conv => {
-							const prev = unreadSnapshot.get(conv.idConversacion) ?? conv.noLeidos;
-							if (conv.noLeidos > prev) {
-								showToast(
-									conv.otroUsuarioNombre,
-									toPreview(conv.ultimoMensaje ?? 'Te ha escrito'),
-									conv.idConversacion
-								);
-							}
-						});
-					}
-					syncUnread(convs);
-					initialized = true;
+				if (initialized) {
+					convs.forEach(conv => {
+						const prev = unreadSnapshot.get(conv.idConversacion) ?? conv.noLeidos;
+						if (conv.noLeidos > prev) {
+							showToast(
+								conv.otroUsuarioNombre,
+								toPreview(conv.ultimoMensaje ?? 'Te ha escrito'),
+								conv.idConversacion
+							);
+						}
+					});
 				}
+				emitUnreadTotal(convs);
+				syncUnread(convs);
+				initialized = true;
 				pollTimer = setTimeout(pollChats, CHAT_POLL_MS);
 			}
 

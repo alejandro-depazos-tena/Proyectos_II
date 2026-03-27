@@ -13,8 +13,9 @@ import { Icon } from "astro-icon/components";
             <a href="/favorites" class="flex items-center gap-1.5 h-full px-3 whitespace-nowrap hover:bg-white/10 transition-colors shrink-0">
                 <Icon name="lucide:heart" class="w-3.5 h-3.5" />Favoritos
             </a>
-            <a href="/chats"     class="flex items-center gap-1.5 h-full px-3 whitespace-nowrap hover:bg-white/10 transition-colors shrink-0">
+            <a href="/chats" class="chat-link-mobile relative flex items-center gap-1.5 h-full px-3 whitespace-nowrap hover:bg-white/10 transition-colors shrink-0">
                 <Icon name="lucide:message-circle" class="w-3.5 h-3.5" />Chats
+                <span id="nav-chat-badge-mobile" class="chat-unread-badge hidden" aria-label="Mensajes sin leer">0</span>
             </a>
             <a href="/blog"      class="flex items-center gap-1.5 h-full px-3 whitespace-nowrap hover:bg-white/10 transition-colors shrink-0">
                 <Icon name="lucide:rss" class="w-3.5 h-3.5" />Blog
@@ -39,8 +40,9 @@ import { Icon } from "astro-icon/components";
                 <Icon name="lucide:heart" class="w-3.5 h-3.5" />Favoritos
             </a>
             <a href="/chats"
-                class="links-item flex items-center gap-1.5 h-full px-4 hover:bg-white/10 text-white/80 hover:text-white transition-all text-xs font-medium">
+                class="links-item chat-link-desktop relative flex items-center gap-1.5 h-full px-4 hover:bg-white/10 text-white/80 hover:text-white transition-all text-xs font-medium">
                 <Icon name="lucide:message-circle" class="w-3.5 h-3.5" />Chats
+                <span id="nav-chat-badge-desktop" class="chat-unread-badge hidden" aria-label="Mensajes sin leer">0</span>
             </a>
         </div>
 
@@ -61,6 +63,39 @@ import { Icon } from "astro-icon/components";
 <style>
     .scrollbar-none::-webkit-scrollbar { display: none; }
     .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .chat-link-mobile,
+    .chat-link-desktop {
+        overflow: visible;
+    }
+
+    .chat-unread-badge {
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 999px;
+        background: #ef4444;
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1;
+        box-shadow: 0 1px 4px rgba(0,0,0,.25);
+    }
+
+    .chat-unread-badge.hidden {
+        display: none;
+    }
+
+    .chat-link-mobile .chat-unread-badge {
+        margin-left: 2px;
+    }
+
+    .chat-link-desktop .chat-unread-badge {
+        margin-left: 4px;
+    }
 </style>
 
 <script>
@@ -71,5 +106,26 @@ import { Icon } from "astro-icon/components";
         if (href === path) {
             link.classList.add('bg-white/20', 'text-white', '!font-bold');
         }
+    });
+
+    const chatBadgeDesktop = document.getElementById('nav-chat-badge-desktop');
+    const chatBadgeMobile = document.getElementById('nav-chat-badge-mobile');
+
+    function setChatUnreadBadge(total: number) {
+        const value = total > 99 ? '99+' : String(total);
+        [chatBadgeDesktop, chatBadgeMobile].forEach((badge) => {
+            if (!badge) return;
+            if (total > 0) {
+                badge.textContent = value;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        });
+    }
+
+    window.addEventListener('ufvshares:chat-unread', (event: Event) => {
+        const customEvent = event as CustomEvent<{ total: number }>;
+        setChatUnreadBadge(customEvent.detail?.total ?? 0);
     });
 </script>
