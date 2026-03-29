@@ -7,6 +7,7 @@ import ToasterComponent from "../components/ui/ToasterComponent";
 
 const { title } = Astro.props;
 const pageTitle = typeof title === "string" && title.trim().length > 0 ? title : "UFV Shares";
+const apiBase = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
 ---
 
 <!doctype html>
@@ -18,13 +19,54 @@ const pageTitle = typeof title === "string" && title.trim().length > 0 ? title :
 		<meta name="generator" content={Astro.generator} />
 		<title>{pageTitle}</title>
 		<style>body{visibility:hidden;}</style>
-		<script is:inline>
+		<script is:inline define:vars={{ apiBase }}>
 			(function(){
-				if(!localStorage.getItem('ufvshares_token')){
+				const SESSION_KEYS = ['ufvshares_token', 'ufvshares_email', 'ufvshares_nombre', 'ufvshares_id'];
+
+				function clearSession(){
+					SESSION_KEYS.forEach(function(key){ localStorage.removeItem(key); });
+				}
+
+				function tokenExpired(token){
+					try {
+						const parts = token.split('.');
+						if(parts.length < 2) return true;
+						const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+						if(!payload || typeof payload.exp !== 'number') return true;
+						return payload.exp * 1000 <= Date.now();
+					} catch (_) {
+						return true;
+					}
+				}
+
+				function redirectToLogin(){
 					location.replace('/auth?mode=login&next='+encodeURIComponent(location.pathname+location.search));
-				} else {
+				}
+
+				function revealBody(){
 					document.addEventListener('DOMContentLoaded',function(){document.body.style.visibility='visible';});
 				}
+
+				var token = localStorage.getItem('ufvshares_token');
+				if(!token || tokenExpired(token)){
+					clearSession();
+					redirectToLogin();
+					return;
+				}
+
+				fetch(apiBase + '/me', { headers: { Authorization: 'Bearer ' + token } })
+					.then(function(res){
+						if(!res.ok){
+							clearSession();
+							redirectToLogin();
+							return;
+						}
+						revealBody();
+					})
+					.catch(function(){
+						// Keep app usable on transient network failures if token has not expired.
+						revealBody();
+					});
 			})();
 		</script>
 	</head>
