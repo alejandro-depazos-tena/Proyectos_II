@@ -22,19 +22,19 @@ const AUTH_PAGE_API_BASE = API_BASE;
           });
         }
 
-        function tokenExpired(tokenValue) {
+        function tokenState(tokenValue) {
           try {
             const parts = tokenValue.split(".");
-            if (parts.length < 2) return true;
+            if (parts.length < 2) return "unknown";
             const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
-            if (!payload || typeof payload.exp !== "number") return true;
-            return payload.exp * 1000 <= Date.now();
+            if (!payload || typeof payload.exp !== "number") return "unknown";
+            return payload.exp * 1000 <= Date.now() ? "expired" : "valid";
           } catch (_) {
-            return true;
+            return "unknown";
           }
         }
 
-        if (tokenExpired(token)) {
+        if (tokenState(token) === "expired") {
           clearSession();
           return;
         }
