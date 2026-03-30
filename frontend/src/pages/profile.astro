@@ -90,6 +90,11 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
               Editar datos
             </button>
           </div>
+
+          <div class="mt-4 p-3 rounded-xl bg-base-200/60 border border-base-200 text-sm text-left">
+            <p class="text-xs uppercase tracking-wide text-base-content/50 mb-1">Pregunta de seguridad configurada</p>
+            <p id="profile-security-question" class="font-semibold text-base-content/80">No configurada</p>
+          </div>
         </div>
 
       </div>
@@ -97,10 +102,10 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
 
     <!-- ── Drawer edición de perfil ──────────────────────────── -->
     <div id="edit-profile-overlay"
-      class="fixed inset-0 z-[900] bg-black/50 hidden items-end sm:items-center justify-center p-4
+      class="fixed inset-0 z-[1200] bg-black/50 hidden items-end sm:items-center justify-center p-4
              transition-opacity">
       <div id="edit-profile-panel"
-        class="bg-base-100 rounded-2xl shadow-2xl w-full max-w-md flex flex-col gap-0
+        class="relative z-[1210] bg-base-100 rounded-2xl shadow-2xl w-full max-w-md flex flex-col gap-0
                overflow-hidden transform translate-y-4 transition-transform">
 
         <!-- Header -->
@@ -110,10 +115,9 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
         </div>
 
         <!-- Step 1: formulario -->
-        <div id="edit-step-form" class="px-6 py-5 flex flex-col gap-4">
+        <div id="edit-step-form" class="relative z-[1220] px-6 py-5 flex flex-col gap-4">
           <p class="text-sm text-base-content/60">
-            Selecciona el dato que quieres cambiar. Te enviaremos un correo de
-            confirmaci&oacute;n antes de aplicar el cambio.
+            Selecciona el dato que quieres cambiar y guarda. El cambio se aplica al momento.
           </p>
 
           <div>
@@ -144,8 +148,40 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
                   d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7
                   a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              Enviar correo de confirmaci&oacute;n
+              Guardar cambio
             </button>
+          </div>
+
+          <div class="divider my-1">Seguridad</div>
+
+          <p class="text-sm text-base-content/60">
+            Puedes cambiar aquí tu pregunta y respuesta de seguridad para recuperar contraseña.
+          </p>
+
+          <p id="edit-security-current" class="text-sm text-base-content/70">
+            Pregunta actual: No configurada
+          </p>
+
+          <div>
+            <label for="edit-security-question" class="label pb-1"><span class="label-text font-semibold">Nueva pregunta de seguridad</span></label>
+            <select id="edit-security-question" class="select select-bordered w-full">
+              <option value="">Selecciona una pregunta</option>
+              <option value="¿Cuál es el nombre de tu primera mascota?">¿Cuál es el nombre de tu primera mascota?</option>
+              <option value="¿Cuál es tu ciudad de nacimiento?">¿Cuál es tu ciudad de nacimiento?</option>
+              <option value="¿Cuál es tu comida favorita?">¿Cuál es tu comida favorita?</option>
+              <option value="¿Cuál fue tu primer colegio?">¿Cuál fue tu primer colegio?</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="edit-security-answer" class="label pb-1"><span class="label-text font-semibold">Nueva respuesta de seguridad</span></label>
+            <input id="edit-security-answer" type="text" class="input input-bordered w-full" placeholder="Tu respuesta" maxlength="255" />
+          </div>
+
+          <p id="edit-security-error" class="text-error text-sm hidden"></p>
+
+          <div class="flex gap-3 justify-end pt-1">
+            <button type="button" id="btn-security-submit" class="btn btn-secondary btn-sm rounded-full">Guardar seguridad</button>
           </div>
         </div>
 
@@ -435,6 +471,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
   }
 
   const headers = { "Authorization": "Bearer " + token, "Content-Type": "application/json" };
+  let currentProfile = null;
 
   const $ = id => document.getElementById(id);
 
@@ -481,6 +518,8 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       // Guardar id para el caché de avatar
       if (me.idUsuario) localStorage.setItem('ufvshares_id', me.idUsuario);
 
+      currentProfile = me;
+
       // Render profile
       fillProfileCard(me);
       $('profile-prods-count').textContent = prods.length;
@@ -515,6 +554,36 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
     $('profile-email').textContent = me.correo;
     $('profile-telefono').textContent = me.telefono ?? '—';
     $('profile-dni').textContent = me.dni ?? '—';
+    syncSecurityQuestionUi(me.preguntaSeguridad ?? 'No configurada');
+      function syncSecurityQuestionUi(question) {
+        const q = (question && question.trim()) ? question.trim() : 'No configurada';
+        if ($('profile-security-question')) $('profile-security-question').textContent = q;
+        if ($('edit-security-current')) $('edit-security-current').textContent = 'Pregunta actual: ' + q;
+
+        const select = $('edit-security-question');
+        if (!select) return;
+
+        const hasOption = Array.from(select.options).some((opt) => opt.value === q);
+        if (hasOption) {
+          select.value = q;
+          return;
+        }
+
+        if (q !== 'No configurada') {
+          const customValue = '__current_custom__';
+          let customOption = Array.from(select.options).find((opt) => opt.value === customValue);
+          if (!customOption) {
+            customOption = document.createElement('option');
+            customOption.value = customValue;
+            select.insertBefore(customOption, select.options[1] ?? null);
+          }
+          customOption.textContent = q + ' (actual)';
+          select.value = customValue;
+        } else {
+          select.value = '';
+        }
+      }
+
     const CACHE_KEY = 'ufvshares_avatar_' + me.idUsuario;
     if (me.fotoPerfil) {
       const src = BACKEND_BASE + me.fotoPerfil;
@@ -585,26 +654,26 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
     }, 4000);
   }
 
-  // ── Leer params de vuelta del enlace de confirmación ─────────
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('cambio') === 'ok') {
-    const campoNames = { nombre: 'Nombre', apellidos: 'Apellidos', telefono: 'Teléfono' };
-    const campo = campoNames[urlParams.get('campo')] ?? 'Dato';
-    showToast(campo + ' actualizado correctamente ✓', 'success');
-    history.replaceState({}, '', '/profile');
-  } else if (urlParams.get('cambio') === 'error') {
-    showToast('El enlace de confirmación no es válido o ha expirado.', 'error');
-    history.replaceState({}, '', '/profile');
-  }
-
   // ── Drawer edición de perfil ─────────────────────────────────
-  function openEditDrawer() {
+  async function openEditDrawer() {
     const overlay = $('edit-profile-overlay');
     const panel   = $('edit-profile-panel');
     // Reset al paso 1
     $('edit-step-form').classList.remove('hidden');
     $('edit-step-ok').classList.add('hidden');
     $('edit-valor').value = '';
+    $('edit-security-answer').value = '';
+
+    try {
+      const meRes = await fetch(API_BASE + '/me', { headers });
+      if (meRes.ok) {
+        currentProfile = await meRes.json();
+        syncSecurityQuestionUi(currentProfile?.preguntaSeguridad ?? 'No configurada');
+      }
+    } catch {
+      // Ignorar para no bloquear la apertura del modal.
+    }
+
     $('edit-error').classList.add('hidden');
     overlay.classList.remove('hidden');
     overlay.classList.add('flex');
@@ -650,7 +719,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
 
     btn.disabled = true;
     const origHtml = btn.innerHTML;
-    btn.innerHTML = '<span class="loading loading-spinner loading-xs"></span> Enviando…';
+    btn.innerHTML = '<span class="loading loading-spinner loading-xs"></span> Guardando…';
     try {
       const res = await fetch(API_BASE + '/me/solicitar-cambio', {
         method: 'POST',
@@ -659,21 +728,93 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        errorEl.textContent = err.message ?? 'Error al enviar la solicitud';
+        if (err?.message === 'Campo no permitido') {
+          errorEl.textContent = 'El campo seleccionado no se puede actualizar.';
+        } else if (err?.message === 'El valor no puede estar vacío') {
+          errorEl.textContent = 'Introduce un valor válido.';
+        } else {
+          errorEl.textContent = 'No se pudo guardar el cambio en este momento.';
+        }
         errorEl.classList.remove('hidden');
         return;
       }
-      const data = await res.json();
-      $('edit-step-form').classList.add('hidden');
-      $('edit-ok-msg').textContent =
-        'Hemos enviado un enlace de confirmación a ' + data.correo + '. Tienes 30 minutos para confirmar el cambio.';
-      $('edit-step-ok').classList.remove('hidden');
+
+      if (campo === 'nombre') {
+        const apellidos = currentProfile?.apellidos ?? '';
+        $('profile-name').textContent = (valor + ' ' + apellidos).trim();
+        currentProfile = { ...(currentProfile || {}), nombre: valor };
+      } else if (campo === 'apellidos') {
+        const nombre = currentProfile?.nombre ?? '';
+        $('profile-name').textContent = (nombre + ' ' + valor).trim();
+        currentProfile = { ...(currentProfile || {}), apellidos: valor };
+      } else if (campo === 'telefono') {
+        $('profile-telefono').textContent = valor;
+        currentProfile = { ...(currentProfile || {}), telefono: valor };
+      }
+
+      showToast('Datos actualizados correctamente', 'success');
+      closeEditDrawer();
     } catch {
       errorEl.textContent = 'No se pudo conectar con el servidor';
       errorEl.classList.remove('hidden');
     } finally {
       btn.disabled = false;
       btn.innerHTML = origHtml;
+    }
+  });
+
+  $('btn-security-submit')?.addEventListener('click', async () => {
+    let question = $('edit-security-question')?.value?.trim() || '';
+    if (question === '__current_custom__') {
+      question = currentProfile?.preguntaSeguridad?.trim() || '';
+    }
+    const answer = $('edit-security-answer')?.value?.trim() || '';
+    const errorEl = $('edit-security-error');
+    const btn = $('btn-security-submit');
+
+    errorEl.classList.add('hidden');
+    if (!question) {
+      errorEl.textContent = 'Selecciona una pregunta de seguridad.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+    if (answer.length < 2) {
+      errorEl.textContent = 'La respuesta debe tener al menos 2 caracteres.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = 'Guardando...';
+    try {
+      const res = await fetch(API_BASE + '/me/seguridad', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          preguntaSeguridad: question,
+          respuestaSeguridad: answer,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        errorEl.textContent = err.message ?? 'No se pudo guardar la seguridad';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      $('profile-security-question').textContent = question;
+      syncSecurityQuestionUi(question);
+      $('edit-security-answer').value = '';
+      currentProfile = { ...(currentProfile || {}), preguntaSeguridad: question };
+      showToast('Pregunta de seguridad actualizada', 'success');
+    } catch {
+      errorEl.textContent = 'No se pudo conectar con el servidor';
+      errorEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
     }
   });
 

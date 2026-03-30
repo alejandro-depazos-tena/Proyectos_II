@@ -125,6 +125,22 @@ const AUTH_PAGE_API_BASE = API_BASE;
                   <p id="err-dni" class="text-error text-xs mt-1 min-h-[1rem]"></p>
                 </label>
               </div>
+              <label class="form-control w-full">
+                <div class="label"><span class="label-text font-medium">Pregunta de seguridad</span></div>
+                <select id="f-pregunta-seguridad" name="preguntaSeguridad" class="select select-bordered w-full">
+                  <option value="">Selecciona una pregunta</option>
+                  <option value="¿Cuál es el nombre de tu primera mascota?">¿Cuál es el nombre de tu primera mascota?</option>
+                  <option value="¿Cuál es tu ciudad de nacimiento?">¿Cuál es tu ciudad de nacimiento?</option>
+                  <option value="¿Cuál es tu comida favorita?">¿Cuál es tu comida favorita?</option>
+                  <option value="¿Cuál fue tu primer colegio?">¿Cuál fue tu primer colegio?</option>
+                </select>
+                <p id="err-pregunta-seguridad" class="text-error text-xs mt-1 min-h-[1rem]"></p>
+              </label>
+              <label class="form-control w-full">
+                <div class="label"><span class="label-text font-medium">Respuesta de seguridad</span></div>
+                <input id="f-respuesta-seguridad" name="respuestaSeguridad" type="text" placeholder="Tu respuesta" class="input input-bordered w-full" />
+                <p id="err-respuesta-seguridad" class="text-error text-xs mt-1 min-h-[1rem]"></p>
+              </label>
             </div>
 
             <!-- Contraseña siempre -->
@@ -150,6 +166,10 @@ const AUTH_PAGE_API_BASE = API_BASE;
             <button id="submit-btn" class="btn btn-primary w-full mt-2" type="submit">Entrar</button>
             <div id="error" class="text-error text-sm text-center" aria-live="polite"></div>
           </form>
+
+          <div class="text-right -mt-2">
+            <a id="forgot-password-link" href="/forgot-password" class="link link-hover text-xs text-primary">¿Has olvidado tu contraseña?</a>
+          </div>
 
           <div class="divider text-xs text-base-content/40">o</div>
 
@@ -179,6 +199,9 @@ const AUTH_PAGE_API_BASE = API_BASE;
       const fTelefono    = document.getElementById("f-telefono");
       const fDni         = document.getElementById("f-dni");
       const fPassword    = document.getElementById("f-password");
+      const fPreguntaSeguridad = document.getElementById("f-pregunta-seguridad");
+      const fRespuestaSeguridad = document.getElementById("f-respuesta-seguridad");
+      const forgotPasswordLink = document.getElementById("forgot-password-link");
 
       // ── Toggle contraseña ─────────────────────────────────────
       document.getElementById("toggle-password").addEventListener("click", function() {
@@ -198,7 +221,7 @@ const AUTH_PAGE_API_BASE = API_BASE;
         if (input) input.classList.toggle("input-error", !!msg);
       }
       function clearErrors() {
-        ["nombre","apellidos","email","telefono","dni","password"].forEach(f => setFieldError(f, ""));
+        ["nombre","apellidos","email","telefono","dni","password","pregunta-seguridad","respuesta-seguridad"].forEach(f => setFieldError(f, ""));
       }
       function validateRegister(p) {
         const e = {};
@@ -207,6 +230,8 @@ const AUTH_PAGE_API_BASE = API_BASE;
         if (!p.email     || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email)) e.email = "Introduce un correo electrónico válido.";
         if (!p.telefono  || !/^[6789]\d{8}$/.test(p.telefono))           e.telefono = "Teléfono: 9 dígitos empezando por 6, 7, 8 o 9.";
         if (!p.dni       || !/^(\d{8}[A-Z]|[XYZ]\d{7}[A-Z])$/.test(p.dni.toUpperCase())) e.dni = "DNI: 12345678A · NIE: X1234567B.";
+        if (!p.preguntaSeguridad) e["pregunta-seguridad"] = "Selecciona una pregunta de seguridad.";
+        if (!p.respuestaSeguridad || p.respuestaSeguridad.trim().length < 2) e["respuesta-seguridad"] = "La respuesta debe tener al menos 2 caracteres.";
         if (!p.password  || p.password.length < 8)  e.password = "Mínimo 8 caracteres.";
         else if (!/[A-Z]/.test(p.password))         e.password = "Debe incluir al menos una mayúscula.";
         else if (!/[0-9]/.test(p.password))         e.password = "Debe incluir al menos un número.";
@@ -228,6 +253,8 @@ const AUTH_PAGE_API_BASE = API_BASE;
         fApellidos.required = isReg;
         fTelefono.required  = isReg;
         fDni.required       = isReg;
+        fPreguntaSeguridad.required = isReg;
+        fRespuestaSeguridad.required = isReg;
         fPassword.autocomplete = isReg ? "new-password" : "current-password";
 
         cardTitle.textContent    = isReg ? "Crear cuenta" : "Bienvenido de vuelta";
@@ -243,6 +270,10 @@ const AUTH_PAGE_API_BASE = API_BASE;
 
       tabLogin.addEventListener("click", () => setMode("login"));
       tabRegister.addEventListener("click", () => setMode("register"));
+      forgotPasswordLink?.addEventListener("click", (e) => {
+        e.preventDefault();
+        window.location.assign("/forgot-password");
+      });
       setMode(mode);
 
       document.getElementById("auth-form").addEventListener("submit", async function(e) {
@@ -261,6 +292,8 @@ const AUTH_PAGE_API_BASE = API_BASE;
             apellidos: (formData.get("apellidos") || "").trim(),
             telefono:  (formData.get("telefono")  || "").trim(),
             dni:       (formData.get("dni")       || "").trim().toUpperCase(),
+            preguntaSeguridad: (formData.get("preguntaSeguridad") || "").trim(),
+            respuestaSeguridad: (formData.get("respuestaSeguridad") || "").trim(),
           };
           const errors = validateRegister(payload);
           if (Object.keys(errors).length > 0) {
