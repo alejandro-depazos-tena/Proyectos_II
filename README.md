@@ -168,6 +168,56 @@ El backend ya está configurado con CORS para aceptar peticiones desde `http://l
 
 ---
 
+## 🐳 Docker (frontend + backend + MariaDB)
+
+La dockerización de este repositorio está planteada en **3 servicios separados**:
+
+- `frontend` (Astro compilado y servido con Nginx)
+- `backend` (Spring Boot)
+- `db` (MariaDB)
+
+Esto es preferible a meter todo en un solo contenedor porque permite:
+
+- desplegar y escalar cada parte por separado,
+- mantener mejor el aislamiento de fallos,
+- cambiar base de datos o frontend sin rehacer todo el stack.
+
+### Archivos principales
+
+- `docker-compose.yml`
+- `backend/Dockerfile`
+- `frontend/Dockerfile`
+- `.env.docker.example`
+
+### Levantar el stack
+
+1. Copia `.env.docker.example` a `.env` y ajusta contraseñas.
+2. Ejecuta:
+
+```bash
+docker compose up --build -d
+```
+
+3. URLs:
+
+- Frontend: `http://localhost`
+- Backend: `http://localhost:8080`
+- MariaDB: `localhost:3306`
+
+### Apagar y limpiar
+
+```bash
+docker compose down
+```
+
+Para borrar también datos persistidos de MariaDB:
+
+```bash
+docker compose down -v
+```
+
+---
+
 ## 🔄 Metodología de Desarrollo
 
 ### Git Flow Implementado
