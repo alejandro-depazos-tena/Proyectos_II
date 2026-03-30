@@ -11,5 +11,7 @@ public record RegisterRequest(
     @NotBlank @Size(min = 2, max = 100) String nombre,
     @NotBlank @Size(min = 2, max = 150) String apellidos,
     @NotBlank @Pattern(regexp = "^[6789]\\d{8}$", message = "Teléfono español no válido") String telefono,
-    @NotBlank @Pattern(regexp = "^(\\d{8}[A-Za-z]|[XYZxyz]\\d{7}[A-Za-z])$", message = "DNI o NIE no válido") String dni
+    @NotBlank @Pattern(regexp = "^(\\d{8}[A-Za-z]|[XYZxyz]\\d{7}[A-Za-z])$", message = "DNI o NIE no válido") String dni,
+    @NotBlank @Size(min = 5, max = 255) String preguntaSeguridad,
+    @NotBlank @Size(min = 2, max = 255) String respuestaSeguridad
 ) {}

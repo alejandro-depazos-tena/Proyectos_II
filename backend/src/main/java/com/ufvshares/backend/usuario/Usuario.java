@@ -51,6 +51,12 @@ public class Usuario {
   @Column(name = "foto_perfil", length = 512)
   private String fotoPerfil;
 
+  @Column(name = "pregunta_seguridad", length = 255)
+  private String preguntaSeguridad;
+
+  @Column(name = "respuesta_seguridad_hash", length = 255)
+  private String respuestaSeguridadHash;
+
   public Long getIdUsuario() {
     return idUsuario;
   }
@@ -113,5 +119,21 @@ public class Usuario {
 
   public void setFotoPerfil(String fotoPerfil) {
     this.fotoPerfil = fotoPerfil;
+  }
+
+  public String getPreguntaSeguridad() {
+    return preguntaSeguridad;
+  }
+
+  public void setPreguntaSeguridad(String preguntaSeguridad) {
+    this.preguntaSeguridad = preguntaSeguridad;
+  }
+
+  public String getRespuestaSeguridadHash() {
+    return respuestaSeguridadHash;
+  }
+
+  public void setRespuestaSeguridadHash(String respuestaSeguridadHash) {
+    this.respuestaSeguridadHash = respuestaSeguridadHash;
   }
 }

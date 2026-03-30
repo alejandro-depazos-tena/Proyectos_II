@@ -1,15 +1,19 @@
 package com.ufvshares.backend.me;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -141,7 +145,48 @@ public class MeController {
     res.put("telefono", u.getTelefono());
     res.put("dni", u.getDni());
     res.put("fotoPerfil", u.getFotoPerfil());
+    res.put("preguntaSeguridad", u.getPreguntaSeguridad());
     return res;
+  }
+
+  @PostMapping("/seguridad")
+  public Map<String, Object> actualizarSeguridad(
+      @RequestHeader("Authorization") String auth,
+      @RequestBody Map<String, String> body) {
+
+    String pregunta = body.get("preguntaSeguridad");
+    String respuesta = body.get("respuestaSeguridad");
+
+    if (pregunta == null || pregunta.isBlank()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La pregunta de seguridad es obligatoria");
+    }
+    if (respuesta == null || respuesta.isBlank()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La respuesta de seguridad es obligatoria");
+    }
+
+    Usuario u = resolveUser(auth);
+    u.setPreguntaSeguridad(pregunta.trim());
+    u.setRespuestaSeguridadHash(hashSha256(respuesta.trim().toLowerCase(Locale.ROOT)));
+    usuarios.save(u);
+
+    Map<String, Object> res = new LinkedHashMap<>();
+    res.put("ok", true);
+    res.put("preguntaSeguridad", u.getPreguntaSeguridad());
+    return res;
+  }
+
+  private String hashSha256(String rawValue) {
+    try {
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      byte[] hashBytes = digest.digest(rawValue.getBytes(StandardCharsets.UTF_8));
+      StringBuilder hex = new StringBuilder(hashBytes.length * 2);
+      for (byte hashByte : hashBytes) {
+        hex.append(String.format("%02x", hashByte));
+      }
+      return hex.toString();
+    } catch (NoSuchAlgorithmException ex) {
+      throw new IllegalStateException("SHA-256 no disponible", ex);
+    }
   }
 
   @GetMapping("/productos")
@@ -402,7 +447,7 @@ public class MeController {
     return result;
   }
 
-  // ── Solicitar cambio de dato de perfil (envía email) ──────────
+  // ── Actualizar dato de perfil directamente ─────────────────────
   @PostMapping("/solicitar-cambio")
   @Transactional
   public Map<String, String> solicitarCambio(
@@ -422,34 +467,19 @@ public class MeController {
 
     Usuario u = resolveUser(auth);
 
-    // Borrar solicitudes anteriores pendientes para el mismo campo
-    pendingRepo.deleteByIdUsuarioAndCampo(u.getIdUsuario(), campo);
-
-    String token = UUID.randomUUID().toString().replace("-", "");
-    PendingCambio pc = new PendingCambio();
-    pc.setIdUsuario(u.getIdUsuario());
-    pc.setCampo(campo);
-    pc.setValorNuevo(valor);
-    pc.setToken(token);
-    pc.setExpiracion(LocalDateTime.now().plusMinutes(30));
-    pendingRepo.save(pc);
-
-    try {
-      emailService.enviarConfirmacionCambio(
-          u.getCorreo(),
-          u.getNombre() + " " + u.getApellidos(),
-          CAMPO_LABEL.getOrDefault(campo, campo),
-          valor,
-          token
-      );
-    } catch (Exception e) {
-      // Si el correo falla, eliminar la solicitud y devolver error claro
-      pendingRepo.deleteByIdUsuarioAndCampo(u.getIdUsuario(), campo);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          "No se pudo enviar el correo de confirmación: " + e.getMessage());
+    switch (campo) {
+      case "nombre" -> u.setNombre(valor);
+      case "apellidos" -> u.setApellidos(valor);
+      case "telefono" -> u.setTelefono(valor);
+      default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Campo no permitido");
     }
+    usuarios.save(u);
 
-    return Map.of("ok", "true", "correo", u.getCorreo());
+    return Map.of(
+        "ok", "true",
+        "campo", campo,
+        "valor", valor
+    );
   }
 
   // ── Confirmar cambio desde el enlace del email ─────────────────
