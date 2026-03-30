@@ -6,7 +6,11 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record RegisterRequest(
-    @Email @NotBlank String email,
+    @Email
+    @Pattern(
+        regexp = "(?i)^[a-z0-9._%+-]+@(ufv\\.es|alumnos\\.ufv\\.es)$",
+        message = "Solo se permiten correos con dominio ufv.es o alumnos.ufv.es")
+    @NotBlank String email,
     @NotBlank @Size(min = 8, max = 100) String password,
     @NotBlank @Size(min = 2, max = 100) String nombre,
     @NotBlank @Size(min = 2, max = 150) String apellidos,
