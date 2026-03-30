@@ -3,6 +3,7 @@ package com.ufvshares.backend.auth;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -15,7 +16,9 @@ public class AuthService {
   private final UsuarioRepository usuarios;
   private final SessionRepository sessions;
 
-  public AuthService(UsuarioRepository usuarios, SessionRepository sessions) {
+  public AuthService(
+      UsuarioRepository usuarios,
+      SessionRepository sessions) {
     this.usuarios = usuarios;
     this.sessions = sessions;
   }
@@ -40,6 +43,8 @@ public class AuthService {
     usuario.setTelefono(req.telefono().trim());
     usuario.setDni(req.dni().trim().toUpperCase());
     usuario.setPasswordHash(hashSha256(req.password()));
+    usuario.setPreguntaSeguridad(req.preguntaSeguridad().trim());
+    usuario.setRespuestaSeguridadHash(hashSha256(normalizeSecurityAnswer(req.respuestaSeguridad())));
     usuarios.save(usuario);
 
     var token = UUID.randomUUID().toString();
@@ -60,6 +65,42 @@ public class AuthService {
     var token = UUID.randomUUID().toString();
     sessions.put(token, normalized);
     return new AuthResponse(token, normalized, usuario.getNombre());
+  }
+
+  public String getSecurityQuestion(String email) {
+    var normalized = normalize(email);
+    var usuario = usuarios.findByCorreoIgnoreCase(normalized)
+        .orElseThrow(() -> new IllegalArgumentException("USER_NOT_FOUND"));
+
+    String question = usuario.getPreguntaSeguridad();
+    if (question == null || question.isBlank()) {
+      throw new IllegalArgumentException("SECURITY_QUESTION_NOT_CONFIGURED");
+    }
+    return question;
+  }
+
+  public void resetPasswordWithSecurityQuestion(String email, String securityAnswer, String newPassword) {
+    var normalized = normalize(email);
+    var usuario = usuarios.findByCorreoIgnoreCase(normalized)
+        .orElseThrow(() -> new IllegalArgumentException("USER_NOT_FOUND"));
+
+    String storedHash = usuario.getRespuestaSeguridadHash();
+    if (storedHash == null || storedHash.isBlank()) {
+      throw new IllegalArgumentException("SECURITY_QUESTION_NOT_CONFIGURED");
+    }
+
+    String answerHash = hashSha256(normalizeSecurityAnswer(securityAnswer));
+    if (!answerHash.equalsIgnoreCase(storedHash)) {
+      throw new IllegalArgumentException("INVALID_SECURITY_ANSWER");
+    }
+
+    usuario.setPasswordHash(hashSha256(newPassword));
+    usuarios.save(usuario);
+    sessions.deleteByEmail(usuario.getCorreo());
+  }
+
+  private String normalizeSecurityAnswer(String answer) {
+    return answer == null ? "" : answer.trim().toLowerCase(Locale.ROOT);
   }
 
   private String hashSha256(String rawValue) {

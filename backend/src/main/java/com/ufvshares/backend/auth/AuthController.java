@@ -29,6 +29,18 @@ public class AuthController {
     return auth.login(request.email(), request.password());
   }
 
+  @PostMapping("/security-question")
+  public SecurityQuestionResponse securityQuestion(@Valid @RequestBody SecurityQuestionRequest request) {
+    String question = auth.getSecurityQuestion(request.email());
+    return new SecurityQuestionResponse(question);
+  }
+
+  @PostMapping("/reset-password-security")
+  public OkResponse resetPasswordSecurity(@Valid @RequestBody ResetPasswordWithSecurityRequest request) {
+    auth.resetPasswordWithSecurityQuestion(request.email(), request.securityAnswer(), request.password());
+    return new OkResponse(true);
+  }
+
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<?> handleIllegalArg(IllegalArgumentException ex) {
     var code = ex.getMessage();
@@ -40,8 +52,12 @@ public class AuthController {
     if ("INVALID_CREDENTIALS".equals(code)) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(code));
     }
+    if ("USER_NOT_FOUND".equals(code) || "SECURITY_QUESTION_NOT_CONFIGURED".equals(code) || "INVALID_SECURITY_ANSWER".equals(code)) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(code));
+    }
     return ResponseEntity.badRequest().body(new ErrorResponse(code));
   }
 
   public record ErrorResponse(String error) {}
+  public record OkResponse(boolean ok) {}
 }

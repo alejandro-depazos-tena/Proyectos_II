@@ -25,4 +25,8 @@ public class SessionRepository {
   public Optional<String> findEmailByToken(String token) {
     return jpa.findByToken(token).map(Session::getEmail);
   }
+
+  public void deleteByEmail(String email) {
+    jpa.deleteByEmail(email);
+  }
 }
