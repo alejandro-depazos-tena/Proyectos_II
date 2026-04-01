@@ -11,6 +11,21 @@ const AUTH_PAGE_API_BASE = API_BASE;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>UFV Shares &middot; Acceso</title>
+    <script is:inline>
+      (function () {
+        var THEME_KEY = "ufvshares_theme";
+        var preferred = "light";
+        try {
+          var stored = localStorage.getItem(THEME_KEY);
+          if (stored === "light" || stored === "dark") {
+            preferred = stored;
+          } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+            preferred = "dark";
+          }
+        } catch (_) {}
+        document.documentElement.setAttribute("data-theme", preferred);
+      })();
+    </script>
     <script define:vars={{ AUTH_PAGE_API_BASE }}>
       (function() {
         const token = localStorage.getItem("ufvshares_token");
@@ -56,6 +71,11 @@ const AUTH_PAGE_API_BASE = API_BASE;
     </script>
   </head>
   <body class="bg-base-200 min-h-screen flex items-center justify-center px-4 py-12">
+    <button id="theme-toggle-floating" type="button" class="theme-switch fixed top-3 right-3 z-50" role="switch" aria-checked="false" aria-label="Cambiar tema" title="Cambiar tema">
+      <span class="theme-switch-thumb">
+        <span id="theme-thumb-icon" class="theme-switch-icon">☀️</span>
+      </span>
+    </button>
 
     <div class="w-full max-w-md">
       <!-- Logo -->
@@ -278,6 +298,36 @@ const AUTH_PAGE_API_BASE = API_BASE;
         e.preventDefault();
         window.location.assign("/forgot-password");
       });
+
+      const THEME_KEY = "ufvshares_theme";
+      const themeToggleFloating = document.getElementById("theme-toggle-floating");
+      const themeThumbIcon = document.getElementById("theme-thumb-icon");
+
+      function updateThemeButton(theme) {
+        const isDark = theme === "dark";
+        themeToggleFloating?.classList.toggle("is-dark", isDark);
+        themeToggleFloating?.setAttribute("aria-checked", isDark ? "true" : "false");
+        if (themeThumbIcon) {
+          themeThumbIcon.textContent = isDark ? "🌙" : "☀️";
+        }
+      }
+
+      function setTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        try {
+          localStorage.setItem(THEME_KEY, theme);
+        } catch (_) {}
+        updateThemeButton(theme);
+      }
+
+      if (themeToggleFloating) {
+        const initialTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+        updateThemeButton(initialTheme);
+        themeToggleFloating.addEventListener("click", () => {
+          const current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+          setTheme(current === "dark" ? "light" : "dark");
+        });
+      }
       setMode(mode);
 
       document.getElementById("auth-form").addEventListener("submit", async function(e) {

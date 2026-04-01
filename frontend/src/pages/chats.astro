@@ -281,6 +281,102 @@ import Layout from "../layouts/Layout.astro";
 <style is:global>
   .chat-bg { background-color: #efeae2; }
 
+  html[data-theme='dark'] .chat-bg {
+    background-color: #0f1726;
+    background-image:
+      radial-gradient(900px 400px at 90% -10%, rgba(79, 70, 229, 0.18), transparent 55%),
+      radial-gradient(700px 300px at 10% 120%, rgba(16, 185, 129, 0.14), transparent 60%);
+  }
+
+  html[data-theme='dark'] #chat-shell {
+    border-color: rgba(147, 170, 206, 0.24) !important;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.38);
+  }
+
+  html[data-theme='dark'] #chat-sidebar,
+  html[data-theme='dark'] #chat-more-menu,
+  html[data-theme='dark'] #profile-modal > div,
+  html[data-theme='dark'] #loc-modal > div,
+  html[data-theme='dark'] #report-modal > div,
+  html[data-theme='dark'] #block-confirm-modal > div {
+    background: #111b2e !important;
+    border-color: rgba(147, 170, 206, 0.24) !important;
+  }
+
+  html[data-theme='dark'] #chat-sidebar-header,
+  html[data-theme='dark'] #chat-header,
+  html[data-theme='dark'] #chat-input-area {
+    background: #162338 !important;
+    border-color: rgba(147, 170, 206, 0.24) !important;
+  }
+
+  html[data-theme='dark'] #chat-sidebar-tabs,
+  html[data-theme='dark'] #archived-shortcut-wrap,
+  html[data-theme='dark'] #chat-search-wrap {
+    background: #111b2e !important;
+    border-color: rgba(147, 170, 206, 0.22) !important;
+  }
+
+  html[data-theme='dark'] #chat-search,
+  html[data-theme='dark'] #msg-input,
+  html[data-theme='dark'] #loc-search-input,
+  html[data-theme='dark'] #emoji-picker,
+  html[data-theme='dark'] #report-reason,
+  html[data-theme='dark'] #report-comment {
+    background: #1a2740 !important;
+    color: #e5eef9 !important;
+    border-color: rgba(147, 170, 206, 0.3) !important;
+  }
+
+  html[data-theme='dark'] #chat-search::placeholder,
+  html[data-theme='dark'] #msg-input::placeholder,
+  html[data-theme='dark'] #loc-search-input::placeholder {
+    color: #9fb0c9 !important;
+  }
+
+  html[data-theme='dark'] .conv-item-active {
+    background-color: #1a2740 !important;
+    border-left: 3px solid #60a5fa;
+  }
+
+  html[data-theme='dark'] .conv-item:hover {
+    background: #18243b !important;
+  }
+
+  html[data-theme='dark'] .chat-filter-tab {
+    border-color: rgba(147, 170, 206, 0.28);
+    color: #b9c8dc;
+    background: #1a2740;
+  }
+
+  html[data-theme='dark'] .chat-filter-tab:hover {
+    border-color: rgba(147, 170, 206, 0.42);
+    color: #e5eef9;
+  }
+
+  html[data-theme='dark'] .chat-filter-tab-active,
+  html[data-theme='dark'] .archived-shortcut-active {
+    border-color: rgba(52, 211, 153, 0.5) !important;
+    background: rgba(16, 185, 129, 0.16) !important;
+    color: #7ce6be !important;
+  }
+
+  html[data-theme='dark'] #chat-empty-state p,
+  html[data-theme='dark'] #no-convs-state p {
+    color: #d7e4f7 !important;
+  }
+
+  html[data-theme='dark'] #chat-empty-state p.text-sm,
+  html[data-theme='dark'] #no-convs-state p.text-sm,
+  html[data-theme='dark'] .text-\[\#4b5563\],
+  html[data-theme='dark'] .text-\[\#667781\] {
+    color: #9fb0c9 !important;
+  }
+
+  html[data-theme='dark'] .text-\[\#3b4a54\] {
+    color: #e5eef9 !important;
+  }
+
   /* Ocultar sidebar solo en movil cuando hay chat abierto */
   .sidebar-chat-open { display: none; }
   @media (min-width: 640px) { .sidebar-chat-open { display: flex !important; flex-direction: column; } }
@@ -323,6 +419,26 @@ import Layout from "../layouts/Layout.astro";
   .bubble-me-cont    { background: #d9fdd3; color: #111b21; border-radius: 7.5px; box-shadow: 0 1px 1px rgba(0,0,0,.10); }
   .bubble-other-cont { background: #ffffff; color: #111b21; border-radius: 7.5px; box-shadow: 0 1px 1px rgba(0,0,0,.10); }
 
+  html[data-theme='dark'] .bubble-me,
+  html[data-theme='dark'] .bubble-me-cont {
+    background: #145c4b;
+    color: #eafff8;
+  }
+
+  html[data-theme='dark'] .bubble-me::after {
+    border-top-color: #145c4b;
+  }
+
+  html[data-theme='dark'] .bubble-other,
+  html[data-theme='dark'] .bubble-other-cont {
+    background: #1d2a43;
+    color: #e5eef9;
+  }
+
+  html[data-theme='dark'] .bubble-other::before {
+    border-top-color: #1d2a43;
+  }
+
   /* Separador de fecha */
   .date-sep {
     background: #e1f2fb; color: #54656f;
@@ -330,6 +446,12 @@ import Layout from "../layouts/Layout.astro";
     padding: 3px 12px; border-radius: 8px;
     box-shadow: 0 1px 2px rgba(0,0,0,.08);
     user-select: none;
+  }
+
+  html[data-theme='dark'] .date-sep {
+    background: #1a2740;
+    color: #b9c8dc;
+    box-shadow: 0 1px 2px rgba(0,0,0,.24);
   }
 
   /* Item activo del sidebar */
@@ -340,6 +462,11 @@ import Layout from "../layouts/Layout.astro";
   #chat-messages::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); border-radius: 3px; }
   #conv-list::-webkit-scrollbar { width: 4px; }
   #conv-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,.10); border-radius: 2px; }
+
+  html[data-theme='dark'] #chat-messages::-webkit-scrollbar-thumb,
+  html[data-theme='dark'] #conv-list::-webkit-scrollbar-thumb {
+    background: rgba(185, 200, 220, .24);
+  }
 
   .chat-toast-root {
     position: fixed;
@@ -365,6 +492,19 @@ import Layout from "../layouts/Layout.astro";
     transform: translateY(-10px);
     opacity: 0;
     transition: transform .2s ease, opacity .2s ease;
+  }
+
+  html[data-theme='dark'] .chat-toast {
+    background: color-mix(in oklab, var(--b1) 92%, transparent);
+    border: 1px solid color-mix(in oklab, var(--bc) 16%, transparent);
+    box-shadow: 0 10px 28px rgba(0,0,0,.22);
+  }
+  html[data-theme='dark'] .chat-toast-title {
+    color: hsl(var(--bc));
+  }
+  html[data-theme='dark'] .chat-toast-text,
+  html[data-theme='dark'] .chat-toast-close {
+    color: color-mix(in oklab, hsl(var(--bc)) 72%, transparent);
   }
   .chat-toast.show {
     transform: translateY(0);

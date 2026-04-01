@@ -1,2 +1,115 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+.theme-switch {
+	width: 58px;
+	height: 34px;
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: 999px;
+	background: #5f636b;
+	display: inline-flex;
+	align-items: center;
+	padding: 2px;
+	cursor: pointer;
+	transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.theme-switch:focus-visible {
+	outline: 2px solid rgba(114, 163, 220, 0.7);
+	outline-offset: 2px;
+}
+
+.theme-switch.is-dark {
+	background: #2f6bff;
+	border-color: rgba(255, 255, 255, 0.35);
+}
+
+.theme-switch-thumb {
+	width: 28px;
+	height: 28px;
+	border-radius: 999px;
+	background: #ffffff;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	transform: translateX(0);
+	transition: transform 0.25s ease;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+}
+
+.theme-switch.is-dark .theme-switch-thumb {
+	transform: translateX(24px);
+}
+
+.theme-switch-icon {
+	font-size: 13px;
+	line-height: 1;
+}
+
+/* Dark mode contrast fixes for components using fixed light-theme slate/gray colors. */
+html[data-theme="dark"] .text-slate-950,
+html[data-theme="dark"] .text-slate-900,
+html[data-theme="dark"] .text-slate-800,
+html[data-theme="dark"] .text-slate-700 {
+	color: #e6eef9 !important;
+}
+
+html[data-theme="dark"] .text-slate-600,
+html[data-theme="dark"] .text-slate-500,
+html[data-theme="dark"] .text-slate-400,
+html[data-theme="dark"] .text-base-content\/60,
+html[data-theme="dark"] .text-base-content\/50,
+html[data-theme="dark"] .text-base-content\/40 {
+	color: #b9c8dc !important;
+}
+
+html[data-theme="dark"] .text-\[\#0B2545\],
+html[data-theme="dark"] .text-\[\#0B2545\]\/70 {
+	color: #dbe7f7 !important;
+}
+
+html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] .bg-white\/80,
+html[data-theme="dark"] .bg-slate-50,
+html[data-theme="dark"] .bg-slate-100,
+html[data-theme="dark"] .bg-slate-50\/50 {
+	background-color: rgba(19, 32, 54, 0.92) !important;
+}
+
+html[data-theme="dark"] .border-slate-100,
+html[data-theme="dark"] .border-slate-200,
+html[data-theme="dark"] .border-gray-300,
+html[data-theme="dark"] .border-blue-100,
+html[data-theme="dark"] .border-violet-100,
+html[data-theme="dark"] .border-green-100,
+html[data-theme="dark"] .border-yellow-100,
+html[data-theme="dark"] .border-rose-100,
+html[data-theme="dark"] .border-cyan-100,
+html[data-theme="dark"] .border-white\/70 {
+	border-color: rgba(129, 158, 198, 0.34) !important;
+}
+
+html[data-theme="dark"] .from-blue-50,
+html[data-theme="dark"] .from-violet-50,
+html[data-theme="dark"] .from-green-50,
+html[data-theme="dark"] .from-yellow-50,
+html[data-theme="dark"] .from-rose-50,
+html[data-theme="dark"] .from-cyan-50,
+html[data-theme="dark"] .to-indigo-50,
+html[data-theme="dark"] .to-purple-50,
+html[data-theme="dark"] .to-emerald-50,
+html[data-theme="dark"] .to-amber-50,
+html[data-theme="dark"] .to-pink-50,
+html[data-theme="dark"] .to-teal-50 {
+	--tw-gradient-from: rgba(22, 34, 56, 0.92) var(--tw-gradient-from-position) !important;
+	--tw-gradient-to: rgba(30, 44, 70, 0.88) var(--tw-gradient-to-position) !important;
+}
+
+html[data-theme="dark"] .text-blue-900,
+html[data-theme="dark"] .text-violet-900,
+html[data-theme="dark"] .text-green-900,
+html[data-theme="dark"] .text-yellow-900,
+html[data-theme="dark"] .text-cyan-900,
+html[data-theme="dark"] .text-rose-900 {
+	color: #e6eef9 !important;
+}
