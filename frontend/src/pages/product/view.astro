@@ -150,6 +150,24 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                         </button>
                     </div>
 
+                    <div id="my-requests-panel" class="hidden rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <div class="flex items-center justify-between gap-3 mb-3">
+                            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Mis solicitudes para este producto</p>
+                            <span id="my-requests-count" class="text-xs font-semibold text-slate-500">0</span>
+                        </div>
+                        <div id="my-requests-list" class="space-y-2"></div>
+                        <p id="my-requests-empty" class="hidden text-sm text-slate-500">Aún no has enviado solicitudes para este producto.</p>
+                    </div>
+
+                    <div id="owner-requests-panel" class="hidden rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <div class="flex items-center justify-between gap-3 mb-3">
+                            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Solicitudes en tu producto</p>
+                            <span id="owner-requests-count" class="text-xs font-semibold text-slate-500">0</span>
+                        </div>
+                        <div id="owner-requests-list" class="space-y-2"></div>
+                        <p id="owner-requests-empty" class="hidden text-sm text-slate-500">No hay solicitudes para este producto.</p>
+                    </div>
+
                     <!-- Trust row -->
                     <div class="flex flex-wrap gap-4 text-xs text-slate-400 pt-2 border-t border-slate-100">
                         <span class="flex items-center gap-1">
@@ -309,6 +327,212 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             modal.classList.remove('hidden');
             modal.classList.add('flex');
         });
+    }
+
+    function formatEsDate(isoDate) {
+        if (!isoDate) return '—';
+        const d = new Date(isoDate);
+        if (Number.isNaN(d.getTime())) return '—';
+        return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    function badgeEstadoSolicitud(estado) {
+        const styles = {
+            PENDIENTE: 'bg-amber-100 text-amber-700 border border-amber-200',
+            ACEPTADA: 'bg-emerald-100 text-emerald-700 border border-emerald-200',
+            RECHAZADA: 'bg-red-100 text-red-700 border border-red-200',
+            CANCELADA: 'bg-slate-200 text-slate-700 border border-slate-300',
+        };
+        const labels = {
+            PENDIENTE: 'Pendiente',
+            ACEPTADA: 'Aceptada',
+            RECHAZADA: 'Rechazada',
+            CANCELADA: 'Cancelada',
+        };
+        const css = styles[estado] || 'bg-slate-100 text-slate-700 border border-slate-200';
+        const label = labels[estado] || estado || 'Desconocido';
+        return `<span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold ${css}">${escapeHtml(label)}</span>`;
+    }
+
+    async function loadMyRequestsForProduct(productId, token) {
+        const panel = document.getElementById('my-requests-panel');
+        const list = document.getElementById('my-requests-list');
+        const empty = document.getElementById('my-requests-empty');
+        const count = document.getElementById('my-requests-count');
+        if (!panel || !list || !empty || !count || !token) return;
+
+        try {
+            const res = await fetch(API_BASE + '/me/solicitudes/enviadas', {
+                headers: { 'Authorization': 'Bearer ' + token },
+            });
+
+            if (!res.ok) {
+                panel.classList.add('hidden');
+                return;
+            }
+
+            const all = await res.json();
+            const productRequests = (Array.isArray(all) ? all : [])
+                .filter((item) => Number(item?.producto?.idProducto) === Number(productId))
+                .sort((a, b) => new Date(b?.fechaSolicitud || 0) - new Date(a?.fechaSolicitud || 0));
+
+            list.innerHTML = '';
+            count.textContent = String(productRequests.length);
+
+            if (productRequests.length === 0) {
+                empty.classList.remove('hidden');
+                panel.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            productRequests.forEach((item) => {
+                const owner = item?.propietario || {};
+                const nombre = [owner.nombre, owner.apellidos].filter(Boolean).join(' ').trim() || 'Vendedor';
+                const fecha = formatEsDate(item?.fechaSolicitud);
+                list.insertAdjacentHTML('beforeend', `
+                    <article class="rounded-xl border border-slate-200 bg-white px-3 py-2">
+                        <div class="flex items-start justify-between gap-2">
+                            <p class="font-semibold text-slate-800 text-sm">${escapeHtml(nombre)}</p>
+                            ${badgeEstadoSolicitud(item?.estadoSolicitud)}
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Enviada el ${escapeHtml(fecha)}</p>
+                    </article>
+                `);
+            });
+
+            panel.classList.remove('hidden');
+        } catch {
+            panel.classList.add('hidden');
+        }
+    }
+
+    async function loadOwnerProductRequests(productId, token) {
+        const panel = document.getElementById('owner-requests-panel');
+        const list = document.getElementById('owner-requests-list');
+        const empty = document.getElementById('owner-requests-empty');
+        const count = document.getElementById('owner-requests-count');
+        if (!panel || !list || !empty || !count || !token) return;
+
+        try {
+            const res = await fetch(API_BASE + '/me/solicitudes/recibidas', {
+                headers: { 'Authorization': 'Bearer ' + token },
+            });
+
+            if (!res.ok) {
+                panel.classList.add('hidden');
+                return;
+            }
+
+            const all = await res.json();
+            const productRequests = (Array.isArray(all) ? all : [])
+                .filter((item) => Number(item?.producto?.idProducto) === Number(productId))
+                .sort((a, b) => new Date(b?.fechaSolicitud || 0) - new Date(a?.fechaSolicitud || 0));
+
+            list.innerHTML = '';
+            count.textContent = String(productRequests.length);
+
+            if (productRequests.length === 0) {
+                empty.classList.remove('hidden');
+                panel.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            productRequests.forEach((item) => {
+                const solicitante = item?.solicitante || {};
+                const nombre = [solicitante.nombre, solicitante.apellidos].filter(Boolean).join(' ').trim() || 'Usuario';
+                const fecha = formatEsDate(item?.fechaSolicitud);
+                const pending = item?.estadoSolicitud === 'PENDIENTE';
+                list.insertAdjacentHTML('beforeend', `
+                    <article class="rounded-xl border border-slate-200 bg-white px-3 py-2" data-owner-request-id="${escapeHtml(item?.idSolicitud)}">
+                        <div class="flex items-start justify-between gap-2">
+                            <p class="font-semibold text-slate-800 text-sm">${escapeHtml(nombre)}</p>
+                            ${badgeEstadoSolicitud(item?.estadoSolicitud)}
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Solicitado el ${escapeHtml(fecha)}</p>
+                        ${pending ? `
+                            <div class="mt-3 flex gap-2">
+                                <button type="button" class="btn btn-xs btn-success rounded-full" data-owner-request-action="accept">Aceptar</button>
+                                <button type="button" class="btn btn-xs btn-error rounded-full" data-owner-request-action="reject">Rechazar</button>
+                            </div>
+                        ` : ''}
+                    </article>
+                `);
+            });
+
+            panel.classList.remove('hidden');
+        } catch {
+            panel.classList.add('hidden');
+        }
+    }
+
+    function setupOwnerRequestsActions(productId, token) {
+        const list = document.getElementById('owner-requests-list');
+        if (!list || !token) return;
+        if (list.getAttribute('data-listener') === 'true') return;
+
+        list.addEventListener('click', async (event) => {
+            const target = event.target;
+            if (!(target instanceof HTMLElement)) return;
+
+            const button = target.closest('[data-owner-request-action]');
+            if (!(button instanceof HTMLButtonElement)) return;
+
+            const card = button.closest('[data-owner-request-id]');
+            const requestId = card?.getAttribute('data-owner-request-id');
+            const action = button.getAttribute('data-owner-request-action');
+            if (!requestId || !action) return;
+
+            const isAccept = action === 'accept';
+            const oldLabel = button.textContent || '';
+            button.disabled = true;
+            button.textContent = isAccept ? 'Aceptando...' : 'Rechazando...';
+
+            try {
+                const res = await fetch(API_BASE + `/me/solicitudes/${requestId}/${isAccept ? 'aceptar' : 'rechazar'}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + token },
+                });
+
+                if (!res.ok) {
+                    const raw = await res.text().catch(() => '');
+                    let message = 'No se pudo actualizar la solicitud.';
+                    if (raw) {
+                        try {
+                            const parsed = JSON.parse(raw);
+                            message = parsed?.message ?? parsed?.error ?? message;
+                        } catch {
+                            message = raw;
+                        }
+                    }
+                    await showReserveFeedbackModal(message, 'error');
+                    return;
+                }
+
+                await showReserveFeedbackModal(
+                    isAccept ? 'Solicitud aceptada correctamente.' : 'Solicitud rechazada correctamente.',
+                    'success'
+                );
+                await loadOwnerProductRequests(productId, token);
+            } catch {
+                await showReserveFeedbackModal('No se pudo conectar con el servidor.', 'error');
+            } finally {
+                button.disabled = false;
+                button.textContent = oldLabel;
+            }
+        });
+
+        list.setAttribute('data-listener', 'true');
     }
 
     // ── Gallery & lightbox ───────────────────────────────────────────────────
@@ -528,6 +752,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         const category = (p.categoria || '').replace(/_/g, ' ');
         const tipo = p.tipoTransaccion === 'ALQUILER' ? 'Alquiler' : 'Venta';
         const id = p.idProducto;
+        let isOwner = false;
 
         // Breadcrumb
         const bcCat = document.getElementById('bc-category');
@@ -595,6 +820,20 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             disableCtaButtons();
         }
 
+        if (token && p.idPropietario) {
+            try {
+                const meRes = await fetch(API_BASE + '/me', {
+                    headers: { 'Authorization': 'Bearer ' + token },
+                });
+                if (meRes.ok) {
+                    const me = await meRes.json();
+                    isOwner = Number(me?.idUsuario) === Number(p.idPropietario);
+                }
+            } catch {
+                isOwner = false;
+            }
+        }
+
         // Favorites data
         const favData = JSON.stringify({ id: String(id), name: title, price: p.precio ?? 0, image: fallbackImg, stock: 1, slug: String(id) });
         document.getElementById('add-fav-btn').dataset.favorite = favData;
@@ -609,10 +848,27 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         const contactBtnLabel = document.getElementById('contact-btn-label');
         const sellerContactQuick = document.getElementById('seller-contact-quick');
         const reserveBtn = document.getElementById('reserve-btn');
+        const addFavBtn = document.getElementById('add-fav-btn');
         if (contactBtnLabel) contactBtnLabel.textContent = `Contactar al ${p.tipoTransaccion === 'ALQUILER' ? 'arrendador' : 'vendedor'}`;
 
+        if (isOwner) {
+            contactBtn?.classList.add('hidden');
+            reserveBtn?.classList.add('hidden');
+            sellerContactQuick?.classList.add('hidden');
+            addFavBtn?.classList.add('hidden');
+            document.getElementById('my-requests-panel')?.classList.add('hidden');
+            await loadOwnerProductRequests(id, token);
+            setupOwnerRequestsActions(id, token);
+        } else if (token) {
+            document.getElementById('owner-requests-panel')?.classList.add('hidden');
+            await loadMyRequestsForProduct(id, token);
+        } else {
+            document.getElementById('owner-requests-panel')?.classList.add('hidden');
+            document.getElementById('my-requests-panel')?.classList.add('hidden');
+        }
+
         if (reserveBtn) {
-            reserveBtn.classList.toggle('hidden', noDisponible);
+            reserveBtn.classList.toggle('hidden', noDisponible || isOwner);
             reserveBtn.onclick = async () => {
                 if (!token) {
                     window.location.href = '/auth?mode=login&next=' + encodeURIComponent(window.location.pathname + window.location.search);
@@ -693,7 +949,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         }
 
         // Wire up contact buttons – always, regardless of whether owner info loaded
-        if (p.idPropietario && contactBtn && !contactBtn.hasAttribute('disabled')) {
+        if (!isOwner && p.idPropietario && contactBtn && !contactBtn.hasAttribute('disabled')) {
             contactBtn.removeAttribute('href');
             contactBtn.addEventListener('click', async function handleContact(e) {
                 e.preventDefault();
@@ -733,7 +989,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                 }
             });
         }
-        if (p.idPropietario && sellerContactQuick && !sellerContactQuick.hasAttribute('disabled')) {
+        if (!isOwner && p.idPropietario && sellerContactQuick && !sellerContactQuick.hasAttribute('disabled')) {
             sellerContactQuick.removeAttribute('href');
             sellerContactQuick.addEventListener('click', async function handleContactQuick(e) {
                 e.preventDefault();
