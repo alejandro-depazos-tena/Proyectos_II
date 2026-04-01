@@ -107,7 +107,7 @@ const AUTH_PAGE_API_BASE = API_BASE;
             <!-- Correo siempre -->
             <label class="form-control w-full">
               <div class="label"><span class="label-text font-medium">Correo electrónico</span></div>
-              <input id="f-email" name="email" type="email" autocomplete="email" required placeholder="tu@ufv.es" class="input input-bordered w-full" />
+              <input id="f-email" name="email" type="email" autocomplete="email" required placeholder="tu@ufv.es o tu@alumnos.ufv.es" class="input input-bordered w-full" />
               <p id="err-email" class="text-error text-xs mt-1 min-h-[1rem]"></p>
             </label>
 
@@ -227,7 +227,11 @@ const AUTH_PAGE_API_BASE = API_BASE;
         const e = {};
         if (!p.nombre    || p.nombre.length    < 2) e.nombre    = "El nombre debe tener al menos 2 caracteres.";
         if (!p.apellidos || p.apellidos.length < 2) e.apellidos = "Los apellidos deben tener al menos 2 caracteres.";
-        if (!p.email     || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email)) e.email = "Introduce un correo electrónico válido.";
+        if (!p.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email)) {
+          e.email = "Introduce un correo electrónico válido.";
+        } else if (!/^[a-z0-9._%+-]+@(ufv\.es|alumnos\.ufv\.es)$/i.test(p.email)) {
+          e.email = "Solo se permiten correos @ufv.es o @alumnos.ufv.es.";
+        }
         if (!p.telefono  || !/^[6789]\d{8}$/.test(p.telefono))           e.telefono = "Teléfono: 9 dígitos empezando por 6, 7, 8 o 9.";
         if (!p.dni       || !/^(\d{8}[A-Z]|[XYZ]\d{7}[A-Z])$/.test(p.dni.toUpperCase())) e.dni = "DNI: 12345678A · NIE: X1234567B.";
         if (!p.preguntaSeguridad) e["pregunta-seguridad"] = "Selecciona una pregunta de seguridad.";
