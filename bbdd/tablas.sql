@@ -9,7 +9,31 @@ CREATE TABLE usuario (
     correo               VARCHAR(150) NOT NULL UNIQUE,
     telefono             VARCHAR(20) NOT NULL UNIQUE,
     dni                  VARCHAR(20) NOT NULL UNIQUE,
-    password             VARCHAR(255) NOT NULL
+    password             VARCHAR(255) NOT NULL,
+    foto_perfil          VARCHAR(512),
+    pregunta_seguridad   VARCHAR(255),
+    respuesta_seguridad_hash VARCHAR(255)
+);
+
+CREATE TABLE sessions (
+    token                VARCHAR(36) PRIMARY KEY,
+    email                VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE pending_cambio (
+    id                   BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_usuario           BIGINT UNSIGNED NOT NULL,
+    campo                VARCHAR(30) NOT NULL,
+    valor_nuevo          VARCHAR(255) NOT NULL,
+    token                VARCHAR(64) NOT NULL UNIQUE,
+    expiracion           DATETIME NOT NULL,
+    usado                BOOLEAN NOT NULL DEFAULT FALSE,
+
+    CONSTRAINT fk_pending_cambio_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id_usuario)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 
@@ -19,9 +43,14 @@ CREATE TABLE producto (
     descripcion          TEXT             NOT NULL,
     categoria ENUM('ELECTRONICA','LIBROS','DEPORTE','HOGAR','OTROS') NOT NULL,
     tipo_transaccion     ENUM('PRESTAMO','ALQUILER','VENTA') NOT NULL,
-    estado_producto      ENUM('DISPONIBLE','NO_DISPONIBLE') NOT NULL DEFAULT 'DISPONIBLE',
+    estado_producto      ENUM('DISPONIBLE','RESERVADO','ALQUILADO','VENDIDO','NO_DISPONIBLE') NOT NULL DEFAULT 'DISPONIBLE',
     precio               DECIMAL(10,2),
     id_propietario       BIGINT UNSIGNED  NOT NULL,
+    condicion            ENUM('NUEVO','COMO_NUEVO','BUENO','ACEPTABLE','DETERIORADO'),
+    ubicacion            VARCHAR(200),
+    imagen_url           VARCHAR(500),
+    fecha_publicacion    DATETIME,
+    vistas               INTEGER NOT NULL DEFAULT 0,
     
     CONSTRAINT fk_producto_propietario
         FOREIGN KEY (id_propietario)
