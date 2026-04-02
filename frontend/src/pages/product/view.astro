@@ -953,7 +953,10 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             contactBtn.removeAttribute('href');
             contactBtn.addEventListener('click', async function handleContact(e) {
                 e.preventDefault();
-                if (!token) { window.location.href = '/auth'; return; }
+                if (!token) {
+                    window.location.href = '/auth?mode=login&next=' + encodeURIComponent(window.location.pathname + window.location.search);
+                    return;
+                }
                 const btn = e.currentTarget;
                 btn.setAttribute('aria-disabled', 'true');
                 const labelEl = document.getElementById('contact-btn-label');
@@ -969,21 +972,22 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                         const conv = await res.json();
                         window.location.href = '/chats?conv=' + conv.idConversacion;
                     } else if (res.status === 401) {
-                        window.location.href = '/auth';
+                        window.location.href = '/auth?mode=login&next=' + encodeURIComponent(window.location.pathname + window.location.search);
                     } else if (res.status === 400) {
-                        alert('No puedes contactar con tu propio anuncio.');
+                        await showReserveFeedbackModal('No puedes contactar con tu propio anuncio.', 'error');
                         btn.removeAttribute('aria-disabled');
                         if (labelEl) labelEl.textContent = prevLabel;
                     } else {
                         const errText = await res.text().catch(() => res.status);
                         console.error('Chat API error', res.status, errText);
-                        alert('Error al abrir el chat (' + res.status + '). Revisa la consola del navegador.');
+                        await showReserveFeedbackModal('Error al abrir el chat (' + res.status + '). Intentalo de nuevo en unos segundos.', 'error');
                         btn.removeAttribute('aria-disabled');
                         if (labelEl) labelEl.textContent = prevLabel;
                     }
                 } catch (err) {
                     console.error('Chat fetch error', err);
-                    alert('No se pudo conectar con el servidor: ' + err.message);
+                    const msg = err instanceof Error ? err.message : 'Error de red';
+                    await showReserveFeedbackModal('No se pudo conectar con el servidor: ' + msg, 'error');
                     btn.removeAttribute('aria-disabled');
                     if (labelEl) labelEl.textContent = prevLabel;
                 }
@@ -993,7 +997,10 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             sellerContactQuick.removeAttribute('href');
             sellerContactQuick.addEventListener('click', async function handleContactQuick(e) {
                 e.preventDefault();
-                if (!token) { window.location.href = '/auth'; return; }
+                if (!token) {
+                    window.location.href = '/auth?mode=login&next=' + encodeURIComponent(window.location.pathname + window.location.search);
+                    return;
+                }
                 try {
                     const res = await fetch(API_BASE + '/chats', {
                         method: 'POST',
@@ -1004,17 +1011,17 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                         const conv = await res.json();
                         window.location.href = '/chats?conv=' + conv.idConversacion;
                     } else if (res.status === 401) {
-                        window.location.href = '/auth';
+                        window.location.href = '/auth?mode=login&next=' + encodeURIComponent(window.location.pathname + window.location.search);
                     } else if (res.status === 400) {
-                        alert('No puedes contactar con tu propio anuncio.');
+                        await showReserveFeedbackModal('No puedes contactar con tu propio anuncio.', 'error');
                     } else {
                         const errText = await res.text().catch(() => '');
                         console.error('Chat API error', res.status, errText);
-                        alert('Error al abrir el chat (' + res.status + '). Revisa la consola.');
+                        await showReserveFeedbackModal('Error al abrir el chat (' + res.status + '). Intentalo de nuevo en unos segundos.', 'error');
                     }
                 } catch (err) {
                     console.error('Chat fetch error', err);
-                    alert('No se pudo conectar con el servidor.');
+                    await showReserveFeedbackModal('No se pudo conectar con el servidor.', 'error');
                 }
             });
         }

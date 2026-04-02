@@ -965,6 +965,10 @@ import Layout from "../layouts/Layout.astro";
     toastHideTimer = setTimeout(closeToast, 4500);
   }
 
+  function showSystemToast(message: string) {
+    showIncomingToast('UFV Shares', message);
+  }
+
   // Helpers de fecha
   function formatTs(iso: string): string {
     const d = new Date(iso);
@@ -1220,7 +1224,11 @@ import Layout from "../layouts/Layout.astro";
   }
 
   // API helpers
-  function checkAuth(s: number) { if (s === 401) window.location.href = '/auth'; }
+  function checkAuth(s: number) {
+    if (s === 401) {
+      window.location.href = '/auth?mode=login&next=' + encodeURIComponent(window.location.pathname + window.location.search);
+    }
+  }
 
   async function fetchConversations(): Promise<ApiConv[]> {
     if (!token) return [];
@@ -1249,7 +1257,7 @@ import Layout from "../layouts/Layout.astro";
   // Abrir conversacion
   async function openConversation(conv: ApiConv) {
     if (isUserBlocked(conv.otroUsuarioId)) {
-      window.alert('Este usuario esta bloqueado. Desbloquealo desde el menu de opciones para volver a chatear.');
+      showSystemToast('Este usuario esta bloqueado. Desbloquealo desde opciones para volver a chatear.');
       return;
     }
     if (pollTimer) clearTimeout(pollTimer);
@@ -1344,7 +1352,10 @@ import Layout from "../layouts/Layout.astro";
 
   // Init
   (async () => {
-    if (!token) { window.location.href = '/auth'; return; }
+    if (!token) {
+      window.location.href = '/auth?mode=login&next=' + encodeURIComponent(window.location.pathname + window.location.search);
+      return;
+    }
     conversations = await fetchConversations();
     syncUnreadSnapshot(conversations);
     filteredConvs = applyFilter(conversations);
@@ -1521,7 +1532,7 @@ import Layout from "../layouts/Layout.astro";
     if (activeConvUserId === null || !reportReason) return;
     const myId = await fetchMyUserId();
     if (myId === null) {
-      window.alert('No se pudo enviar el reporte. Inicia sesion de nuevo.');
+      showSystemToast('No se pudo enviar el reporte. Inicia sesion de nuevo.');
       return;
     }
 
@@ -1539,13 +1550,13 @@ import Layout from "../layouts/Layout.astro";
         body: JSON.stringify(payload)
       });
       if (!res.ok) {
-        window.alert('No se pudo enviar el reporte. Intentalo de nuevo.');
+        showSystemToast('No se pudo enviar el reporte. Intentalo de nuevo.');
         return;
       }
       closeReportModal();
-      window.alert('Reporte enviado correctamente. Gracias por avisarnos.');
+      showSystemToast('Reporte enviado correctamente. Gracias por avisarnos.');
     } catch {
-      window.alert('No se pudo enviar el reporte. Revisa tu conexion e intentalo de nuevo.');
+      showSystemToast('No se pudo enviar el reporte. Revisa tu conexion e intentalo de nuevo.');
     }
   });
 
