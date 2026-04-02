@@ -9,7 +9,8 @@ CREATE TABLE usuario (
     correo               VARCHAR(150) NOT NULL UNIQUE,
     telefono             VARCHAR(20) NOT NULL UNIQUE,
     dni                  VARCHAR(20) NOT NULL UNIQUE,
-    password             VARCHAR(255) NOT NULL
+    password             VARCHAR(255) NOT NULL,
+    es_admin             BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 

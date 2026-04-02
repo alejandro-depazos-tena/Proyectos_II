@@ -28,11 +28,19 @@ const AUTH_PAGE_API_BASE = API_BASE;
     </script>
     <script define:vars={{ AUTH_PAGE_API_BASE }}>
       (function() {
+        const params = new URLSearchParams(location.search);
+        const mode = params.get("mode");
+        const explicitAuthMode = mode === "login" || mode === "register";
+
+        // Si el usuario abre explícitamente la pantalla de login/registro,
+        // permitimos cambiar de cuenta sin redirigir automáticamente.
+        if (explicitAuthMode) return;
+
         const token = localStorage.getItem("ufvshares_token");
         if (!token) return;
 
         function clearSession() {
-          ["ufvshares_token", "ufvshares_email", "ufvshares_nombre", "ufvshares_id"].forEach((key) => {
+          ["ufvshares_token", "ufvshares_email", "ufvshares_nombre", "ufvshares_id", "ufvshares_admin"].forEach((key) => {
             localStorage.removeItem(key);
           });
         }
@@ -55,17 +63,18 @@ const AUTH_PAGE_API_BASE = API_BASE;
         }
 
         fetch(AUTH_PAGE_API_BASE + "/me", { headers: { Authorization: "Bearer " + token } })
-          .then((res) => {
+          .then(async (res) => {
             if (!res.ok) {
               clearSession();
               return;
             }
+            const me = await res.json().catch(() => null);
+            localStorage.setItem("ufvshares_admin", me?.esAdmin ? "1" : "0");
             const next = new URLSearchParams(location.search).get("next") || "/app";
             location.replace(next);
           })
           .catch(() => {
-            const next = new URLSearchParams(location.search).get("next") || "/app";
-            location.replace(next);
+            // Si hay un fallo de red, mantenemos la pantalla de auth usable.
           });
       })();
     </script>
@@ -387,6 +396,7 @@ const AUTH_PAGE_API_BASE = API_BASE;
           localStorage.setItem("ufvshares_token", body.token);
           localStorage.setItem("ufvshares_email", body.email);
           if (body.nombre) localStorage.setItem("ufvshares_nombre", body.nombre);
+          localStorage.setItem("ufvshares_admin", body.esAdmin ? "1" : "0");
           window.location.href = next;
         } catch(err) {
           errorEl.textContent = "No se pudo conectar con el backend";

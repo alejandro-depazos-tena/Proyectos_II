@@ -45,8 +45,13 @@ export default function FavoritesList() {
             {favorites.map((product) => (
                 <div key={product.id} className="card bg-base-100 shadow-sm hover:shadow-xl transition-shadow duration-300 border border-base-200 overflow-hidden relative group">
                     <button
-                        onClick={() => void handleRemove(product.id, product.name)}
-                        className="absolute top-3 right-3 z-20 btn btn-circle btn-sm bg-white hover:bg-error hover:text-white border-none shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                        type="button"
+                        onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            void handleRemove(product.id, product.name);
+                        }}
+                        className="absolute top-3 right-3 z-20 btn btn-circle btn-sm bg-white hover:bg-error hover:text-white border-none shadow-md opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                         aria-label="Eliminar de favoritos"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>

@@ -1,0 +1,407 @@
+---
+import Layout from "../layouts/Layout.astro";
+const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
+---
+
+<Layout title="Panel Admin | UFV Shares">
+  <section class="admin-shell">
+    <header class="admin-hero">
+      <p class="admin-kicker">Panel de administracion</p>
+      <h1>Metricas de plataforma</h1>
+      <p>Vision global de solicitudes, compras, publicaciones y actividad de chat.</p>
+    </header>
+
+    <div id="admin-error" class="admin-error hidden"></div>
+
+    <section id="kpis" class="kpis-grid"></section>
+
+    <section class="charts-grid">
+      <article class="chart-card">
+        <h3>Publicaciones por dia (14 dias)</h3>
+        <div id="chart-productos-dia" class="chart-line"></div>
+      </article>
+      <article class="chart-card">
+        <h3>Solicitudes por estado</h3>
+        <div id="chart-solicitudes-estado" class="chart-bars"></div>
+      </article>
+      <article class="chart-card">
+        <h3>Productos por categoria</h3>
+        <div id="chart-productos-categoria" class="chart-bars"></div>
+      </article>
+      <article class="chart-card">
+        <h3>Tipos de transaccion publicados</h3>
+        <div id="chart-productos-tipo" class="chart-bars"></div>
+      </article>
+      <article class="chart-card">
+        <h3>Mensajes de chat por dia</h3>
+        <div id="chart-mensajes-dia" class="chart-line"></div>
+      </article>
+      <article class="chart-card">
+        <h3>Top productos mas solicitados</h3>
+        <div id="chart-top-productos" class="chart-bars"></div>
+      </article>
+    </section>
+  </section>
+</Layout>
+
+<script define:vars={{ API_BASE }}>
+  const token = localStorage.getItem("ufvshares_token");
+  const errEl = document.getElementById("admin-error");
+
+  function clearSession() {
+    ["ufvshares_token", "ufvshares_email", "ufvshares_nombre", "ufvshares_id", "ufvshares_admin"].forEach((k) => {
+      localStorage.removeItem(k);
+    });
+  }
+
+  function showError(message) {
+    if (!errEl) return;
+    errEl.textContent = message;
+    errEl.classList.remove("hidden");
+  }
+
+  function shortDateLabel(isoDate) {
+    try {
+      const d = new Date(isoDate + "T00:00:00");
+      return d.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit" });
+    } catch {
+      return isoDate;
+    }
+  }
+
+  function formatLabel(label) {
+    return String(label || "").replaceAll("_", " ");
+  }
+
+  function renderKpis(overview) {
+    const el = document.getElementById("kpis");
+    if (!el) return;
+
+    const cards = [
+      ["Usuarios", overview.totalUsuarios],
+      ["Productos publicados", overview.totalProductos],
+      ["Solicitudes pendientes", overview.solicitudesPendientes],
+      ["Solicitudes aceptadas", overview.solicitudesAceptadas],
+      ["Solicitudes rechazadas", overview.solicitudesRechazadas],
+      ["Compras realizadas", overview.comprasRealizadas],
+      ["Alquileres activos", overview.alquileresActivos],
+      ["Conversaciones", overview.conversacionesActivas],
+      ["Mensajes totales", overview.mensajesTotales],
+    ];
+
+    el.innerHTML = cards
+      .map(([title, value]) => `
+        <div class="kpi-card">
+          <span>${title}</span>
+          <strong>${Number(value || 0).toLocaleString("es-ES")}</strong>
+        </div>
+      `)
+      .join("");
+  }
+
+  function renderBarChart(containerId, rows) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+
+    const data = Array.isArray(rows) ? rows : [];
+    const max = Math.max(1, ...data.map((r) => Number(r.count || 0)));
+
+    if (!data.length) {
+      el.innerHTML = '<p class="chart-empty">Sin datos</p>';
+      return;
+    }
+
+    el.innerHTML = data
+      .map((row) => {
+        const count = Number(row.count || 0);
+        const pct = Math.round((count / max) * 100);
+        return `
+          <div class="bar-row">
+            <div class="bar-meta">
+              <span>${formatLabel(row.label)}</span>
+              <strong>${count}</strong>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  function renderLineChart(containerId, rows) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+
+    const data = Array.isArray(rows) ? rows : [];
+    const values = data.map((r) => Number(r.count || 0));
+    const max = Math.max(1, ...values);
+
+    if (!data.length) {
+      el.innerHTML = '<p class="chart-empty">Sin datos</p>';
+      return;
+    }
+
+    const width = 720;
+    const height = 220;
+    const stepX = data.length > 1 ? width / (data.length - 1) : width;
+
+    const points = data
+      .map((row, i) => {
+        const y = height - (Number(row.count || 0) / max) * (height - 20) - 10;
+        const x = i * stepX;
+        return `${x},${y}`;
+      })
+      .join(" ");
+
+    const last = data[data.length - 1];
+
+    el.innerHTML = `
+      <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" class="spark">
+        <polyline fill="none" stroke="currentColor" stroke-width="3" points="${points}"></polyline>
+      </svg>
+      <div class="line-foot">
+        <span>Ultimo dia: ${shortDateLabel(last.date)}</span>
+        <strong>${Number(last.count || 0)} publicaciones</strong>
+      </div>
+    `;
+  }
+
+  async function ensureAdmin() {
+    if (!token) {
+      window.location.href = "/auth?mode=login&next=" + encodeURIComponent("/admin");
+      return false;
+    }
+
+    const meRes = await fetch(API_BASE + "/me", { headers: { Authorization: "Bearer " + token } });
+    if (!meRes.ok) {
+      clearSession();
+      window.location.href = "/auth?mode=login&next=" + encodeURIComponent("/admin");
+      return false;
+    }
+
+    const me = await meRes.json().catch(() => null);
+    if (!me?.esAdmin) {
+      window.location.href = "/app";
+      return false;
+    }
+
+    localStorage.setItem("ufvshares_admin", "1");
+    return true;
+  }
+
+  async function loadDashboard() {
+    try {
+      const allowed = await ensureAdmin();
+      if (!allowed) return;
+
+      const res = await fetch(API_BASE + "/admin/metrics", {
+        headers: { Authorization: "Bearer " + token },
+      });
+
+      if (res.status === 403) {
+        window.location.href = "/app";
+        return;
+      }
+
+      if (!res.ok) {
+        showError("No se pudieron cargar las metricas del panel.");
+        return;
+      }
+
+      const payload = await res.json();
+      renderKpis(payload.overview || {});
+
+      const charts = payload.charts || {};
+      renderLineChart("chart-productos-dia", charts.productosPorDia || []);
+      renderBarChart("chart-solicitudes-estado", charts.solicitudesPorEstado || []);
+      renderBarChart("chart-productos-categoria", charts.productosPorCategoria || []);
+      renderBarChart("chart-productos-tipo", charts.productosPorTipoTransaccion || []);
+      renderLineChart("chart-mensajes-dia", charts.mensajesPorDia || []);
+      renderBarChart("chart-top-productos", charts.topProductosSolicitados || []);
+    } catch {
+      showError("Error de conexion al cargar el panel de admin.");
+    }
+  }
+
+  loadDashboard();
+</script>
+
+<style>
+  .admin-shell {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .admin-hero {
+    background: linear-gradient(120deg, #0b3b66 0%, #175a91 55%, #2684c5 100%);
+    color: #f4fbff;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 20px 40px rgba(9, 36, 62, 0.2);
+  }
+
+  .admin-kicker {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    opacity: 0.8;
+    margin: 0 0 0.35rem;
+  }
+
+  .admin-hero h1 {
+    margin: 0;
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    line-height: 1.05;
+  }
+
+  .admin-hero p {
+    margin: 0.5rem 0 0;
+    max-width: 62ch;
+    opacity: 0.92;
+  }
+
+  .admin-error {
+    margin: 0 0 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 0.75rem;
+    background: #ffe6e6;
+    color: #8a1f1f;
+    border: 1px solid #efb3b3;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .kpis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .kpi-card {
+    background: #ffffff;
+    border: 1px solid #dce6ef;
+    border-radius: 0.85rem;
+    padding: 0.9rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .kpi-card span {
+    color: #4f6478;
+    font-size: 0.83rem;
+  }
+
+  .kpi-card strong {
+    color: #0b3b66;
+    font-size: 1.45rem;
+    line-height: 1;
+  }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 0.9rem;
+  }
+
+  .chart-card {
+    background: #ffffff;
+    border: 1px solid #dce6ef;
+    border-radius: 0.85rem;
+    padding: 1rem;
+    min-height: 250px;
+  }
+
+  .chart-card h3 {
+    margin: 0 0 0.8rem;
+    color: #123a5f;
+    font-size: 1.03rem;
+    line-height: 1.2;
+  }
+
+  .chart-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .bar-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .bar-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.7rem;
+    color: #4f6478;
+    font-size: 0.86rem;
+  }
+
+  .bar-meta strong {
+    color: #0f5f99;
+    font-size: 0.85rem;
+  }
+
+  .bar-track {
+    width: 100%;
+    height: 9px;
+    border-radius: 999px;
+    background: #e4edf5;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #1b74b8 0%, #37b5db 100%);
+  }
+
+  .chart-line {
+    color: #1d80c7;
+  }
+
+  .spark {
+    width: 100%;
+    height: 185px;
+    background: linear-gradient(180deg, #f4f9fd 0%, #ffffff 100%);
+    border: 1px solid #e5eef7;
+    border-radius: 0.7rem;
+    display: block;
+  }
+
+  .line-foot {
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.6rem;
+    font-size: 0.83rem;
+    color: #47637d;
+  }
+
+  .line-foot strong {
+    color: #154e7a;
+  }
+
+  .chart-empty {
+    color: #8fa4b8;
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 560px) {
+    .charts-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .line-foot {
+      flex-direction: column;
+    }
+  }
+</style>

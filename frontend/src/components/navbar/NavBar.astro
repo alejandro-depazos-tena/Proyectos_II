@@ -96,6 +96,7 @@ import Links from "./Links.astro";
     const token = localStorage.getItem("ufvshares_token");
     const nombre = localStorage.getItem("ufvshares_nombre");
     const email = localStorage.getItem("ufvshares_email");
+    const adminFlag = localStorage.getItem("ufvshares_admin") === "1";
     const THEME_KEY = "ufvshares_theme";
     const themeToggle = document.getElementById("theme-toggle");
     const themeThumbIcon = document.getElementById("theme-thumb-icon");
@@ -104,6 +105,8 @@ import Links from "./Links.astro";
         localStorage.removeItem("ufvshares_token");
         localStorage.removeItem("ufvshares_email");
         localStorage.removeItem("ufvshares_nombre");
+        localStorage.removeItem("ufvshares_id");
+        localStorage.removeItem("ufvshares_admin");
     }
 
     function updateThemeButton(theme: "light" | "dark") {
@@ -140,9 +143,10 @@ import Links from "./Links.astro";
     }
 
     if (navAuthLinks) {
-        function renderLoggedIn() {
+        function renderLoggedIn(isAdmin = false) {
             navAuthLinks!.innerHTML = `
                 <span class="text-sm opacity-60 hidden xl:inline">${nombre || email || ""}</span>
+                ${isAdmin ? '<a href="/admin" class="btn btn-outline btn-xs">Admin</a>' : ''}
                 <button id="nav-logout" class="btn btn-ghost btn-sm">Cerrar sesi&oacute;n</button>
             `;
             document.getElementById("nav-logout")?.addEventListener("click", () => {
@@ -159,9 +163,22 @@ import Links from "./Links.astro";
         }
 
         if (token) {
-            renderLoggedIn();
+            renderLoggedIn(adminFlag);
             fetch(API_BASE_NAV + "/me", { headers: { Authorization: "Bearer " + token } })
-                .then(res => { if (!res.ok) { clearSession(); renderGuest(); } })
+                .then(async res => {
+                    if (!res.ok) {
+                        clearSession();
+                        renderGuest();
+                        return;
+                    }
+
+                    const me = await res.json().catch(() => null);
+                    if (me?.nombre) localStorage.setItem("ufvshares_nombre", String(me.nombre));
+                    if (me?.idUsuario != null) localStorage.setItem("ufvshares_id", String(me.idUsuario));
+                    const isAdmin = Boolean(me?.esAdmin);
+                    localStorage.setItem("ufvshares_admin", isAdmin ? "1" : "0");
+                    renderLoggedIn(isAdmin);
+                })
                 .catch(() => { /* network error – keep current state */ });
         } else {
             renderGuest();

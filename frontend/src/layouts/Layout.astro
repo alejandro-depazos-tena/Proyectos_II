@@ -36,7 +36,7 @@ const apiBase = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
 		</script>
 		<script is:inline define:vars={{ apiBase }}>
 			(function(){
-				const SESSION_KEYS = ['ufvshares_token', 'ufvshares_email', 'ufvshares_nombre', 'ufvshares_id'];
+				const SESSION_KEYS = ['ufvshares_token', 'ufvshares_email', 'ufvshares_nombre', 'ufvshares_id', 'ufvshares_admin'];
 
 				function clearSession(){
 					SESSION_KEYS.forEach(function(key){ localStorage.removeItem(key); });

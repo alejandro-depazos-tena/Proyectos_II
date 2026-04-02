@@ -148,6 +148,7 @@ public class MeController {
     res.put("correo", u.getCorreo());
     res.put("telefono", u.getTelefono());
     res.put("dni", u.getDni());
+    res.put("esAdmin", u.isEsAdmin());
     res.put("fotoPerfil", u.getFotoPerfil());
     res.put("preguntaSeguridad", u.getPreguntaSeguridad());
     return res;
@@ -217,7 +218,10 @@ public class MeController {
       @RequestHeader("Authorization") String auth,
       @PathVariable Long idProducto) {
     Usuario u = resolveUser(auth);
-    favoritos.deleteByIdUsuarioAndIdProducto(u.getIdUsuario(), idProducto);
+    int deleted = favoritos.deleteOwnedFavorite(u.getIdUsuario(), idProducto);
+    if (deleted == 0) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "FAVORITO_NOT_FOUND");
+    }
   }
 
   @PostMapping("/seguridad")

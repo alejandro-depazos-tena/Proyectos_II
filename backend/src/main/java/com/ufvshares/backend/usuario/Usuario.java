@@ -57,6 +57,9 @@ public class Usuario {
   @Column(name = "respuesta_seguridad_hash", length = 255)
   private String respuestaSeguridadHash;
 
+  @Column(name = "es_admin", nullable = false)
+  private boolean esAdmin = false;
+
   public Long getIdUsuario() {
     return idUsuario;
   }
@@ -135,5 +138,13 @@ public class Usuario {
 
   public void setRespuestaSeguridadHash(String respuestaSeguridadHash) {
     this.respuestaSeguridadHash = respuestaSeguridadHash;
+  }
+
+  public boolean isEsAdmin() {
+    return esAdmin;
+  }
+
+  public void setEsAdmin(boolean esAdmin) {
+    this.esAdmin = esAdmin;
   }
 }

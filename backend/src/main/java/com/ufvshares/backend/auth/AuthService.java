@@ -49,7 +49,7 @@ public class AuthService {
 
     var token = UUID.randomUUID().toString();
     sessions.put(token, normalized);
-    return new AuthResponse(token, normalized, req.nombre().trim());
+    return new AuthResponse(token, normalized, req.nombre().trim(), usuario.isEsAdmin());
   }
 
   public AuthResponse login(String email, String password) {
@@ -64,7 +64,7 @@ public class AuthService {
 
     var token = UUID.randomUUID().toString();
     sessions.put(token, normalized);
-    return new AuthResponse(token, normalized, usuario.getNombre());
+    return new AuthResponse(token, normalized, usuario.getNombre(), usuario.isEsAdmin());
   }
 
   public String getSecurityQuestion(String email) {

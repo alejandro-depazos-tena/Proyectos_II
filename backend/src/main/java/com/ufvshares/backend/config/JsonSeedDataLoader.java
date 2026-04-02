@@ -114,6 +114,7 @@ public class JsonSeedDataLoader implements CommandLineRunner {
       usuario.setTelefono(node.path("telefono").asText());
       usuario.setDni(node.path("dni").asText());
       usuario.setPasswordHash(node.path("password").asText());
+      usuario.setEsAdmin(node.path("es_admin").asBoolean(false));
       usuarios.add(usuario);
     }
 

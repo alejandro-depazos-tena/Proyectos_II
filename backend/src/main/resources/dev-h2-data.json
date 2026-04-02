@@ -4,10 +4,11 @@
       "id_usuario": 1,
       "nombre": "Lucia",
       "apellidos": "Martinez Gomez",
-      "correo": "lucia.martinez@ufv.es",
+      "correo": "admin@ufv.es",
       "telefono": "600111001",
       "dni": "00000001A",
-      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+      "es_admin": true,
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
     },
     {
       "id_usuario": 2,
@@ -16,7 +17,7 @@
       "correo": "pablo.sanchez@ufv.es",
       "telefono": "600111002",
       "dni": "00000002B",
-      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
     },
     {
       "id_usuario": 3,
@@ -25,7 +26,7 @@
       "correo": "marta.lopez@ufv.es",
       "telefono": "600111003",
       "dni": "00000003C",
-      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
     },
     {
       "id_usuario": 4,
@@ -34,7 +35,7 @@
       "correo": "carlos.fernandez@ufv.es",
       "telefono": "600111004",
       "dni": "00000004D",
-      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
     },
     {
       "id_usuario": 5,
@@ -43,7 +44,7 @@
       "correo": "elena.navarro@ufv.es",
       "telefono": "600111005",
       "dni": "00000005E",
-      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
     },
     {
       "id_usuario": 6,
@@ -52,7 +53,7 @@
       "correo": "javier.moreno@ufv.es",
       "telefono": "600111006",
       "dni": "00000006F",
-      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
     },
     {
       "id_usuario": 7,
@@ -61,7 +62,7 @@
       "correo": "andrea.romero@ufv.es",
       "telefono": "600111007",
       "dni": "00000007G",
-      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
     },
     {
       "id_usuario": 8,
@@ -70,7 +71,7 @@
       "correo": "diego.hernandez@ufv.es",
       "telefono": "600111008",
       "dni": "00000008H",
-      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
     },
     {
       "id_usuario": 9,
@@ -79,7 +80,7 @@
       "correo": "nuria.castro@ufv.es",
       "telefono": "600111009",
       "dni": "00000009J",
-      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
     },
     {
       "id_usuario": 10,
@@ -88,7 +89,97 @@
       "correo": "alberto.ortega@ufv.es",
       "telefono": "600111010",
       "dni": "00000010K",
-      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
+    },
+    {
+      "id_usuario": 11,
+      "nombre": "Sergio",
+      "apellidos": "Vidal Ramos",
+      "correo": "sergio.vidal@ufv.es",
+      "telefono": "600111011",
+      "dni": "00000011L",
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
+    },
+    {
+      "id_usuario": 12,
+      "nombre": "Irene",
+      "apellidos": "Mendez Prieto",
+      "correo": "irene.mendez@ufv.es",
+      "telefono": "600111012",
+      "dni": "00000012M",
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
+    },
+    {
+      "id_usuario": 13,
+      "nombre": "Rocio",
+      "apellidos": "Campos Nieto",
+      "correo": "rocio.campos@ufv.es",
+      "telefono": "600111013",
+      "dni": "00000013N",
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
+    },
+    {
+      "id_usuario": 14,
+      "nombre": "Hugo",
+      "apellidos": "Arias Molina",
+      "correo": "hugo.arias@ufv.es",
+      "telefono": "600111014",
+      "dni": "00000014P",
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
+    },
+    {
+      "id_usuario": 15,
+      "nombre": "Noelia",
+      "apellidos": "Serrano Vega",
+      "correo": "noelia.serrano@ufv.es",
+      "telefono": "600111015",
+      "dni": "00000015R",
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
+    },
+    {
+      "id_usuario": 16,
+      "nombre": "Raul",
+      "apellidos": "Benitez Cano",
+      "correo": "raul.benitez@ufv.es",
+      "telefono": "600111016",
+      "dni": "00000016S",
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
+    },
+    {
+      "id_usuario": 17,
+      "nombre": "Paula",
+      "apellidos": "Bravo Hidalgo",
+      "correo": "paula.bravo@ufv.es",
+      "telefono": "600111017",
+      "dni": "00000017T",
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
+    },
+    {
+      "id_usuario": 18,
+      "nombre": "Adrian",
+      "apellidos": "Prieto Lara",
+      "correo": "adrian.prieto@ufv.es",
+      "telefono": "600111018",
+      "dni": "00000018V",
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
+    },
+    {
+      "id_usuario": 19,
+      "nombre": "Clara",
+      "apellidos": "Soto Rubio",
+      "correo": "clara.soto@ufv.es",
+      "telefono": "600111019",
+      "dni": "00000019W",
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
+    },
+    {
+      "id_usuario": 20,
+      "nombre": "Tomas",
+      "apellidos": "Marin Oliva",
+      "correo": "tomas.marin@ufv.es",
+      "telefono": "600111020",
+      "dni": "00000020X",
+      "password": "f83940fd01327be194f7f676a10d6fcd24d2c04af7bd0d4eca4491fe530db902"
     }
   ],
   "producto": [
@@ -287,6 +378,370 @@
       "ubicacion": "Residencia B, hab. 210",
       "imagen_url": "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&auto=format&fit=crop",
       "vistas": 6
+    },
+    {
+      "id_producto": 15,
+      "titulo": "Camara web Logitech C920",
+      "descripcion": "Camara Full HD para clases online y streaming.",
+      "categoria": "ELECTRONICA",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "DISPONIBLE",
+      "precio": 38.0,
+      "id_propietario": 11,
+      "condicion": "BUENO",
+      "ubicacion": "Edificio E, cafeteria",
+      "imagen_url": "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=600&auto=format&fit=crop",
+      "vistas": 29
+    },
+    {
+      "id_producto": 16,
+      "titulo": "Altavoz Bluetooth JBL",
+      "descripcion": "Altavoz portatil con buena bateria, ideal para reuniones.",
+      "categoria": "ELECTRONICA",
+      "tipo_transaccion": "ALQUILER",
+      "estado_producto": "DISPONIBLE",
+      "precio": 4.5,
+      "id_propietario": 11,
+      "condicion": "COMO_NUEVO",
+      "ubicacion": "Residencia D, hab. 12",
+      "imagen_url": "https://images.unsplash.com/photo-1589003077984-894e133dabab?w=600&auto=format&fit=crop",
+      "vistas": 18
+    },
+    {
+      "id_producto": 17,
+      "titulo": "Libro de Estadistica Aplicada",
+      "descripcion": "Libro recomendado para analitica de datos.",
+      "categoria": "LIBROS",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "DISPONIBLE",
+      "precio": 14.0,
+      "id_propietario": 12,
+      "condicion": "ACEPTABLE",
+      "ubicacion": "Biblioteca central",
+      "imagen_url": "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=600&auto=format&fit=crop",
+      "vistas": 33
+    },
+    {
+      "id_producto": 18,
+      "titulo": "Libro de Marketing Digital",
+      "descripcion": "Edicion 2023 con ejercicios practicos.",
+      "categoria": "LIBROS",
+      "tipo_transaccion": "ALQUILER",
+      "estado_producto": "DISPONIBLE",
+      "precio": 3.0,
+      "id_propietario": 12,
+      "condicion": "BUENO",
+      "ubicacion": "Campus A, aula 2.4",
+      "imagen_url": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=600&auto=format&fit=crop",
+      "vistas": 11
+    },
+    {
+      "id_producto": 19,
+      "titulo": "Esterilla de yoga",
+      "descripcion": "Esterilla antideslizante de 6 mm.",
+      "categoria": "DEPORTE",
+      "tipo_transaccion": "PRESTAMO",
+      "estado_producto": "DISPONIBLE",
+      "precio": null,
+      "id_propietario": 13,
+      "condicion": "COMO_NUEVO",
+      "ubicacion": "Pabellon sur",
+      "imagen_url": "https://images.unsplash.com/photo-1599447332412-6bc6830c815a?w=600&auto=format&fit=crop",
+      "vistas": 7
+    },
+    {
+      "id_producto": 20,
+      "titulo": "Mancuernas ajustables 20kg",
+      "descripcion": "Par de mancuernas con discos intercambiables.",
+      "categoria": "DEPORTE",
+      "tipo_transaccion": "ALQUILER",
+      "estado_producto": "DISPONIBLE",
+      "precio": 8.0,
+      "id_propietario": 13,
+      "condicion": "BUENO",
+      "ubicacion": "Residencia E, gimnasio",
+      "imagen_url": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&auto=format&fit=crop",
+      "vistas": 16
+    },
+    {
+      "id_producto": 21,
+      "titulo": "Microondas compacto",
+      "descripcion": "Microondas de 20 litros funcionando perfecto.",
+      "categoria": "HOGAR",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "DISPONIBLE",
+      "precio": 32.0,
+      "id_propietario": 14,
+      "condicion": "BUENO",
+      "ubicacion": "Residencia C, hall",
+      "imagen_url": "https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?w=600&auto=format&fit=crop",
+      "vistas": 13
+    },
+    {
+      "id_producto": 22,
+      "titulo": "Tostadora doble ranura",
+      "descripcion": "Tostadora basica para piso compartido.",
+      "categoria": "HOGAR",
+      "tipo_transaccion": "PRESTAMO",
+      "estado_producto": "DISPONIBLE",
+      "precio": null,
+      "id_propietario": 14,
+      "condicion": "ACEPTABLE",
+      "ubicacion": "Residencia C, cocina comun",
+      "imagen_url": "https://images.unsplash.com/photo-1585238342024-78d387f4a707?w=600&auto=format&fit=crop",
+      "vistas": 4
+    },
+    {
+      "id_producto": 23,
+      "titulo": "Impresora HP DeskJet",
+      "descripcion": "Impresora con cartuchos al 60%. Incluye cable USB.",
+      "categoria": "ELECTRONICA",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "DISPONIBLE",
+      "precio": 26.0,
+      "id_propietario": 15,
+      "condicion": "ACEPTABLE",
+      "ubicacion": "Campus B, coworking",
+      "imagen_url": "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=600&auto=format&fit=crop",
+      "vistas": 24
+    },
+    {
+      "id_producto": 24,
+      "titulo": "Auriculares Sony WH-CH520",
+      "descripcion": "Auriculares inalambricos con autonomia de 40h.",
+      "categoria": "ELECTRONICA",
+      "tipo_transaccion": "ALQUILER",
+      "estado_producto": "DISPONIBLE",
+      "precio": 5.0,
+      "id_propietario": 15,
+      "condicion": "COMO_NUEVO",
+      "ubicacion": "Residencia F, hab. 40",
+      "imagen_url": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop",
+      "vistas": 45
+    },
+    {
+      "id_producto": 25,
+      "titulo": "Apuntes impresos Calculo I",
+      "descripcion": "Carpeta completa de apuntes y ejercicios resueltos.",
+      "categoria": "LIBROS",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "DISPONIBLE",
+      "precio": 9.5,
+      "id_propietario": 16,
+      "condicion": "BUENO",
+      "ubicacion": "Biblioteca, planta 1",
+      "imagen_url": "https://images.unsplash.com/photo-1455885666463-9f41f3f56f56?w=600&auto=format&fit=crop",
+      "vistas": 38
+    },
+    {
+      "id_producto": 26,
+      "titulo": "Libro de Derecho Civil",
+      "descripcion": "Manual actualizado con legislacion 2025.",
+      "categoria": "LIBROS",
+      "tipo_transaccion": "ALQUILER",
+      "estado_producto": "NO_DISPONIBLE",
+      "precio": 4.0,
+      "id_propietario": 16,
+      "condicion": "BUENO",
+      "ubicacion": "Campus C, despacho alumnos",
+      "imagen_url": "https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=600&auto=format&fit=crop",
+      "vistas": 8
+    },
+    {
+      "id_producto": 27,
+      "titulo": "Balon de baloncesto Spalding",
+      "descripcion": "Balon talla oficial para pista interior o exterior.",
+      "categoria": "DEPORTE",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "DISPONIBLE",
+      "precio": 12.0,
+      "id_propietario": 17,
+      "condicion": "COMO_NUEVO",
+      "ubicacion": "Pista exterior",
+      "imagen_url": "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&auto=format&fit=crop",
+      "vistas": 52
+    },
+    {
+      "id_producto": 28,
+      "titulo": "Botas de futbol talla 43",
+      "descripcion": "Botas con tacos FG, poco uso.",
+      "categoria": "DEPORTE",
+      "tipo_transaccion": "ALQUILER",
+      "estado_producto": "DISPONIBLE",
+      "precio": 4.0,
+      "id_propietario": 17,
+      "condicion": "BUENO",
+      "ubicacion": "Vestuarios campus",
+      "imagen_url": "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?w=600&auto=format&fit=crop",
+      "vistas": 21
+    },
+    {
+      "id_producto": 29,
+      "titulo": "Silla ergonomica de estudio",
+      "descripcion": "Silla con soporte lumbar y altura ajustable.",
+      "categoria": "HOGAR",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "DISPONIBLE",
+      "precio": 48.0,
+      "id_propietario": 18,
+      "condicion": "BUENO",
+      "ubicacion": "Residencia A, hab. 22",
+      "imagen_url": "https://images.unsplash.com/photo-1505843490701-5be5d84f52f9?w=600&auto=format&fit=crop",
+      "vistas": 36
+    },
+    {
+      "id_producto": 30,
+      "titulo": "Flexo vintage",
+      "descripcion": "Lampara flexo metalica, luz calida.",
+      "categoria": "HOGAR",
+      "tipo_transaccion": "PRESTAMO",
+      "estado_producto": "DISPONIBLE",
+      "precio": null,
+      "id_propietario": 18,
+      "condicion": "ACEPTABLE",
+      "ubicacion": "Residencia A, sala comun",
+      "imagen_url": "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600&auto=format&fit=crop",
+      "vistas": 5
+    },
+    {
+      "id_producto": 31,
+      "titulo": "Mochila 35L trekking",
+      "descripcion": "Mochila resistente al agua para escapadas de finde.",
+      "categoria": "OTROS",
+      "tipo_transaccion": "ALQUILER",
+      "estado_producto": "DISPONIBLE",
+      "precio": 6.0,
+      "id_propietario": 19,
+      "condicion": "BUENO",
+      "ubicacion": "Residencia G",
+      "imagen_url": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=600&auto=format&fit=crop",
+      "vistas": 17
+    },
+    {
+      "id_producto": 32,
+      "titulo": "Maleta cabina 55cm",
+      "descripcion": "Maleta rigida con 4 ruedas.",
+      "categoria": "OTROS",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "DISPONIBLE",
+      "precio": 30.0,
+      "id_propietario": 19,
+      "condicion": "BUENO",
+      "ubicacion": "Residencia G, recepcion",
+      "imagen_url": "https://images.unsplash.com/photo-1502920514313-52581002a659?w=600&auto=format&fit=crop",
+      "vistas": 14
+    },
+    {
+      "id_producto": 33,
+      "titulo": "Teclado mecanico Keychron",
+      "descripcion": "Teclado mecanico bluetooth, switches brown.",
+      "categoria": "ELECTRONICA",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "DISPONIBLE",
+      "precio": 58.0,
+      "id_propietario": 20,
+      "condicion": "COMO_NUEVO",
+      "ubicacion": "Campus D, sala maker",
+      "imagen_url": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&auto=format&fit=crop",
+      "vistas": 73
+    },
+    {
+      "id_producto": 34,
+      "titulo": "Raton Logitech MX Master",
+      "descripcion": "Raton ergonomico para productividad.",
+      "categoria": "ELECTRONICA",
+      "tipo_transaccion": "ALQUILER",
+      "estado_producto": "DISPONIBLE",
+      "precio": 6.5,
+      "id_propietario": 20,
+      "condicion": "BUENO",
+      "ubicacion": "Campus D, laboratorio 3",
+      "imagen_url": "https://images.unsplash.com/photo-1527814050087-3793815479db?w=600&auto=format&fit=crop",
+      "vistas": 28
+    },
+    {
+      "id_producto": 35,
+      "titulo": "Libro de Psicologia Social",
+      "descripcion": "Subrayado en algunas paginas, muy util para examen.",
+      "categoria": "LIBROS",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "DISPONIBLE",
+      "precio": 11.0,
+      "id_propietario": 3,
+      "condicion": "ACEPTABLE",
+      "ubicacion": "Campus A, banco central",
+      "imagen_url": "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&auto=format&fit=crop",
+      "vistas": 20
+    },
+    {
+      "id_producto": 36,
+      "titulo": "Tablet Samsung Galaxy Tab",
+      "descripcion": "Tablet de 10 pulgadas con funda y lapiz.",
+      "categoria": "ELECTRONICA",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "NO_DISPONIBLE",
+      "precio": 95.0,
+      "id_propietario": 5,
+      "condicion": "BUENO",
+      "ubicacion": "Residencia B",
+      "imagen_url": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&auto=format&fit=crop",
+      "vistas": 61
+    },
+    {
+      "id_producto": 37,
+      "titulo": "Proyector portatil",
+      "descripcion": "Proyector mini HDMI para presentaciones en aula.",
+      "categoria": "ELECTRONICA",
+      "tipo_transaccion": "ALQUILER",
+      "estado_producto": "DISPONIBLE",
+      "precio": 9.0,
+      "id_propietario": 4,
+      "condicion": "COMO_NUEVO",
+      "ubicacion": "Campus E, aula multimedia",
+      "imagen_url": "https://images.unsplash.com/photo-1579547621113-e4bb2a19bdd6?w=600&auto=format&fit=crop",
+      "vistas": 26
+    },
+    {
+      "id_producto": 38,
+      "titulo": "Patines en linea talla 40",
+      "descripcion": "Patines con freno trasero, incluyen protecciones.",
+      "categoria": "DEPORTE",
+      "tipo_transaccion": "ALQUILER",
+      "estado_producto": "DISPONIBLE",
+      "precio": 5.0,
+      "id_propietario": 7,
+      "condicion": "BUENO",
+      "ubicacion": "Residencia C",
+      "imagen_url": "https://images.unsplash.com/photo-1521334884684-d80222895322?w=600&auto=format&fit=crop",
+      "vistas": 12
+    },
+    {
+      "id_producto": 39,
+      "titulo": "Plancha de vapor",
+      "descripcion": "Plancha compacta para ropa, base ceramica.",
+      "categoria": "HOGAR",
+      "tipo_transaccion": "PRESTAMO",
+      "estado_producto": "DISPONIBLE",
+      "precio": null,
+      "id_propietario": 10,
+      "condicion": "BUENO",
+      "ubicacion": "Residencia F",
+      "imagen_url": "https://images.unsplash.com/photo-1588627541420-fce3f661b779?w=600&auto=format&fit=crop",
+      "vistas": 3
+    },
+    {
+      "id_producto": 40,
+      "titulo": "Router WiFi 6",
+      "descripcion": "Router dual band para mejorar cobertura en piso.",
+      "categoria": "ELECTRONICA",
+      "tipo_transaccion": "VENTA",
+      "estado_producto": "DISPONIBLE",
+      "precio": 35.0,
+      "id_propietario": 2,
+      "condicion": "COMO_NUEVO",
+      "ubicacion": "Campus B",
+      "imagen_url": "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=600&auto=format&fit=crop",
+      "vistas": 31
     }
   ],
   "solicitud": [],

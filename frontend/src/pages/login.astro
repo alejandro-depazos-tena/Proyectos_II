@@ -66,11 +66,13 @@ const next = Astro.url.searchParams.get('next') ?? '/app';
 
 		<script type="module">
 			const API_BASE = 'http://localhost:8080/api';
-			const next = new URLSearchParams(window.location.search).get('next') || '/app';
+			const params = new URLSearchParams(window.location.search);
+			const next = params.get('next') || '/app';
+			const allowSwitchAccount = params.get('switch') === '1';
 			const THEME_KEY = 'ufvshares_theme';
 
 			const token = localStorage.getItem('ufvshares_token');
-			if (token) {
+			if (token && !allowSwitchAccount) {
 				window.location.href = next;
 			}
 
@@ -135,6 +137,8 @@ const next = Astro.url.searchParams.get('next') ?? '/app';
 
 					localStorage.setItem('ufvshares_token', body.token);
 					localStorage.setItem('ufvshares_email', body.email);
+					if (body?.nombre) localStorage.setItem('ufvshares_nombre', body.nombre);
+					localStorage.setItem('ufvshares_admin', body?.esAdmin ? '1' : '0');
 					window.location.href = next;
 				} catch {
 					errorEl.textContent = 'No se pudo conectar con el backend';
