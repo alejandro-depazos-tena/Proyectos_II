@@ -1,6 +1,16 @@
 USE ufvshare;
 
 -- Limpieza mínima para poder re-ejecutar este script sin errores de UNIQUE/FK
+DELETE FROM mensaje;
+DELETE FROM conversacion;
+DELETE FROM favorito;
+DELETE FROM foto_producto;
+DELETE FROM transaccion;
+DELETE FROM solicitud;
+DELETE FROM reporte_producto;
+DELETE FROM reporte_usuario;
+DELETE FROM pending_cambio;
+DELETE FROM sessions;
 DELETE FROM producto;
 DELETE FROM usuario;
 
@@ -49,7 +59,11 @@ INSERT INTO producto (
 	tipo_transaccion,
 	estado_producto,
 	precio,
-	id_propietario
+	id_propietario,
+	condicion,
+	ubicacion,
+	imagen_url,
+	vistas
 ) VALUES
 (1, 'Portatil Lenovo IdeaPad', 'Portatil de 15 pulgadas con cargador original.', 'ELECTRONICA', 'ALQUILER', 'DISPONIBLE', 18.00, 1),
 (2, 'Calculadora cientifica Casio', 'Ideal para ingenieria y matematicas.', 'ELECTRONICA', 'VENTA', 'DISPONIBLE', 22.50, 1),
@@ -64,31 +78,5 @@ INSERT INTO producto (
 (11, 'Aspiradora compacta', 'Ligera y facil de guardar.', 'HOGAR', 'ALQUILER', 'DISPONIBLE', 7.00, 7),
 (12, 'Mando PS5', 'Mando original con poco uso.', 'ELECTRONICA', 'VENTA', 'DISPONIBLE', 45.00, 8),
 (13, 'Patinete plegable', 'Patinete urbano con freno trasero.', 'DEPORTE', 'VENTA', 'NO_DISPONIBLE', 55.00, 8),
-(14, 'Kit de herramientas', 'Caja con herramientas basicas para bricolaje.', 'OTROS', 'PRESTAMO', 'DISPONIBLE', NULL, 9),
-(15, 'Camara web Logitech C920', 'Camara Full HD para clases online y streaming.', 'ELECTRONICA', 'VENTA', 'DISPONIBLE', 38.00, 11),
-(16, 'Altavoz Bluetooth JBL', 'Altavoz portatil con buena bateria, ideal para reuniones.', 'ELECTRONICA', 'ALQUILER', 'DISPONIBLE', 4.50, 11),
-(17, 'Libro de Estadistica Aplicada', 'Libro recomendado para analitica de datos.', 'LIBROS', 'VENTA', 'DISPONIBLE', 14.00, 12),
-(18, 'Libro de Marketing Digital', 'Edicion 2023 con ejercicios practicos.', 'LIBROS', 'ALQUILER', 'DISPONIBLE', 3.00, 12),
-(19, 'Esterilla de yoga', 'Esterilla antideslizante de 6 mm.', 'DEPORTE', 'PRESTAMO', 'DISPONIBLE', NULL, 13),
-(20, 'Mancuernas ajustables 20kg', 'Par de mancuernas con discos intercambiables.', 'DEPORTE', 'ALQUILER', 'DISPONIBLE', 8.00, 13),
-(21, 'Microondas compacto', 'Microondas de 20 litros funcionando perfecto.', 'HOGAR', 'VENTA', 'DISPONIBLE', 32.00, 14),
-(22, 'Tostadora doble ranura', 'Tostadora basica para piso compartido.', 'HOGAR', 'PRESTAMO', 'DISPONIBLE', NULL, 14),
-(23, 'Impresora HP DeskJet', 'Impresora con cartuchos al 60%. Incluye cable USB.', 'ELECTRONICA', 'VENTA', 'DISPONIBLE', 26.00, 15),
-(24, 'Auriculares Sony WH-CH520', 'Auriculares inalambricos con autonomia de 40h.', 'ELECTRONICA', 'ALQUILER', 'DISPONIBLE', 5.00, 15),
-(25, 'Apuntes impresos Calculo I', 'Carpeta completa de apuntes y ejercicios resueltos.', 'LIBROS', 'VENTA', 'DISPONIBLE', 9.50, 16),
-(26, 'Libro de Derecho Civil', 'Manual actualizado con legislacion 2025.', 'LIBROS', 'ALQUILER', 'NO_DISPONIBLE', 4.00, 16),
-(27, 'Balon de baloncesto Spalding', 'Balon talla oficial para pista interior o exterior.', 'DEPORTE', 'VENTA', 'DISPONIBLE', 12.00, 17),
-(28, 'Botas de futbol talla 43', 'Botas con tacos FG, poco uso.', 'DEPORTE', 'ALQUILER', 'DISPONIBLE', 4.00, 17),
-(29, 'Silla ergonomica de estudio', 'Silla con soporte lumbar y altura ajustable.', 'HOGAR', 'VENTA', 'DISPONIBLE', 48.00, 18),
-(30, 'Flexo vintage', 'Lampara flexo metalica, luz calida.', 'HOGAR', 'PRESTAMO', 'DISPONIBLE', NULL, 18),
-(31, 'Mochila 35L trekking', 'Mochila resistente al agua para escapadas de finde.', 'OTROS', 'ALQUILER', 'DISPONIBLE', 6.00, 19),
-(32, 'Maleta cabina 55cm', 'Maleta rigida con 4 ruedas.', 'OTROS', 'VENTA', 'DISPONIBLE', 30.00, 19),
-(33, 'Teclado mecanico Keychron', 'Teclado mecanico bluetooth, switches brown.', 'ELECTRONICA', 'VENTA', 'DISPONIBLE', 58.00, 20),
-(34, 'Raton Logitech MX Master', 'Raton ergonomico para productividad.', 'ELECTRONICA', 'ALQUILER', 'DISPONIBLE', 6.50, 20),
-(35, 'Libro de Psicologia Social', 'Subrayado en algunas paginas, muy util para examen.', 'LIBROS', 'VENTA', 'DISPONIBLE', 11.00, 3),
-(36, 'Tablet Samsung Galaxy Tab', 'Tablet de 10 pulgadas con funda y lapiz.', 'ELECTRONICA', 'VENTA', 'NO_DISPONIBLE', 95.00, 5),
-(37, 'Proyector portatil', 'Proyector mini HDMI para presentaciones en aula.', 'ELECTRONICA', 'ALQUILER', 'DISPONIBLE', 9.00, 4),
-(38, 'Patines en linea talla 40', 'Patines con freno trasero, incluyen protecciones.', 'DEPORTE', 'ALQUILER', 'DISPONIBLE', 5.00, 7),
-(39, 'Plancha de vapor', 'Plancha compacta para ropa, base ceramica.', 'HOGAR', 'PRESTAMO', 'DISPONIBLE', NULL, 10),
-(40, 'Router WiFi 6', 'Router dual band para mejorar cobertura en piso.', 'ELECTRONICA', 'VENTA', 'DISPONIBLE', 35.00, 2);
+(14, 'Otros: Kit de herramientas', 'Caja con herramientas basicas para bricolaje.', 'OTROS', 'PRESTAMO', 'DISPONIBLE', NULL, 9);
 
