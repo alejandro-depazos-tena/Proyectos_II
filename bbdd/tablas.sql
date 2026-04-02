@@ -90,6 +90,27 @@ CREATE TABLE foto_producto (
         ON UPDATE CASCADE
 );
 
+CREATE TABLE favorito (
+    id_favorito          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_usuario           BIGINT UNSIGNED NOT NULL,
+    id_producto          BIGINT UNSIGNED NOT NULL,
+    fecha_creacion       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_favorito_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id_usuario)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_favorito_producto
+        FOREIGN KEY (id_producto)
+        REFERENCES producto(id_producto)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT uk_favorito_usuario_producto UNIQUE (id_usuario, id_producto)
+);
+
 CREATE TABLE reporte_usuario (
     id_reporte              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     id_usuario_reportante   BIGINT UNSIGNED NOT NULL,

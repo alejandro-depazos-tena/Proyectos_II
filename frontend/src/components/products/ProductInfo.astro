@@ -269,10 +269,12 @@ const productImage = product.image || (product as any).images?.[0] || "";
             updateFavUI(isFavorite(favoriteData.id));
         });
 
-        favBtn?.addEventListener("click", () => {
-            const result = toggleFavorite(favoriteData);
+        favBtn?.addEventListener("click", async () => {
+            const result = await toggleFavorite(favoriteData);
             if (result.success) {
                 toast.success(result.message);
+            } else {
+                toast.error(result.message);
             }
         });
     }

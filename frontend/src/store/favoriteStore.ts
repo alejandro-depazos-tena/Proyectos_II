@@ -9,141 +9,170 @@ export interface FavoriteItem {
     slug: string;
 }
 
-const LEGACY_STORAGE_KEY = 'favorite_items';
-const STORAGE_PREFIX = 'favorite_items:';
+interface FavoriteActionResult {
+    success: boolean;
+    message: string;
+}
+
+const SESSION_TOKEN_KEY = 'ufvshares_token';
 const SESSION_ID_KEY = 'ufvshares_id';
 const SESSION_EMAIL_KEY = 'ufvshares_email';
 const isBrowser = typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+const API_BASE = (import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:8080/api').replace(/\/$/, '');
+const BACKEND_BASE = API_BASE.replace(/\/api$/, '');
 
-function safeParseFavorites(raw: string | null): FavoriteItem[] {
-    if (!raw) return [];
-    try {
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : [];
-    } catch {
-        return [];
+let loadingPromise: Promise<void> | null = null;
+
+function getSessionToken(): string | null {
+    if (!isBrowser) return null;
+    return localStorage.getItem(SESSION_TOKEN_KEY)?.trim() || null;
+}
+
+function resolveImageUrl(raw: unknown): string {
+    if (typeof raw !== 'string' || !raw.trim()) return '/Logo.png';
+    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+    if (raw.startsWith('/')) return `${BACKEND_BASE}${raw}`;
+    return raw;
+}
+
+function mapApiFavorite(item: any): FavoriteItem {
+    const id = String(item?.idProducto ?? '');
+    return {
+        id,
+        name: String(item?.titulo ?? 'Producto'),
+        price: Number(item?.precio ?? 0),
+        image: resolveImageUrl(item?.fotoUrl ?? item?.imagenUrl),
+        stock: 1,
+        slug: id,
+    };
+}
+
+async function requestFavorites(): Promise<FavoriteItem[]> {
+    const token = getSessionToken();
+    if (!token) return [];
+
+    const response = await fetch(`${API_BASE}/me/favoritos`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!response.ok) {
+        if (response.status === 401) return [];
+        throw new Error('No se pudieron cargar los favoritos');
     }
+
+    const data = await response.json();
+    if (!Array.isArray(data)) return [];
+    return data.map(mapApiFavorite).filter((item) => item.id);
 }
 
-function resolveUserScope(): string {
-    if (!isBrowser) return 'guest';
+export const favoriteItems = atom<FavoriteItem[]>([]);
 
-    const userId = localStorage.getItem(SESSION_ID_KEY)?.trim();
-    if (userId) return `id:${userId}`;
-
-    const email = localStorage.getItem(SESSION_EMAIL_KEY)?.trim().toLowerCase();
-    if (email) return `email:${email}`;
-
-    return 'guest';
-}
-
-function storageKey(scope: string): string {
-    return `${STORAGE_PREFIX}${scope}`;
-}
-
-function loadFavoritesForScope(scope: string): FavoriteItem[] {
-    if (!isBrowser) return [];
-
-    const scopedKey = storageKey(scope);
-    const scoped = safeParseFavorites(localStorage.getItem(scopedKey));
-    if (scoped.length > 0) return scoped;
-
-    // One-time migration from old global key to the current scope.
-    const legacy = safeParseFavorites(localStorage.getItem(LEGACY_STORAGE_KEY));
-    if (legacy.length > 0) {
-        localStorage.setItem(scopedKey, JSON.stringify(legacy));
-        return legacy;
-    }
-
-    return [];
-}
-
-let currentScope = resolveUserScope();
-export const favoriteItems = atom<FavoriteItem[]>(loadFavoritesForScope(currentScope));
-
-function ensureScopeIsSynced() {
+export async function refreshFavorites() {
     if (!isBrowser) return;
+    loadingPromise = (async () => {
+        const items = await requestFavorites();
+        favoriteItems.set(items);
+    })();
+    try {
+        await loadingPromise;
+    } finally {
+        loadingPromise = null;
+    }
+}
 
-    const nextScope = resolveUserScope();
-    if (nextScope === currentScope) return;
-
-    const previousScope = currentScope;
-    const previousItems = favoriteItems.get();
-
-    currentScope = nextScope;
-    const nextItems = loadFavoritesForScope(currentScope);
-
-    // Keep favorites when session identity is upgraded from email to user id.
-    if (
-        previousScope.startsWith('email:') &&
-        currentScope.startsWith('id:') &&
-        nextItems.length === 0 &&
-        previousItems.length > 0
-    ) {
-        favoriteItems.set(previousItems);
-        persistCurrentScope(previousItems);
+async function ensureFavoritesLoaded() {
+    if (!isBrowser) return;
+    if (loadingPromise) {
+        await loadingPromise;
         return;
     }
-
-    favoriteItems.set(nextItems);
-}
-
-function persistCurrentScope(items: FavoriteItem[]) {
-    if (!isBrowser) return;
-    localStorage.setItem(storageKey(currentScope), JSON.stringify(items));
+    if (favoriteItems.get().length > 0) return;
+    await refreshFavorites();
 }
 
 if (isBrowser) {
-    window.addEventListener('storage', (event) => {
-        if (event.key === SESSION_ID_KEY || event.key === SESSION_EMAIL_KEY) {
-            ensureScopeIsSynced();
-            return;
-        }
+    refreshFavorites().catch(() => {
+        favoriteItems.set([]);
+    });
 
-        if (event.key === storageKey(currentScope)) {
-            favoriteItems.set(safeParseFavorites(event.newValue));
+    window.addEventListener('storage', (event) => {
+        if (event.key === SESSION_TOKEN_KEY || event.key === SESSION_ID_KEY || event.key === SESSION_EMAIL_KEY) {
+            refreshFavorites().catch(() => {
+                favoriteItems.set([]);
+            });
+            return;
         }
     });
 }
 
-export function addToFavorites(product: FavoriteItem) {
-    ensureScopeIsSynced();
-    const items = favoriteItems.get();
-    const existingItem = items.find((item) => item.id === product.id);
-
-    if (!existingItem) {
-        const nextItems = [...items, product];
-        favoriteItems.set(nextItems);
-        persistCurrentScope(nextItems);
-        return { success: true, message: `${product.name} añadido a favoritos` };
+export async function addToFavorites(product: FavoriteItem): Promise<FavoriteActionResult> {
+    const token = getSessionToken();
+    if (!token) {
+        return { success: false, message: 'Inicia sesion para guardar favoritos.' };
     }
-    return { success: false, message: `${product.name} ya está en favoritos` }; // Should not happen if we toggle
+
+    const idProducto = Number(product.id);
+    if (!Number.isFinite(idProducto) || idProducto <= 0) {
+        return { success: false, message: 'Producto invalido.' };
+    }
+
+    const response = await fetch(`${API_BASE}/me/favoritos/${idProducto}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!response.ok) {
+        return { success: false, message: 'No se pudo guardar en favoritos.' };
+    }
+
+    const items = favoriteItems.get();
+    if (!items.some((item) => item.id === product.id)) {
+        favoriteItems.set([...items, product]);
+    }
+
+    return { success: true, message: `${product.name} anadido a favoritos` };
 }
 
-export function removeFromFavorites(productId: string) {
-    ensureScopeIsSynced();
+export async function removeFromFavorites(productId: string): Promise<FavoriteActionResult> {
+    const token = getSessionToken();
+    if (!token) {
+        return { success: false, message: 'Inicia sesion para gestionar favoritos.' };
+    }
+
+    const idProducto = Number(productId);
+    if (!Number.isFinite(idProducto) || idProducto <= 0) {
+        return { success: false, message: 'Producto invalido.' };
+    }
+
+    const response = await fetch(`${API_BASE}/me/favoritos/${idProducto}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!response.ok && response.status !== 404) {
+        return { success: false, message: 'No se pudo eliminar de favoritos.' };
+    }
+
     const items = favoriteItems.get();
-    const itemToRemove = items.find(item => item.id === productId);
+    const itemToRemove = items.find((item) => item.id === productId);
     const nextItems = items.filter((item) => item.id !== productId);
     favoriteItems.set(nextItems);
-    persistCurrentScope(nextItems);
     return { success: true, message: `${itemToRemove?.name || 'Producto'} eliminado de favoritos` };
 }
 
-export function toggleFavorite(product: FavoriteItem) {
-    ensureScopeIsSynced();
+export async function toggleFavorite(product: FavoriteItem): Promise<FavoriteActionResult> {
+    await ensureFavoritesLoaded();
     const items = favoriteItems.get();
     const exists = items.some((item) => item.id === product.id);
 
     if (exists) {
-        return removeFromFavorites(product.id);
+        return await removeFromFavorites(product.id);
     } else {
-        return addToFavorites(product);
+        return await addToFavorites(product);
     }
 }
 
 export function isFavorite(productId: string) {
-    ensureScopeIsSynced();
     const items = favoriteItems.get();
     return items.some((item) => item.id === productId);
 }

@@ -8,6 +8,27 @@ Este documento recoge una propuesta realista para llevar **UFVShares** a una ver
 
 > **Nota sobre estimaciones:** las horas son orientativas para una persona con conocimiento del proyecto. No incluyen reuniones, cambios de alcance ni validación externa.
 
+## Actualización de avance verificado (02/04/2026)
+
+Tras revisar el código actual de frontend y backend, este es el estado real de los puntos principales del roadmap:
+
+| Ítem del roadmap | Estado actual | Qué ya está hecho | Qué falta cerrar |
+|---|---|---|---|
+| Recuperar contraseña | **Parcial avanzado** | Existe página `forgot-password.astro` + endpoints `/api/auth/security-question` y `/api/auth/reset-password-security` | Flujo profesional por email con token temporal, expiración y hardening de seguridad |
+| Flujo solicitud → aceptación → transacción | **Parcial avanzado** | Backend de solicitudes/transacciones operativo + UX en `profile.astro` y `product/view.astro` para reservar/aceptar/rechazar y ver estado | Cierre completo de ciclo en frontend (completar/cancelar transacción de forma guiada) y mayor consistencia UX |
+| Frontend de reportes | **Parcial** | Modal y envío de reporte de usuario en `chats.astro` hacia `/api/reportes-usuario` | Reporte de producto en vistas de producto y panel de moderación |
+| Búsqueda global de productos | **Parcial** | Buscador/filtros funcionales en home (`FeaturedProducts.astro`) | Buscador global unificado entre catálogo/vistas/categorías con mayor relevancia |
+| Gestión de sesión | **Parcial** | Logout visible, sesiones persistidas en BD y limpieza de sesión al reset de contraseña | Expiración temporal robusta, invalidación más completa y control uniforme de sesión caducada |
+| Favoritos en backend | **No implementado aún** | Favoritos locales mejorados con scope por usuario en `favoriteStore.ts` | Persistencia y sincronización real en backend entre dispositivos |
+| Checkout/carrito | **Sigue activo (pendiente decisión)** | Flujo completo local en `cartStore.ts`, `checkout.astro` y componentes asociados | Retirarlo/archivarlo si el cierre de negocio definitivo es por chat |
+| Testing | **Muy inicial** | Test base de backend (`HelloControllerTest`) | Cobertura real de auth, productos, chat, solicitudes/transacciones y frontend |
+
+### Resumen rápido del avance
+
+- Se ha avanzado **más de lo esperado** en autenticación recuperable, solicitudes/transacciones y UX de perfil/producto.
+- El mayor gap actual está en **profesionalización**: seguridad de contraseñas/sesión, testing, accesibilidad y limpieza de flujos (checkout vs chat).
+- El documento pasa a priorizar **trabajo restante real**, no trabajo desde cero.
+
 ---
 
 ## 0. Funcionalidades ya desarrolladas detectadas
@@ -46,19 +67,19 @@ Estas son las piezas que conviene cerrar para considerar la aplicación como rea
 
 | Cambio | Descripción realista | Prioridad | Horas estimadas |
 |---|---|---:|---:|
-| **Recuperar contraseña** | No se ha detectado flujo de “has olvidado la contraseña” ni endpoints de reseteo | Muy alta | 12-18 h |
-| **Cerrar flujo solicitud → aceptación → transacción** | El backend existe, pero falta asegurar una UX completa y visible en frontend | Muy alta | 14-22 h |
+| **Recuperar contraseña (hardening)** | Ya existe recuperación por pregunta de seguridad; falta migrar/completar flujo robusto por email+token con expiración e invalidación segura | Muy alta | 6-12 h |
+| **Cerrar flujo solicitud → aceptación → transacción** | Backend y parte del frontend ya están conectados; falta cerrar por completo los estados finales y UX end-to-end | Muy alta | 8-16 h |
 | **Eliminar o archivar definitivamente checkout/carrito** | Dejar documentado y limpio que el cierre entre usuarios se hace por chat, evitando mantener un flujo que ya no forma parte del producto | Media | 2-4 h |
-| **Frontend de reportes** | El backend de reportes existe, pero falta validar o construir una interfaz clara para denunciar producto/usuario | Alta | 8-14 h |
-| **Búsqueda global de productos** | Hay filtros y buscador en chats, pero no un buscador global fuerte en catálogo | Alta | 10-16 h |
-| **Gestión de sesión más completa** | Falta revisar logout visible, expiración, invalidación de sesión y redirecciones limpias | Media | 6-10 h |
+| **Frontend de reportes** | Ya existe flujo para reportar usuarios desde chat; falta completar reportes de producto y coherencia visual/funcional | Alta | 4-10 h |
+| **Búsqueda global de productos** | Existe buscador y filtros en home; falta unificar la búsqueda global y mejorar relevancia entre vistas | Alta | 6-12 h |
+| **Gestión de sesión más completa** | Hay logout visible y sesiones persistentes; falta expiración temporal, invalidación total y redirecciones más homogéneas | Media | 4-8 h |
 | **Refactorización técnica de código** | Limpiar duplicaciones, separar mejor lógica, modularizar scripts largos y mejorar mantenibilidad | Alta | 16-28 h |
 | **Plan de testing de aplicación** | Definir y cubrir pruebas unitarias, integración y validación de flujos críticos | Alta | 18-30 h |
 | **Accesibilidad y navegación asistida** | Adaptar la app a criterios W3C/WCAG: contraste, foco, teclado, labels, semántica y lectura asistida | Muy alta | 16-26 h |
 | **Gestión global de errores y cargas** | Hay partes cuidadas, pero aún conviene unificar errores, loaders y estados vacíos | Alta | 8-12 h |
 | **Responsive y revisión de navegación** | Varias vistas están bien trabajadas, pero conviene una pasada completa móvil/tablet | Alta | 8-14 h |
 
-**Total estimado bloque:** **126-188 horas**
+**Total estimado bloque (restante real):** **96-172 horas**
 
 ---
 
@@ -90,13 +111,13 @@ Aquí van los cambios de más impacto, teniendo en cuenta lo que **todavía no e
 
 | Cambio importante | Alcance | Prioridad | Horas estimadas |
 |---|---|---:|---:|
-| **Has olvidado la contraseña** | Solicitud por email, token temporal, nueva contraseña y expiración segura | Muy alta | 12-18 h |
+| **Has olvidado la contraseña (versión profesional)** | Evolucionar desde pregunta de seguridad actual a recuperación por email con token temporal, expiración y controles de abuso | Muy alta | 8-14 h |
 | **Sistema de notificaciones real** | Centro de notificaciones dentro de la app + base para eventos relevantes | Muy alta | 16-24 h |
 | **Panel de administración básico** | Moderación de reportes, productos y usuarios desde interfaz interna | Alta | 18-28 h |
 | **Reputación / valoraciones** | Valorar usuarios tras transacción o trato completado | Alta | 10-16 h |
 | **Favoritos en backend** | Pasar de favoritos solo locales a favoritos asociados al usuario y sincronizados entre dispositivos | Media | 10-16 h |
-| **Historial de actividad** | Ver solicitudes, conversaciones recientes, publicaciones y movimientos relevantes | Media | 8-14 h |
-| **Búsqueda global potente** | Buscador unificado con texto, filtros y ordenaciones útiles | Alta | 12-18 h |
+| **Historial de actividad** | Ya hay base de historial/solicitudes; falta enriquecer eventos y mejorar UX de lectura y filtros | Media | 6-12 h |
+| **Búsqueda global potente** | Partir del buscador actual de catálogo y evolucionarlo a un buscador unificado y más relevante | Alta | 8-16 h |
 | **Cobertura de tests automatizados** | Consolidar suite de pruebas para frontend y backend con foco en regresiones | Alta | 20-32 h |
 | **Refactorización estructural por módulos** | Reorganizar componentes, servicios y scripts extensos para reducir deuda técnica | Alta | 18-30 h |
 

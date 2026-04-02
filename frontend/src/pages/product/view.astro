@@ -1067,14 +1067,15 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         favBtn.removeAttribute('data-listener');
 
         if (!favBtn.getAttribute('data-listener')) {
-            favBtn.addEventListener('click', () => {
+            favBtn.addEventListener('click', async () => {
                 const fav = JSON.parse(favBtn.getAttribute('data-favorite') || '{}');
                 if (!fav.id) {
                     toast.error('Producto no cargado aún');
                     return;
                 }
-                const result = toggleFavorite(fav);
-                toast.success(result.message);
+                const result = await toggleFavorite(fav);
+                if (result.success) toast.success(result.message);
+                else toast.error(result.message);
                 updateFavBtn();
             });
             favBtn.setAttribute('data-listener', 'true');

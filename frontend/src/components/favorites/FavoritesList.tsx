@@ -5,10 +5,21 @@ import { toast } from 'sonner';
 export default function FavoritesList() {
     const favorites = useStore(favoriteItems);
 
-    const handleRemove = (id: string, name: string) => {
-        const result = removeFromFavorites(id);
+    const formatPrice = (price: number) => {
+        const numericPrice = Number(price) || 0;
+        if (numericPrice === 0) return 'Gratis';
+        return new Intl.NumberFormat('es-ES', {
+            style: 'currency',
+            currency: 'EUR',
+        }).format(numericPrice);
+    };
+
+    const handleRemove = async (id: string, name: string) => {
+        const result = await removeFromFavorites(id);
         if (result.success) {
             toast.info(`${name} eliminado de favoritos`);
+        } else {
+            toast.error(result.message);
         }
     };
 
@@ -34,7 +45,7 @@ export default function FavoritesList() {
             {favorites.map((product) => (
                 <div key={product.id} className="card bg-base-100 shadow-sm hover:shadow-xl transition-shadow duration-300 border border-base-200 overflow-hidden relative group">
                     <button
-                        onClick={() => handleRemove(product.id, product.name)}
+                        onClick={() => void handleRemove(product.id, product.name)}
                         className="absolute top-3 right-3 z-20 btn btn-circle btn-sm bg-white hover:bg-error hover:text-white border-none shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
                         aria-label="Eliminar de favoritos"
                     >
@@ -58,7 +69,7 @@ export default function FavoritesList() {
 
                         <div className="flex items-center justify-between mt-4">
                             <span className="text-xl font-bold text-primary">
-                                ${product.price.toLocaleString("en-US")}
+                                {formatPrice(product.price)}
                             </span>
                             <a
                                 href={`/product/view?id=${product.id}`}

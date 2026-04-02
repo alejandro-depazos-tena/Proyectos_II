@@ -203,7 +203,7 @@ const image = categoryImages.find(
   }
 
   // Event delegation: handles buttons added dynamically
-  document.addEventListener('click', (e) => {
+  document.addEventListener('click', async (e) => {
     const btn = (e.target as Element).closest('.add-to-favorite-btn');
     if (!btn) return;
     e.preventDefault();
@@ -211,8 +211,9 @@ const image = categoryImages.find(
     try {
       const fav = JSON.parse((btn as HTMLElement).dataset.favorite || '{}');
       if (!fav.id) return;
-      const result = toggleFavorite(fav);
+      const result = await toggleFavorite(fav);
       if (result.success) toast.success(result.message);
+      else toast.error(result.message);
       updateFavBtn(btn, isFavorite(fav.id));
     } catch {}
   }, true);

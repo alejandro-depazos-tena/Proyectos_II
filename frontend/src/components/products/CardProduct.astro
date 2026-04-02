@@ -195,13 +195,13 @@ const { title, price, images, stock, slug, category } = Astro.props;
 
             if (btn.getAttribute("data-fav-listener")) return;
 
-            btn.addEventListener("click", (e) => {
+            btn.addEventListener("click", async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 const product = JSON.parse(
                     btn.getAttribute("data-favorite") || "{}",
                 );
-                const result = toggleFavorite(product);
+                const result = await toggleFavorite(product);
 
                 // Update style immediately
                 const isNowFav = isFavorite(product.id);
@@ -211,6 +211,8 @@ const { title, price, images, stock, slug, category } = Astro.props;
                     // Custom message based on action (added or removed)
                     // The store returns a generic message, but we can infer or simpler just show it
                     toast.success(result.message);
+                } else {
+                    toast.error(result.message);
                 }
             });
             btn.setAttribute("data-fav-listener", "true");

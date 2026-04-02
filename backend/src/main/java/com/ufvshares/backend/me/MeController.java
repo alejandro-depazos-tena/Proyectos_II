@@ -42,6 +42,8 @@ import com.ufvshares.backend.auth.SessionRepository;
 import com.ufvshares.backend.cambioperfil.EmailService;
 import com.ufvshares.backend.cambioperfil.PendingCambio;
 import com.ufvshares.backend.cambioperfil.PendingCambioRepository;
+import com.ufvshares.backend.favorito.Favorito;
+import com.ufvshares.backend.favorito.FavoritoRepository;
 import com.ufvshares.backend.fotoproducto.FotoProducto;
 import com.ufvshares.backend.fotoproducto.FotoProductoRepository;
 import com.ufvshares.backend.producto.Producto;
@@ -70,6 +72,7 @@ public class MeController {
   private final SessionRepository sessions;
   private final UsuarioRepository usuarios;
   private final ProductoRepository productos;
+  private final FavoritoRepository favoritos;
   private final FotoProductoRepository fotosRepo;
   private final SolicitudRepository solicitudes;
   private final SolicitudService solicitudService;
@@ -84,7 +87,7 @@ public class MeController {
   private String frontendUrl;
 
   public MeController(SessionRepository sessions, UsuarioRepository usuarios,
-      ProductoRepository productos, FotoProductoRepository fotosRepo,
+      ProductoRepository productos, FavoritoRepository favoritos, FotoProductoRepository fotosRepo,
       SolicitudRepository solicitudes,
       SolicitudService solicitudService,
       TransaccionRepository transacciones,
@@ -92,6 +95,7 @@ public class MeController {
     this.sessions = sessions;
     this.usuarios = usuarios;
     this.productos = productos;
+    this.favoritos = favoritos;
     this.fotosRepo = fotosRepo;
     this.solicitudes = solicitudes;
     this.solicitudService = solicitudService;
@@ -147,6 +151,73 @@ public class MeController {
     res.put("fotoPerfil", u.getFotoPerfil());
     res.put("preguntaSeguridad", u.getPreguntaSeguridad());
     return res;
+  }
+
+  @GetMapping("/favoritos")
+  @Transactional
+  public List<Map<String, Object>> getMisFavoritos(@RequestHeader("Authorization") String auth) {
+    Usuario u = resolveUser(auth);
+    List<Favorito> items = favoritos.findByIdUsuarioOrderByFechaCreacionDesc(u.getIdUsuario());
+    List<Map<String, Object>> result = new ArrayList<>();
+
+    for (Favorito f : items) {
+      Producto p = productos.findById(f.getIdProducto()).orElse(null);
+      if (p == null) {
+        favoritos.delete(f);
+        continue;
+      }
+
+      Map<String, Object> m = new LinkedHashMap<>();
+      m.put("idFavorito", f.getIdFavorito());
+      m.put("fechaCreacion", f.getFechaCreacion());
+      m.put("idProducto", p.getIdProducto());
+      m.put("titulo", p.getTitulo());
+      m.put("precio", p.getPrecio());
+      m.put("imagenUrl", p.getImagenUrl());
+      m.put("categoria", p.getCategoria());
+      m.put("tipoTransaccion", p.getTipoTransaccion());
+      m.put("estadoProducto", p.getEstadoProducto());
+
+      List<FotoProducto> fotos = fotosRepo.findByIdProductoOrderByEsPrincipalDesc(p.getIdProducto());
+      if (!fotos.isEmpty()) {
+        m.put("fotoUrl", fotos.get(0).getUrlFoto());
+      }
+
+      result.add(m);
+    }
+
+    return result;
+  }
+
+  @PostMapping("/favoritos/{idProducto}")
+  @Transactional
+  public Map<String, Object> anadirFavorito(
+      @RequestHeader("Authorization") String auth,
+      @PathVariable Long idProducto) {
+    Usuario u = resolveUser(auth);
+
+    Producto p = productos.findById(idProducto)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "PRODUCTO_NOT_FOUND"));
+
+    if (favoritos.existsByIdUsuarioAndIdProducto(u.getIdUsuario(), idProducto)) {
+      return Map.of("ok", true, "alreadyExists", true, "idProducto", idProducto);
+    }
+
+    Favorito favorito = new Favorito();
+    favorito.setIdUsuario(u.getIdUsuario());
+    favorito.setIdProducto(p.getIdProducto());
+    favoritos.save(favorito);
+
+    return Map.of("ok", true, "alreadyExists", false, "idProducto", idProducto);
+  }
+
+  @DeleteMapping("/favoritos/{idProducto}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void eliminarFavorito(
+      @RequestHeader("Authorization") String auth,
+      @PathVariable Long idProducto) {
+    Usuario u = resolveUser(auth);
+    favoritos.deleteByIdUsuarioAndIdProducto(u.getIdUsuario(), idProducto);
   }
 
   @PostMapping("/seguridad")
@@ -573,6 +644,7 @@ public class MeController {
     if (!p.getIdPropietario().equals(u.getIdUsuario())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No es tu producto");
     }
+    favoritos.deleteByIdProducto(id);
     fotosRepo.deleteByIdProducto(id);
     productos.delete(p);
   }
