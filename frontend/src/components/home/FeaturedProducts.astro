@@ -546,6 +546,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
       ? 'Gratis'
       : new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Number(p.precio));
     const tipo = p.tipoTransaccion === 'ALQUILER' ? 'Alquiler' : 'Venta';
+    const tipoBadgeClass = p.tipoTransaccion === 'ALQUILER' ? 'badge-success' : 'badge-primary';
     const productData = escAttr(JSON.stringify({ id: String(id), name: title, price: p.precio ?? 0, image: img, stock: 1 }));
     const favData = escAttr(JSON.stringify({ id: String(id), name: title, price: p.precio ?? 0, image: img, stock: 1, slug: String(id) }));
     return `<div class="product-card-wrapper hidden">
@@ -558,7 +559,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
     <div class="relative w-full overflow-hidden bg-gray-100" style="aspect-ratio:4/5">
       <img src="${img}" alt="${escAttr(title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" onerror="this.src='/foto.webp'" />
       <a href="/product/view?id=${id}" class="absolute inset-0 z-10" aria-label="Ver ${escAttr(title)}"></a>
-      <span class="absolute top-3 left-3 badge badge-primary font-bold text-xs z-20">${tipo}</span>
+      <span class="absolute top-3 left-3 badge ${tipoBadgeClass} font-bold text-xs z-20">${tipo}</span>
     </div>
     <div class="p-4">
       <span class="text-xs font-semibold text-slate-400 uppercase tracking-widest">${category}</span>
