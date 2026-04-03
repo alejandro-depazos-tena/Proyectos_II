@@ -59,7 +59,13 @@ const apiBase = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
 				}
 
 				function revealBody(){
-					document.addEventListener('DOMContentLoaded',function(){document.body.style.visibility='visible';});
+					if (document.readyState === 'loading') {
+						document.addEventListener('DOMContentLoaded', function(){
+							document.body.style.visibility = 'visible';
+						}, { once: true });
+						return;
+					}
+					document.body.style.visibility = 'visible';
 				}
 
 				var token = localStorage.getItem('ufvshares_token');
