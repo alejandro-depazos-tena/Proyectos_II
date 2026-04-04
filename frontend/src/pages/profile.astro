@@ -238,20 +238,21 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
 
     <!-- Navegación rápida de secciones -->
     <div class="bg-base-100 border border-base-200 rounded-2xl p-4 shadow-sm">
-      <p class="text-xs uppercase tracking-[0.16em] text-base-content/45 mb-3">Áreas del perfil</p>
+      <p class="text-xs uppercase tracking-[0.16em] text-base-content/45 mb-1">Áreas del perfil</p>
+      <p class="text-sm text-base-content/60 mb-3">Selecciona qué quieres gestionar ahora.</p>
       <div class="flex gap-2 overflow-x-auto pb-1">
-        <button type="button" data-section-btn="productos" class="btn btn-sm rounded-full shrink-0">Mis productos</button>
-        <button type="button" data-section-btn="reservas" class="btn btn-sm rounded-full btn-ghost shrink-0">Reservas</button>
-        <button type="button" data-section-btn="solicitudes" class="btn btn-sm rounded-full btn-ghost shrink-0">Solicitudes</button>
-        <button type="button" data-section-btn="historial" class="btn btn-sm rounded-full btn-ghost shrink-0">Historial</button>
-        <button type="button" data-section-btn="contratos" class="btn btn-sm rounded-full btn-ghost shrink-0">Contratos</button>
+        <button type="button" data-section-btn="productos" class="btn btn-sm rounded-full shrink-0" title="Gestionar anuncios publicados">Mis anuncios</button>
+        <button type="button" data-section-btn="reservas" class="btn btn-sm rounded-full btn-ghost shrink-0" title="Ver tus reservas y compras">Reservas y compras</button>
+        <button type="button" data-section-btn="solicitudes" class="btn btn-sm rounded-full btn-ghost shrink-0" title="Solicitudes enviadas y recibidas">Solicitudes de intercambio</button>
+        <button type="button" data-section-btn="historial" class="btn btn-sm rounded-full btn-ghost shrink-0" title="Historial de ventas y alquileres">Historial de actividad</button>
+        <button type="button" data-section-btn="contratos" class="btn btn-sm rounded-full btn-ghost shrink-0" title="Contratos generados y firmados">Contratos y firma</button>
       </div>
     </div>
 
     <!-- Sección: Mis productos -->
     <section id="section-productos" class="profile-section">
       <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-black uppercase tracking-tighter">Mis productos</h2>
+        <h2 class="text-xl font-black uppercase tracking-tighter">Mis anuncios publicados</h2>
         <button id="btn-toggle-form" class="btn btn-primary btn-sm rounded-full hidden">
           + Publicar producto
         </button>
@@ -394,7 +395,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
     <!-- Sección: Solicitudes -->
     <section id="section-solicitudes" class="profile-section hidden">
       <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-black uppercase tracking-tighter">Solicitudes</h2>
+        <h2 class="text-xl font-black uppercase tracking-tighter">Solicitudes recibidas y enviadas</h2>
       </div>
 
       <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -434,7 +435,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
     <!-- Sección: Historial de ventas/alquileres -->
     <section id="section-historial" class="profile-section hidden">
       <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-black uppercase tracking-tighter">Historial de ventas y alquileres</h2>
+        <h2 class="text-xl font-black uppercase tracking-tighter">Historial de ventas, alquileres y préstamos</h2>
       </div>
 
       <div id="history-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
@@ -446,7 +447,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
 
     <section id="section-contratos" class="profile-section hidden">
       <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-black uppercase tracking-tighter">Contratos</h2>
+        <h2 class="text-xl font-black uppercase tracking-tighter">Contratos y estado de firma</h2>
       </div>
 
       <div id="contracts-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>

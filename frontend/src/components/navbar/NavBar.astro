@@ -11,7 +11,7 @@ import Links from "./Links.astro";
         <nav class="navbar max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Left Side: Logo -->
             <div class="navbar-start">
-                <a href="/" class="flex items-center gap-2 group">
+                <a id="main-logo-link" href="/" class="flex items-center gap-2 group">
                     <div
                         class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center group-hover:rotate-12 transition-transform shadow-sm"
                     >
@@ -90,6 +90,7 @@ import Links from "./Links.astro";
     const navbar = document.getElementById("main-navbar");
     const navFavCount = document.getElementById("nav-fav-count");
     const navAuthLinks = document.getElementById("nav-auth-links");
+    const mainLogoLink = document.getElementById("main-logo-link");
     const isAdminRoute = location.pathname === "/admin";
 
     if (isAdminRoute && navbar) {
@@ -146,6 +147,10 @@ import Links from "./Links.astro";
             const current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
             setTheme(current === "dark" ? "light" : "dark");
         });
+    }
+
+    if (mainLogoLink) {
+        mainLogoLink.setAttribute("href", token ? "/app" : "/");
     }
 
     if (navAuthLinks) {
