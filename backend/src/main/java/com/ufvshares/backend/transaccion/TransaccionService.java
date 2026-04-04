@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ufvshares.backend.common.NotFoundException;
+import com.ufvshares.backend.contrato.ContratoService;
 import com.ufvshares.backend.producto.EstadoProducto;
 import com.ufvshares.backend.producto.Producto;
 import com.ufvshares.backend.producto.ProductoRepository;
@@ -23,13 +24,16 @@ public class TransaccionService {
   private final TransaccionRepository repository;
   private final SolicitudRepository solicitudRepository;
   private final ProductoRepository productoRepository;
+  private final ContratoService contratoService;
 
   public TransaccionService(TransaccionRepository repository,
       SolicitudRepository solicitudRepository,
-      ProductoRepository productoRepository) {
+      ProductoRepository productoRepository,
+      ContratoService contratoService) {
     this.repository = repository;
     this.solicitudRepository = solicitudRepository;
     this.productoRepository = productoRepository;
+    this.contratoService = contratoService;
   }
 
   public List<Transaccion> findAll() {
@@ -72,6 +76,7 @@ public class TransaccionService {
       producto.setEstadoProducto(EstadoProducto.DISPONIBLE);
       productoRepository.save(producto);
     }
+    contratoService.finalizarSiExiste(transaccion.getIdTransaccion());
     return transaccion;
   }
 
@@ -92,6 +97,8 @@ public class TransaccionService {
         .orElseThrow(() -> new NotFoundException("PRODUCTO_NOT_FOUND"));
     producto.setEstadoProducto(EstadoProducto.DISPONIBLE);
     productoRepository.save(producto);
+
+    contratoService.cancelarSiExiste(transaccion.getIdTransaccion());
 
     return transaccion;
   }

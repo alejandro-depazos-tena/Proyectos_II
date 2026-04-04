@@ -42,6 +42,11 @@ import com.ufvshares.backend.auth.SessionRepository;
 import com.ufvshares.backend.cambioperfil.EmailService;
 import com.ufvshares.backend.cambioperfil.PendingCambio;
 import com.ufvshares.backend.cambioperfil.PendingCambioRepository;
+import com.ufvshares.backend.contrato.Contrato;
+import com.ufvshares.backend.contrato.EstadoContrato;
+import com.ufvshares.backend.contrato.FirmaContratoRequest;
+import com.ufvshares.backend.contrato.ContratoRepository;
+import com.ufvshares.backend.contrato.ContratoService;
 import com.ufvshares.backend.favorito.Favorito;
 import com.ufvshares.backend.favorito.FavoritoRepository;
 import com.ufvshares.backend.fotoproducto.FotoProducto;
@@ -57,6 +62,9 @@ import com.ufvshares.backend.transaccion.Transaccion;
 import com.ufvshares.backend.transaccion.TransaccionRepository;
 import com.ufvshares.backend.usuario.Usuario;
 import com.ufvshares.backend.usuario.UsuarioRepository;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/me")
@@ -77,6 +85,8 @@ public class MeController {
   private final SolicitudRepository solicitudes;
   private final SolicitudService solicitudService;
   private final TransaccionRepository transacciones;
+  private final ContratoRepository contratosRepo;
+  private final ContratoService contratos;
   private final PendingCambioRepository pendingRepo;
   private final EmailService emailService;
 
@@ -91,6 +101,8 @@ public class MeController {
       SolicitudRepository solicitudes,
       SolicitudService solicitudService,
       TransaccionRepository transacciones,
+      ContratoRepository contratosRepo,
+      ContratoService contratos,
       PendingCambioRepository pendingRepo, EmailService emailService) {
     this.sessions = sessions;
     this.usuarios = usuarios;
@@ -100,6 +112,8 @@ public class MeController {
     this.solicitudes = solicitudes;
     this.solicitudService = solicitudService;
     this.transacciones = transacciones;
+    this.contratosRepo = contratosRepo;
+    this.contratos = contratos;
     this.pendingRepo = pendingRepo;
     this.emailService = emailService;
   }
@@ -434,6 +448,12 @@ public class MeController {
     Map<String, Object> response = new LinkedHashMap<>();
     response.put("idSolicitud", updated.getIdSolicitud());
     response.put("estadoSolicitud", updated.getEstadoSolicitud());
+    Transaccion transaccion = transacciones.findByIdSolicitud(updated.getIdSolicitud()).orElse(null);
+    if (transaccion != null) {
+      contratos.findByTransaccion(transaccion.getIdTransaccion()).ifPresent(c -> {
+        response.put("contrato", toContratoMap(c));
+      });
+    }
     return response;
   }
 
@@ -511,6 +531,10 @@ public class MeController {
           m.put("persona", persona);
         }
 
+        contratos.findByTransaccion(t.getIdTransaccion()).ifPresent(c -> {
+          m.put("contrato", toContratoMap(c));
+        });
+
         result.add(m);
       }
     }
@@ -520,6 +544,115 @@ public class MeController {
         Comparator.nullsLast(Comparator.reverseOrder())));
 
     return result;
+  }
+
+  @GetMapping("/contratos")
+  public List<Map<String, Object>> getContratos(@RequestHeader("Authorization") String auth) {
+    Usuario u = resolveUser(auth);
+    List<Contrato> list = contratosRepo.findByIdPropietarioOrIdArrendatarioOrderByFechaCreacionDesc(
+        u.getIdUsuario(),
+        u.getIdUsuario());
+    List<Map<String, Object>> result = new ArrayList<>();
+
+    for (Contrato c : list) {
+      Map<String, Object> item = toContratoMap(c);
+      item.put("rol", c.getIdPropietario().equals(u.getIdUsuario()) ? "ARRENDADOR" : "ARRENDATARIO");
+
+      Transaccion t = transacciones.findById(c.getIdTransaccion()).orElse(null);
+      if (t != null) {
+        item.put("estadoTransaccion", t.getEstadoTransaccion());
+      }
+
+      Producto p = productos.findById(c.getIdProducto()).orElse(null);
+      if (p != null) {
+        Map<String, Object> prod = new LinkedHashMap<>();
+        prod.put("idProducto", p.getIdProducto());
+        prod.put("titulo", p.getTitulo());
+        prod.put("categoria", p.getCategoria());
+        prod.put("tipoTransaccion", p.getTipoTransaccion());
+        prod.put("precio", p.getPrecio());
+        prod.put("imagenUrl", p.getImagenUrl());
+        List<FotoProducto> fotos = fotosRepo.findByIdProductoOrderByEsPrincipalDesc(p.getIdProducto());
+        if (!fotos.isEmpty()) prod.put("fotoUrl", fotos.get(0).getUrlFoto());
+        item.put("producto", prod);
+      }
+
+      Long contraparteId = c.getIdPropietario().equals(u.getIdUsuario()) ? c.getIdArrendatario() : c.getIdPropietario();
+      usuarios.findById(contraparteId).ifPresent(persona -> {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("idUsuario", persona.getIdUsuario());
+        m.put("nombre", persona.getNombre());
+        m.put("apellidos", persona.getApellidos());
+        m.put("correo", persona.getCorreo());
+        item.put("contraparte", m);
+      });
+
+      result.add(item);
+    }
+
+    return result;
+  }
+
+  @PutMapping("/contratos/{idContrato}/firmar")
+  @Transactional
+  public Map<String, Object> firmarContrato(
+      @RequestHeader("Authorization") String auth,
+      @PathVariable Long idContrato,
+      @Valid @RequestBody FirmaContratoRequest request,
+      HttpServletRequest httpRequest) {
+    Usuario u = resolveUser(auth);
+    Contrato contrato = contratosRepo.findById(idContrato)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "CONTRATO_NOT_FOUND"));
+
+    if (!u.getIdUsuario().equals(contrato.getIdArrendatario())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "SOLO_EL_ARRENDATARIO_PUEDE_FIRMAR");
+    }
+    if (contrato.getEstadoContrato() != EstadoContrato.PENDIENTE_FIRMA) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "CONTRATO_NO_PENDIENTE_DE_FIRMA");
+    }
+    if (!request.isAceptaTerminos()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "DEBES_ACEPTAR_LOS_TERMINOS");
+    }
+
+    contrato = contratos.firmarPorArrendatario(
+        contrato,
+        httpRequest.getRemoteAddr(),
+        httpRequest.getHeader("User-Agent"));
+
+    Transaccion t = transacciones.findById(contrato.getIdTransaccion())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "TRANSACCION_NOT_FOUND"));
+    t.setEstadoTransaccion(EstadoTransaccion.EN_CURSO);
+    transacciones.save(t);
+
+    Producto p = productos.findById(contrato.getIdProducto())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "PRODUCTO_NOT_FOUND"));
+    p.setEstadoProducto(p.getTipoTransaccion() == null || p.getTipoTransaccion().name().equals("VENTA")
+        ? p.getEstadoProducto()
+        : com.ufvshares.backend.producto.EstadoProducto.ALQUILADO);
+    productos.save(p);
+
+    Map<String, Object> res = new LinkedHashMap<>();
+    res.put("idContrato", contrato.getIdContrato());
+    res.put("estadoContrato", contrato.getEstadoContrato());
+    res.put("fechaFirmaArrendatario", contrato.getFechaFirmaArrendatario());
+    return res;
+  }
+
+  private Map<String, Object> toContratoMap(Contrato contrato) {
+    Map<String, Object> map = new LinkedHashMap<>();
+    map.put("idContrato", contrato.getIdContrato());
+    map.put("idTransaccion", contrato.getIdTransaccion());
+    map.put("idProducto", contrato.getIdProducto());
+    map.put("idPropietario", contrato.getIdPropietario());
+    map.put("idArrendatario", contrato.getIdArrendatario());
+    map.put("fechaCreacion", contrato.getFechaCreacion());
+    map.put("fechaInicio", contrato.getFechaInicio());
+    map.put("fechaFin", contrato.getFechaFin());
+    map.put("fechaFirmaArrendatario", contrato.getFechaFirmaArrendatario());
+    map.put("aceptaTerminos", contrato.isAceptaTerminos());
+    map.put("estadoContrato", contrato.getEstadoContrato());
+    map.put("textoCondiciones", contrato.getTextoCondiciones());
+    return map;
   }
 
   // ── Actualizar dato de perfil directamente ─────────────────────

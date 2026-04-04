@@ -224,6 +224,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       <button type="button" data-section-btn="reservas" class="btn btn-sm rounded-full btn-ghost">Reservas</button>
       <button type="button" data-section-btn="solicitudes" class="btn btn-sm rounded-full btn-ghost">Solicitudes</button>
       <button type="button" data-section-btn="historial" class="btn btn-sm rounded-full btn-ghost">Historial</button>
+      <button type="button" data-section-btn="contratos" class="btn btn-sm rounded-full btn-ghost">Contratos</button>
     </div>
 
     <!-- Sección: Mis productos -->
@@ -422,6 +423,41 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       </div>
     </section>
 
+    <section id="section-contratos" class="profile-section hidden">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-black uppercase tracking-tighter">Contratos</h2>
+      </div>
+
+      <div id="contracts-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+
+      <div id="no-contracts" class="hidden text-center py-12 bg-base-100 border border-base-200 rounded-2xl">
+        <p class="text-base-content/60">Aún no tienes contratos activos o finalizados.</p>
+      </div>
+    </section>
+
+    <div id="contract-detail-modal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/60 p-4">
+      <div class="w-full max-w-3xl rounded-2xl border border-base-300 bg-base-100 shadow-2xl max-h-[90vh] overflow-hidden">
+        <div class="flex items-center justify-between border-b border-base-200 px-5 py-4">
+          <h3 id="contract-detail-title" class="text-lg font-black tracking-tight">Detalle del contrato</h3>
+          <button id="contract-detail-close" type="button" class="btn btn-ghost btn-sm btn-circle" aria-label="Cerrar detalle de contrato">&times;</button>
+        </div>
+        <div class="overflow-y-auto max-h-[calc(90vh-76px)] px-5 py-4 space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <p><span class="font-semibold">Estado:</span> <span id="contract-detail-estado">-</span></p>
+            <p><span class="font-semibold">Rol:</span> <span id="contract-detail-rol">-</span></p>
+            <p><span class="font-semibold">Creado:</span> <span id="contract-detail-creado">-</span></p>
+            <p><span class="font-semibold">Firmado:</span> <span id="contract-detail-firmado">-</span></p>
+            <p><span class="font-semibold">Periodo:</span> <span id="contract-detail-periodo">-</span></p>
+            <p><span class="font-semibold">Contraparte:</span> <span id="contract-detail-contraparte">-</span></p>
+          </div>
+          <div class="rounded-xl border border-base-200 bg-base-50 p-4">
+            <p class="text-xs uppercase tracking-wide text-base-content/60 mb-2">Texto completo</p>
+            <p id="contract-detail-texto" class="text-sm leading-relaxed whitespace-pre-wrap"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Loading -->
     <div id="loading" class="flex justify-center py-20">
       <span class="loading loading-spinner loading-lg text-primary"></span>
@@ -474,6 +510,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
 
   const headers = { "Authorization": "Bearer " + token, "Content-Type": "application/json" };
   let currentProfile = null;
+  const contractsById = new Map();
 
   const $ = id => document.getElementById(id);
 
@@ -499,13 +536,14 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
 
   async function loadProfile() {
     try {
-      const [meRes, prodRes, reservasRes, historyRes, sentReqRes, receivedReqRes] = await Promise.all([
+      const [meRes, prodRes, reservasRes, historyRes, sentReqRes, receivedReqRes, contractsRes] = await Promise.all([
         fetch(API_BASE + "/me", { headers }),
         fetch(API_BASE + "/me/productos", { headers }),
         fetch(API_BASE + "/me/reservas", { headers }),
         fetch(API_BASE + "/me/historial", { headers }),
         fetch(API_BASE + "/me/solicitudes/enviadas", { headers }),
         fetch(API_BASE + "/me/solicitudes/recibidas", { headers }),
+        fetch(API_BASE + "/me/contratos", { headers }),
       ]);
 
       if (!meRes.ok) { clearSession(); window.location.href = "/auth?mode=login&next=" + encodeURIComponent("/profile"); return; }
@@ -516,6 +554,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       const historial = historyRes.ok ? await historyRes.json() : [];
       const sentRequests = sentReqRes.ok ? await sentReqRes.json() : [];
       const receivedRequests = receivedReqRes.ok ? await receivedReqRes.json() : [];
+      const contracts = contractsRes.ok ? await contractsRes.json() : [];
 
       // Guardar id para el caché de avatar
       if (me.idUsuario) localStorage.setItem('ufvshares_id', me.idUsuario);
@@ -533,6 +572,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       renderReserved(reservas);
       renderRequests({ sent: sentRequests, received: receivedRequests });
       renderHistory(historial);
+      renderContracts(contracts);
     } catch (e) {
       $("loading").classList.add("hidden");
       console.error(e);
@@ -541,7 +581,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
 
   // Activar sección inicial
   const initialSection = (location.hash || '').replace('#', '') || 'productos';
-  if (['productos', 'reservas', 'solicitudes', 'historial'].includes(initialSection)) {
+  if (['productos', 'reservas', 'solicitudes', 'historial', 'contratos'].includes(initialSection)) {
     setActiveSection(initialSection);
   } else {
     setActiveSection('productos');
@@ -1175,6 +1215,171 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       `);
     });
   }
+
+  function renderContracts(items) {
+    const grid = $("contracts-grid");
+    const empty = $("no-contracts");
+    if (!grid || !empty) return;
+
+    const estadoContratoLabel = {
+      PENDIENTE_FIRMA: 'Pendiente de firma',
+      ACTIVO: 'Activo',
+      FINALIZADO: 'Finalizado',
+      CANCELADO: 'Cancelado',
+    };
+    const estadoContratoClass = {
+      PENDIENTE_FIRMA: 'badge-warning',
+      ACTIVO: 'badge-success',
+      FINALIZADO: 'badge-info',
+      CANCELADO: 'badge-error',
+    };
+
+    const rolLabel = {
+      ARRENDADOR: 'Eres arrendador',
+      ARRENDATARIO: 'Eres arrendatario',
+    };
+
+    contractsById.clear();
+    grid.innerHTML = "";
+    if (!Array.isArray(items) || items.length === 0) {
+      empty.classList.remove("hidden");
+      return;
+    }
+
+    empty.classList.add("hidden");
+
+    items.forEach((item) => {
+      contractsById.set(String(item.idContrato), item);
+      const prod = item.producto ?? {};
+      const cp = item.contraparte ?? {};
+      const estado = item.estadoContrato ?? 'ACTIVO';
+      const estadoTxt = estadoContratoLabel[estado] ?? estado;
+      const estadoCls = estadoContratoClass[estado] ?? 'badge-ghost';
+      const rolTxt = rolLabel[item.rol] ?? 'Contrato';
+
+      const imgSrc = prod.fotoUrl ? BACKEND_BASE + prod.fotoUrl : (prod.imagenUrl ?? null);
+      const imgHtml = imgSrc
+        ? `<img src="${imgSrc}" alt="${prod.titulo ?? 'Producto'}" class="w-full h-40 object-cover rounded-t-2xl" />`
+        : `<div class="w-full h-40 bg-base-200 rounded-t-2xl flex items-center justify-center text-base-content/30 text-sm">Sin foto</div>`;
+
+      const fechaInicio = formatEsDate(item.fechaInicio);
+      const fechaFin = formatEsDate(item.fechaFin);
+      const fechaCreacion = formatEsDate(item.fechaCreacion);
+      const fechaFirma = formatEsDate(item.fechaFirmaArrendatario);
+      const canSign = item.rol === 'ARRENDATARIO' && estado === 'PENDIENTE_FIRMA';
+
+      const cpNombre = (cp.nombre || cp.apellidos)
+        ? `${cp.nombre ?? ''} ${cp.apellidos ?? ''}`.trim()
+        : 'Usuario';
+
+      grid.insertAdjacentHTML("beforeend", `
+        <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer" data-contract-id="${item.idContrato}">
+          ${imgHtml}
+          <div class="card-body p-5">
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="font-bold leading-tight">${prod.titulo ?? 'Producto'}</h3>
+              <span class="badge badge-sm ${estadoCls} border-none">${estadoTxt}</span>
+            </div>
+            <p class="text-xs text-base-content/60 mt-1">${rolTxt}</p>
+            <p class="text-xs text-base-content/60">Creado: ${fechaCreacion}</p>
+            <p class="text-xs text-base-content/60">Periodo: ${fechaInicio} → ${fechaFin}</p>
+            <p class="text-xs text-base-content/60">Firma arrendatario: ${item.fechaFirmaArrendatario ? fechaFirma : 'Pendiente'}</p>
+            <div class="mt-2">
+              <p class="text-sm font-semibold">Contraparte: ${cpNombre}</p>
+              ${cp.correo ? `<p class="text-xs text-base-content/50">${cp.correo}</p>` : ''}
+            </div>
+            ${item.textoCondiciones ? `<p class="text-xs text-base-content/70 mt-3 line-clamp-3">${item.textoCondiciones}</p>` : ''}
+            ${canSign ? `<div class="mt-3"><button type="button" class="btn btn-sm btn-primary rounded-full" data-sign-contract-id="${item.idContrato}">Firmar contrato</button></div>` : ''}
+          </div>
+        </div>
+      `);
+    });
+  }
+
+  function openContractDetail(item) {
+    if (!item) return;
+    const estadoContratoLabel = {
+      PENDIENTE_FIRMA: 'Pendiente de firma',
+      ACTIVO: 'Activo',
+      FINALIZADO: 'Finalizado',
+      CANCELADO: 'Cancelado',
+    };
+    const rolLabel = {
+      ARRENDADOR: 'Eres arrendador',
+      ARRENDATARIO: 'Eres arrendatario',
+    };
+    const cp = item.contraparte ?? {};
+    const cpNombre = (cp.nombre || cp.apellidos)
+      ? `${cp.nombre ?? ''} ${cp.apellidos ?? ''}`.trim()
+      : 'Usuario';
+
+    $('contract-detail-title').textContent = item.producto?.titulo
+      ? `Contrato · ${item.producto.titulo}`
+      : 'Detalle del contrato';
+    $('contract-detail-estado').textContent = estadoContratoLabel[item.estadoContrato] ?? (item.estadoContrato ?? '—');
+    $('contract-detail-rol').textContent = rolLabel[item.rol] ?? 'Contrato';
+    $('contract-detail-creado').textContent = formatEsDate(item.fechaCreacion);
+    $('contract-detail-firmado').textContent = item.fechaFirmaArrendatario ? formatEsDate(item.fechaFirmaArrendatario) : 'Pendiente';
+    $('contract-detail-periodo').textContent = `${formatEsDate(item.fechaInicio)} → ${formatEsDate(item.fechaFin)}`;
+    $('contract-detail-contraparte').textContent = cp.correo ? `${cpNombre} (${cp.correo})` : cpNombre;
+    $('contract-detail-texto').textContent = item.textoCondiciones || 'Este contrato no tiene texto disponible.';
+
+    $('contract-detail-modal')?.classList.remove('hidden');
+    $('contract-detail-modal')?.classList.add('flex');
+  }
+
+  function closeContractDetail() {
+    $('contract-detail-modal')?.classList.add('hidden');
+    $('contract-detail-modal')?.classList.remove('flex');
+  }
+
+  $('contract-detail-close')?.addEventListener('click', closeContractDetail);
+  $('contract-detail-modal')?.addEventListener('click', (e) => {
+    if (e.target === $('contract-detail-modal')) closeContractDetail();
+  });
+
+  $('contracts-grid')?.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-sign-contract-id]');
+    if (btn) {
+      const idContrato = btn.getAttribute('data-sign-contract-id');
+      if (!idContrato) return;
+
+      if (!confirm('Vas a firmar este contrato y aceptar sus términos. ¿Deseas continuar?')) return;
+
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = 'Firmando...';
+      try {
+        const res = await fetch(API_BASE + `/me/contratos/${idContrato}/firmar`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({
+            aceptaTerminos: true,
+          }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          showToast(err.message ?? 'No se pudo firmar el contrato', 'error');
+          return;
+        }
+        showToast('Contrato firmado correctamente');
+        await loadProfile();
+        setActiveSection('contratos');
+      } catch {
+        showToast('No se pudo conectar con el servidor', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+      return;
+    }
+
+    const card = e.target.closest('[data-contract-id]');
+    if (!card) return;
+    const idContrato = card.getAttribute('data-contract-id');
+    if (!idContrato) return;
+    openContractDetail(contractsById.get(idContrato));
+  });
 
   // ── Eliminar producto ────────────────────────────────────────
   async function deleteProduct(id, btn) {
