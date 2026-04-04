@@ -90,6 +90,12 @@ import Links from "./Links.astro";
     const navbar = document.getElementById("main-navbar");
     const navFavCount = document.getElementById("nav-fav-count");
     const navAuthLinks = document.getElementById("nav-auth-links");
+    const isAdminRoute = location.pathname === "/admin";
+
+    if (isAdminRoute && navbar) {
+        navbar.classList.remove("navbar-hidden");
+        navbar.style.transform = "translateY(0)";
+    }
 
     // Auth-aware nav links
     const API_BASE_NAV = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
@@ -197,6 +203,7 @@ import Links from "./Links.astro";
     });
 
     window.addEventListener("scroll", () => {
+        if (isAdminRoute) return;
         if (!navbar) return;
 
         const currentScrollY = window.scrollY;
