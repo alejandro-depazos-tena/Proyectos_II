@@ -1,6 +1,8 @@
 package com.ufvshares.backend.solicitud;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -67,7 +69,7 @@ public class SolicitudService {
   }
 
   @Transactional
-  public Solicitud reservar(Long idProducto, Long idSolicitante) {
+  public Solicitud reservar(Long idProducto, Long idSolicitante, LocalDate fechaFin) {
     Producto producto = productoRepository.findById(idProducto)
         .orElseThrow(() -> new NotFoundException("PRODUCTO_NOT_FOUND"));
 
@@ -88,11 +90,25 @@ public class SolicitudService {
     }
 
     Solicitud solicitud = new Solicitud();
+    LocalDateTime ahora = LocalDateTime.now();
     solicitud.setIdProducto(idProducto);
     solicitud.setIdSolicitante(idSolicitante);
     solicitud.setTipoTransaccion(producto.getTipoTransaccion());
     solicitud.setEstadoSolicitud(EstadoSolicitud.PENDIENTE);
-    solicitud.setFechaSolicitud(LocalDateTime.now());
+    solicitud.setFechaSolicitud(ahora);
+
+    if (producto.getTipoTransaccion() == TipoTransaccion.ALQUILER) {
+      if (fechaFin == null) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "DEBES_INDICAR_FECHA_FIN_ALQUILER");
+      }
+      LocalDateTime fechaFinDateTime = fechaFin.atTime(LocalTime.MAX.withNano(0));
+      if (!fechaFinDateTime.isAfter(ahora)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "FECHA_FIN_INVALIDA");
+      }
+      solicitud.setFechaInicio(ahora);
+      solicitud.setFechaFin(fechaFinDateTime);
+    }
+
     return repository.save(solicitud);
   }
 

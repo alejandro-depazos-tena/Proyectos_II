@@ -6,3 +6,4 @@ public enum EstadoSolicitud {
   RECHAZADA,
   CANCELADA
 }
+

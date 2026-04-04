@@ -71,9 +71,10 @@ public class SolicitudController {
   @ResponseStatus(HttpStatus.CREATED)
   public Solicitud reservar(
       @RequestHeader("Authorization") String auth,
-      @PathVariable Long idProducto) {
+      @PathVariable Long idProducto,
+      @RequestBody(required = false) ReservaSolicitudRequest body) {
     Long idSolicitante = resolveUserId(auth);
-    return service.reservar(idProducto, idSolicitante);
+    return service.reservar(idProducto, idSolicitante, body != null ? body.getFechaFin() : null);
   }
 
   @PutMapping("/{id}")
