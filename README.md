@@ -157,6 +157,19 @@ Astro levanta por defecto en `http://localhost:4321`.
 
 El backend ya está configurado con CORS para aceptar peticiones desde `http://localhost:4321`.
 
+### Comparador Amazon/Keepa (opcional)
+
+La integración está preparada en modo **gratis** (sin API de pago):
+
+1. El backend busca el producto en Amazon ES y estima el precio actual por scraping.
+2. La ficha del producto muestra un precio online de referencia y enlaces externos para comparar.
+3. Abre una ficha de producto para ver la comparativa en el bloque de precio.
+
+Notas:
+- No necesitas `KEEPA_API_KEY`.
+- Al ser scraping, Amazon puede limitar o cambiar el HTML, por lo que algunos productos podrían no devolver precio.
+- Si falla la consulta, la UI mantiene enlaces y muestra mensaje de estado sin romper la página.
+
 ### Problemas típicos
 
 - **Puerto ocupado**:

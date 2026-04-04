@@ -533,6 +533,29 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
     return '/foto.webp';
   }
 
+  function buildMarketplaceQuery(product) {
+    return [product?.titulo, product?.categoria, product?.marca]
+      .filter(Boolean)
+      .join(' ')
+      .replace(/_/g, ' ')
+      .trim();
+  }
+
+  function getAmazonSearchUrl(product) {
+    return `https://www.amazon.es/s?k=${encodeURIComponent(buildMarketplaceQuery(product))}`;
+  }
+
+  function getKeepaSearchUrl(product) {
+    return `https://keepa.com/#!search/${encodeURIComponent(buildMarketplaceQuery(product))}`;
+  }
+
+  function getOnlineReferencePrice(product) {
+    const raw = product?.precioOnline ?? product?.precioReferenciaOnline ?? product?.precioMarketplace;
+    const value = Number(raw);
+    if (!Number.isFinite(value) || value <= 0) return '';
+    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
+  }
+
   function escAttr(str) {
     return String(str ?? '').replace(/&/g, '&amp;').replace(/'/g, '&#39;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
@@ -549,6 +572,9 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
     const tipoBadgeClass = p.tipoTransaccion === 'ALQUILER' ? 'badge-success' : 'badge-primary';
     const productData = escAttr(JSON.stringify({ id: String(id), name: title, price: p.precio ?? 0, image: img, stock: 1 }));
     const favData = escAttr(JSON.stringify({ id: String(id), name: title, price: p.precio ?? 0, image: img, stock: 1, slug: String(id) }));
+    const amazonUrl = escAttr(getAmazonSearchUrl(p));
+    const keepaUrl = escAttr(getKeepaSearchUrl(p));
+    const onlineRefPrice = getOnlineReferencePrice(p);
     return `<div class="product-card-wrapper hidden">
   <div class="card bg-base-100 shadow-sm hover:shadow-xl transition-shadow duration-300 group relative rounded-xl overflow-hidden border border-base-200">
     <div class="absolute top-3 right-3 z-20 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 ease-in-out">
@@ -567,6 +593,13 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
       <div class="flex items-center justify-between mt-2">
         <span class="text-xl font-bold text-primary">${price}</span>
         <span class="text-success text-xs flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-success inline-block"></span>Disponible</span>
+      </div>
+      <div class="mt-3 border-t border-base-200 pt-3 space-y-2">
+        ${onlineRefPrice ? `<p class="text-xs text-slate-500">Precio online ref.: <span class="font-semibold text-slate-700">${onlineRefPrice}</span></p>` : ''}
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <a href="${amazonUrl}" target="_blank" rel="noopener noreferrer" class="badge badge-outline hover:border-primary hover:text-primary">Amazon</a>
+          <a href="${keepaUrl}" target="_blank" rel="noopener noreferrer" class="badge badge-outline hover:border-primary hover:text-primary">Keepa</a>
+        </div>
       </div>
     </div>
   </div>

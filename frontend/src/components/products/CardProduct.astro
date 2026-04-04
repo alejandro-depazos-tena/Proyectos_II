@@ -8,9 +8,13 @@ interface Props {
     stock: number;
     slug: string;
     category?: string;
+    onlinePrice?: number | null;
 }
 
-const { title, price, images, stock, slug, category } = Astro.props;
+const { title, price, images, stock, slug, category, onlinePrice } = Astro.props;
+const marketplaceQuery = [title, category].filter(Boolean).join(" ").trim();
+const amazonSearchUrl = `https://www.amazon.es/s?k=${encodeURIComponent(marketplaceQuery)}`;
+const keepaSearchUrl = `https://keepa.com/#!search/${encodeURIComponent(marketplaceQuery)}`;
 ---
 
 <div
@@ -122,6 +126,37 @@ const { title, price, images, stock, slug, category } = Astro.props;
                         </span>
                     )
                 }
+            </div>
+        </div>
+
+        <div class="mt-3 border-t border-base-200 pt-3 space-y-2">
+            {
+                typeof onlinePrice === "number" && Number.isFinite(onlinePrice) && onlinePrice > 0 && (
+                    <p class="text-xs text-slate-500">
+                        Precio online ref.:{" "}
+                        <span class="font-semibold text-slate-700">
+                            {onlinePrice.toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
+                        </span>
+                    </p>
+                )
+            }
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+                <a
+                    href={amazonSearchUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="badge badge-outline hover:border-primary hover:text-primary"
+                >
+                    Ver en Amazon
+                </a>
+                <a
+                    href={keepaSearchUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="badge badge-outline hover:border-primary hover:text-primary"
+                >
+                    Ver en Keepa
+                </a>
             </div>
         </div>
     </div>

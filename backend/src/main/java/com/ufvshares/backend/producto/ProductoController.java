@@ -33,15 +33,18 @@ public class ProductoController {
   private final SessionRepository sessions;
   private final UsuarioRepository usuarios;
   private final FotoProductoRepository fotosRepo;
+  private final MarketplaceKeepaService marketplaceKeepaService;
 
   public ProductoController(ProductoService service,
       SessionRepository sessions,
       UsuarioRepository usuarios,
-      FotoProductoRepository fotosRepo) {
+      FotoProductoRepository fotosRepo,
+      MarketplaceKeepaService marketplaceKeepaService) {
     this.service = service;
     this.sessions = sessions;
     this.usuarios = usuarios;
     this.fotosRepo = fotosRepo;
+    this.marketplaceKeepaService = marketplaceKeepaService;
   }
 
   /**
@@ -136,6 +139,12 @@ public class ProductoController {
     }
     m.put("fotos", fotosInfo);
     return m;
+  }
+
+  @GetMapping("/{id}/marketplace")
+  public Map<String, Object> getMarketplaceData(@PathVariable Long id) {
+    Producto p = service.findById(id);
+    return marketplaceKeepaService.getMarketplaceData(p);
   }
 
   @PostMapping

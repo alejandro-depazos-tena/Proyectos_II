@@ -91,6 +91,25 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                         <p id="product-desc" class="text-slate-600 leading-relaxed text-base"></p>
                     </div>
 
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4" id="marketplace-compare-card">
+                        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-3">Comparar precio online</p>
+                        <div class="space-y-2 mb-3">
+                            <p class="text-sm text-slate-600">
+                                Precio del anuncio:
+                                <span class="font-black text-slate-900" id="seller-price-compare">—</span>
+                            </p>
+                            <p class="text-sm text-slate-600" id="online-price-reference-row">
+                                Precio online de referencia:
+                                <span class="font-black text-slate-900" id="online-price-reference">No disponible</span>
+                            </p>
+                        </div>
+                        <p id="marketplace-status" class="hidden text-xs text-slate-500 mb-3"></p>
+                        <div class="flex flex-wrap gap-2">
+                            <a id="marketplace-amazon-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline rounded-full">Ver en Amazon</a>
+                            <a id="marketplace-keepa-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline rounded-full">Ver en Keepa</a>
+                        </div>
+                    </div>
+
                     <!-- Stats row -->
                     <div id="product-stats" class="grid grid-cols-3 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                         <div class="text-center">
@@ -262,6 +281,95 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
 
     function chip(label, value, colorClass) {
         return `<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${colorClass}">${label}: <span class="font-bold">${value}</span></span>`;
+    }
+
+    function buildMarketplaceQuery(product) {
+        return [product?.titulo, product?.categoria, product?.marca]
+            .filter(Boolean)
+            .join(' ')
+            .replace(/_/g, ' ')
+            .trim();
+    }
+
+    function getAmazonSearchUrl(product) {
+        return `https://www.amazon.es/s?k=${encodeURIComponent(buildMarketplaceQuery(product))}`;
+    }
+
+    function getKeepaSearchUrl(product) {
+        return `https://keepa.com/#!search/${encodeURIComponent(buildMarketplaceQuery(product))}`;
+    }
+
+    function getOnlineReferencePrice(product) {
+        const raw = product?.precioOnline ?? product?.precioReferenciaOnline ?? product?.precioMarketplace;
+        const value = Number(raw);
+        if (!Number.isFinite(value) || value <= 0) return null;
+        return value;
+    }
+
+    function toEuro(value) {
+        return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
+    }
+
+    async function loadMarketplaceData(productId, fallbackProduct) {
+        const status = document.getElementById('marketplace-status');
+        const onlineRefEl = document.getElementById('online-price-reference');
+        const onlineRefRow = document.getElementById('online-price-reference-row');
+        const amazonLink = document.getElementById('marketplace-amazon-link');
+        const keepaLink = document.getElementById('marketplace-keepa-link');
+
+        if (status) {
+            status.classList.remove('hidden');
+            status.textContent = 'Consultando precio online...';
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/productos/${productId}/marketplace`);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+
+            if (amazonLink && data.amazonSearchUrl) amazonLink.setAttribute('href', data.amazonSearchUrl);
+            if (keepaLink && (data.keepaSearchUrl || data.keepaProductUrl)) {
+                keepaLink.setAttribute('href', data.keepaProductUrl || data.keepaSearchUrl);
+            }
+
+            if (onlineRefEl && data.currentOnlinePrice != null) {
+                onlineRefEl.textContent = toEuro(Number(data.currentOnlinePrice));
+                onlineRefRow?.classList.remove('hidden');
+            } else if (onlineRefEl) {
+                const fallback = getOnlineReferencePrice(fallbackProduct);
+                if (fallback !== null) {
+                    onlineRefEl.textContent = toEuro(fallback);
+                    onlineRefRow?.classList.remove('hidden');
+                } else {
+                    onlineRefEl.textContent = 'No disponible';
+                    onlineRefRow?.classList.add('hidden');
+                }
+            }
+
+            if (status) {
+                if (data.available === false && data.message) {
+                    status.textContent = data.message;
+                    status.classList.remove('hidden');
+                } else {
+                    status.classList.add('hidden');
+                }
+            }
+        } catch {
+            const fallback = getOnlineReferencePrice(fallbackProduct);
+            if (onlineRefEl) {
+                if (fallback !== null) {
+                    onlineRefEl.textContent = toEuro(fallback);
+                    onlineRefRow?.classList.remove('hidden');
+                } else {
+                    onlineRefEl.textContent = 'No disponible';
+                    onlineRefRow?.classList.add('hidden');
+                }
+            }
+            if (status) {
+                status.textContent = 'No se pudo cargar la comparativa online ahora mismo.';
+                status.classList.remove('hidden');
+            }
+        }
     }
 
     function toLocalDateInputValue(date) {
@@ -827,6 +935,27 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         document.getElementById('product-title').textContent = title;
         document.getElementById('product-price').textContent = price;
         document.getElementById('product-desc').textContent = p.descripcion || '';
+        const sellerPriceCompare = document.getElementById('seller-price-compare');
+        if (sellerPriceCompare) sellerPriceCompare.textContent = price;
+
+        const amazonLink = document.getElementById('marketplace-amazon-link');
+        const keepaLink = document.getElementById('marketplace-keepa-link');
+        if (amazonLink) amazonLink.setAttribute('href', getAmazonSearchUrl(p));
+        if (keepaLink) keepaLink.setAttribute('href', getKeepaSearchUrl(p));
+
+        const onlineRef = getOnlineReferencePrice(p);
+        const onlineRefEl = document.getElementById('online-price-reference');
+        const onlineRefRow = document.getElementById('online-price-reference-row');
+        if (onlineRefEl) {
+            onlineRefEl.textContent = onlineRef === null
+                ? 'No disponible'
+                : new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(onlineRef);
+        }
+        if (onlineRefRow) {
+            onlineRefRow.classList.toggle('hidden', onlineRef === null);
+        }
+
+        await loadMarketplaceData(id, p);
 
         // Stats row
         const statFecha = document.getElementById('stat-fecha');
