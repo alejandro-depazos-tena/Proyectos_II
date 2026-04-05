@@ -12,8 +12,24 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 
-// Filter related articles
-const relatedPosts = blogPosts.filter((p) => p.slug !== post.slug).slice(0, 2);
+function hashString(value: string) {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
+// Vary related articles per post instead of always showing the same two.
+const relatedPosts = blogPosts
+  .filter((p) => p.slug !== post.slug)
+  .map((p) => ({
+    post: p,
+    score: hashString(`${post.slug}:${p.slug}`),
+  }))
+  .sort((a, b) => a.score - b.score)
+  .slice(0, 2)
+  .map(({ post }) => post);
 ---
 
 <Layout>

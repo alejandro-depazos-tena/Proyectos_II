@@ -33,7 +33,7 @@ export default function FavoritesList() {
                 <p className="text-base-content/70 mb-6 max-w-md">
                     Pulsa el icono del corazón en cualquier producto para guardarlo aquí.
                 </p>
-                <a href="/" className="btn btn-primary">
+                <a href="/app" className="btn btn-primary">
                     Empezar a comprar
                 </a>
             </div>
