@@ -137,18 +137,25 @@ import Layout from "../layouts/Layout.astro";
       </div>
 
       <!-- ══ SIN CONVERSACIONES ══ -->
-      <div id="no-convs-state" class="hidden flex-1 flex-col items-center justify-center gap-5 text-center px-8 chat-bg">
-        <div class="w-24 h-24 rounded-full bg-white shadow flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <div id="no-convs-state" class="hidden flex-1 items-center justify-center px-6 py-8 chat-bg">
+        <div class="w-full max-w-md rounded-2xl border border-base-200/80 bg-base-100/95 shadow-xl p-6 text-center">
+          <div class="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-primary" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <p class="font-bold text-xl text-base-content">Aun no tienes conversaciones</p>
+          <p class="text-sm text-base-content/65 mt-2 leading-relaxed">
+            Cuando contactes con un vendedor desde un producto, el chat aparecera aqui.
+          </p>
+          <div class="mt-5 flex flex-wrap justify-center gap-2.5">
+            <a href="/app" class="btn btn-primary btn-sm rounded-full gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              Explorar productos
+            </a>
+            <a href="/favorites" class="btn btn-outline btn-sm rounded-full">
+              Ver favoritos
+            </a>
+          </div>
         </div>
-        <div>
-          <p class="font-bold text-xl text-[#3b4a54]">Sin mensajes todavia</p>
-          <p class="text-sm text-[#4b5563] mt-1.5 max-w-xs leading-relaxed">Cuando contactes con un vendedor desde la pagina de un producto, la conversacion aparecera aqui.</p>
-        </div>
-        <a href="/app" class="btn btn-primary btn-sm rounded-full gap-2 mt-1">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          Explorar productos
-        </a>
       </div>
 
     </div>
@@ -200,24 +207,25 @@ import Layout from "../layouts/Layout.astro";
   </div>
 
 <!-- Modal perfil usuario -->
-<div id="profile-modal" class="hidden fixed inset-0 z-[100] bg-black/50 items-center justify-center p-4">
-  <div class="bg-base-100 rounded-2xl shadow-2xl w-full max-w-sm flex flex-col overflow-hidden">
-    <!-- Banner + avatar -->
-    <div class="relative">
-      <div class="h-24 bg-gradient-to-r from-[#128C7E] to-[#25d366]"></div>
-      <div id="pm-avatar" class="absolute left-1/2 -translate-x-1/2 -bottom-8 w-16 h-16 rounded-full border-4 border-base-100 bg-primary/20 flex items-center justify-center text-xl font-black text-primary shrink-0 overflow-hidden shadow"></div>
-    </div>
-    <!-- Contenido -->
-    <div class="pt-12 pb-5 px-5 flex flex-col gap-4">
-      <div class="text-center">
-        <p id="pm-name" class="font-bold text-lg text-base-content"></p>
-        <p id="pm-apellidos" class="text-sm text-base-content/60"></p>
-      </div>
-      <div class="flex justify-center gap-8 py-3 bg-base-200/50 rounded-xl">
-        <div class="text-center">
-          <p id="pm-anuncios" class="font-bold text-xl text-[#128C7E]">-</p>
-          <p class="text-[11px] text-base-content/50 mt-0.5">Anuncios</p>
+<div id="profile-modal" class="hidden fixed inset-0 z-[100] bg-black/55 items-center justify-center p-4">
+  <div class="bg-base-100 rounded-2xl shadow-2xl w-full max-w-sm flex flex-col overflow-hidden border border-base-200">
+    <div class="relative px-5 pt-5 pb-4 border-b border-base-200">
+      <button id="profile-modal-close-top" class="btn btn-ghost btn-circle btn-sm absolute top-3 right-3" aria-label="Cerrar perfil">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+      <div class="flex items-center gap-3 pr-8">
+        <div id="pm-avatar" class="w-16 h-16 rounded-full border-2 border-base-200 bg-primary/15 flex items-center justify-center text-xl font-black text-primary shrink-0 overflow-hidden shadow-sm"></div>
+        <div class="min-w-0">
+          <p id="pm-name" class="font-bold text-lg text-base-content truncate"></p>
+          <p id="pm-apellidos" class="text-sm text-base-content/60 truncate"></p>
+          <p class="text-xs text-base-content/50 mt-1">Perfil publico del chat</p>
         </div>
+      </div>
+    </div>
+    <div class="p-5 flex flex-col gap-3.5">
+      <div class="rounded-xl bg-base-200/55 px-4 py-3 text-center">
+        <p id="pm-anuncios" class="font-bold text-2xl text-primary leading-none">-</p>
+        <p class="text-[11px] text-base-content/55 mt-1.5 uppercase tracking-wide">Anuncios publicados</p>
       </div>
       <div class="flex flex-col gap-2.5">
         <div id="pm-phone-row" class="hidden flex items-center gap-3 bg-base-200/50 rounded-xl px-4 py-3">
@@ -242,7 +250,7 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </div>
       </div>
-      <button id="profile-modal-close" class="btn btn-ghost rounded-xl w-full mt-1">Cerrar</button>
+      <button id="profile-modal-close" class="btn btn-ghost rounded-xl w-full mt-1">Cerrar perfil</button>
     </div>
   </div>
 </div>
@@ -408,6 +416,9 @@ import Layout from "../layouts/Layout.astro";
   /* Ocultar sidebar solo en movil cuando hay chat abierto */
   .sidebar-chat-open { display: none; }
   @media (min-width: 640px) { .sidebar-chat-open { display: flex !important; flex-direction: column; } }
+
+  /* Fuerza ocultar el panel principal incluso cuando aplica sm:flex. */
+  .chat-main-hidden { display: none !important; }
 
   /* Burbuja enviada con cola abajo-derecha */
   .bubble-me {
@@ -997,6 +1008,7 @@ import Layout from "../layouts/Layout.astro";
       chatSidebar.classList.remove('sidebar-chat-open');
       chatMain.classList.add('hidden');
       chatMain.classList.remove('flex');
+      chatMain.classList.add('chat-main-hidden');
     }
 
     filteredConvs = applyFilter(conversations);
@@ -1297,11 +1309,12 @@ import Layout from "../layouts/Layout.astro";
     renderCollapsedConversationRail();
     convSkeleton?.remove();
     if (filteredConvs.length === 0) {
+      const hasQuery = (chatSearch?.value.trim() ?? '').length > 0;
       const emptyMsg = activeSidebarView === 'blocked'
         ? 'No tienes usuarios bloqueados'
         : (activeSidebarView === 'unread'
           ? 'No tienes chats sin leer'
-          : (activeSidebarView === 'archived' ? 'No tienes chats archivados' : 'Sin resultados'));
+          : (activeSidebarView === 'archived' ? 'No tienes chats archivados' : (hasQuery ? 'Sin resultados' : 'Aun no tienes conversaciones')));
       convList.innerHTML = '<div class="flex flex-col items-center justify-center py-16 gap-2 text-center px-6"><p class="text-sm text-base-content/40">' + emptyMsg + '</p></div>';
     } else if (activeSidebarView === 'blocked') {
       convList.innerHTML = filteredConvs.map((conv) => {
@@ -1417,8 +1430,11 @@ import Layout from "../layouts/Layout.astro";
     syncUnreadSnapshot(conversations);
     renderConvList();
     chatSidebar.classList.add('sidebar-chat-open');
+    noConvsState.classList.add('hidden');
+    noConvsState.classList.remove('flex');
     chatMain.classList.remove('hidden');
     chatMain.classList.add('flex');
+    chatMain.classList.remove('chat-main-hidden');
     // Store current user info in dataset so the single header listener always has fresh data
     chatHeaderAvatar.dataset.userId    = String(conv.otroUsuarioId);
     chatHeaderAvatar.dataset.fotoUrl   = conv.otroUsuarioFoto ?? '';
@@ -1471,6 +1487,9 @@ import Layout from "../layouts/Layout.astro";
           }
         });
         conversations = updated;
+        noConvsState.classList.add('hidden');
+        noConvsState.classList.remove('flex');
+        chatSidebar.classList.remove('hidden');
         filteredConvs = applyFilter(conversations);
         syncUnreadSnapshot(conversations);
         renderConvList();
@@ -1501,13 +1520,16 @@ import Layout from "../layouts/Layout.astro";
     filteredConvs = applyFilter(conversations);
     const urlConvId = new URLSearchParams(window.location.search).get('conv');
     if (conversations.length === 0 && !urlConvId) {
-      chatSidebar.classList.add('hidden');
+      chatSidebar.classList.remove('hidden');
+      renderConvList();
       chatMain.classList.add('hidden');
+      chatMain.classList.add('chat-main-hidden');
       noConvsState.classList.remove('hidden');
       noConvsState.classList.add('flex');
       convSkeleton?.remove();
     } else {
       noConvsState.classList.add('hidden');
+      chatMain.classList.remove('chat-main-hidden');
       renderConvList();
       if (urlConvId) {
         let target = conversations.find(c => String(c.idConversacion) === urlConvId);
@@ -1617,6 +1639,7 @@ import Layout from "../layouts/Layout.astro";
     chatSidebar.classList.remove('sidebar-chat-open');
     chatMain.classList.add('hidden');
     chatMain.classList.remove('flex');
+    chatMain.classList.add('chat-main-hidden');
     schedulePoll();
   });
 
@@ -1653,6 +1676,7 @@ import Layout from "../layouts/Layout.astro";
       chatSidebar.classList.remove('sidebar-chat-open');
       chatMain.classList.add('hidden');
       chatMain.classList.remove('flex');
+      chatMain.classList.add('chat-main-hidden');
     }
 
     filteredConvs = applyFilter(conversations);
@@ -1962,6 +1986,7 @@ import Layout from "../layouts/Layout.astro";
   const pmProductRow      = document.getElementById('pm-product-row');
   const pmProductCount    = document.getElementById('pm-product-count');
   const profileModalClose = document.getElementById('profile-modal-close');
+  const profileModalCloseTop = document.getElementById('profile-modal-close-top');
 
   async function openProfileModal(userId: number, fotoUrl: string | null, iniciales: string) {
     // Mostrar con datos básicos inmediatamente
@@ -2000,6 +2025,10 @@ import Layout from "../layouts/Layout.astro";
   }
 
   profileModalClose?.addEventListener('click', () => {
+    profileModal?.classList.add('hidden');
+    profileModal?.classList.remove('flex');
+  });
+  profileModalCloseTop?.addEventListener('click', () => {
     profileModal?.classList.add('hidden');
     profileModal?.classList.remove('flex');
   });
