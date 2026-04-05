@@ -1,0 +1,106 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Ajustes | UFV Shares">
+  <section class="max-w-5xl mx-auto px-4 py-8 sm:py-10">
+    <header class="mb-7">
+      <p class="text-xs uppercase tracking-[0.2em] text-primary/80 font-semibold">Preferencias</p>
+      <h1 class="text-3xl sm:text-4xl font-black text-base-content mt-2">Ajustes</h1>
+      <p class="text-sm sm:text-base text-base-content/65 mt-2 max-w-2xl">
+        Configura tu experiencia de uso y accede rapido a opciones de cuenta y seguridad.
+      </p>
+    </header>
+
+    <div class="grid gap-5 lg:grid-cols-3">
+      <article class="rounded-2xl border border-base-200 bg-base-100 shadow-sm p-5 lg:col-span-2">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-base-content">Tema de la aplicacion</h2>
+            <p class="text-sm text-base-content/65 mt-1">
+              Cambia entre modo claro y oscuro. Esta preferencia se guarda en tu navegador.
+            </p>
+          </div>
+          <span id="theme-current-pill" class="badge badge-outline">Claro</span>
+        </div>
+
+        <div class="mt-5 flex items-center gap-4">
+          <button
+            id="settings-theme-toggle"
+            class="theme-switch"
+            type="button"
+            role="switch"
+            aria-checked="false"
+            aria-label="Activar modo oscuro"
+            title="Cambiar tema"
+          >
+            <span class="theme-switch-thumb">
+              <span id="settings-theme-icon" class="theme-switch-icon">☀️</span>
+            </span>
+          </button>
+          <div>
+            <p id="theme-current-label" class="font-semibold text-base-content">Modo claro</p>
+            <p class="text-xs text-base-content/55">Puedes cambiarlo cuando quieras.</p>
+          </div>
+        </div>
+      </article>
+
+      <aside class="rounded-2xl border border-base-200 bg-base-100 shadow-sm p-5">
+        <h2 class="text-lg font-bold text-base-content">Acciones rapidas</h2>
+        <div class="mt-4 flex flex-col gap-2.5">
+          <a href="/profile" class="btn btn-outline justify-start">Editar perfil</a>
+          <a href="/forgot-password" class="btn btn-outline justify-start">Recuperar contraseña</a>
+          <a href="/profile#mis-anuncios" class="btn btn-outline justify-start">Mis anuncios</a>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const THEME_KEY = "ufvshares_theme";
+  const themeToggle = document.getElementById("settings-theme-toggle") as HTMLButtonElement | null;
+  const themeIcon = document.getElementById("settings-theme-icon");
+  const themeLabel = document.getElementById("theme-current-label");
+  const themePill = document.getElementById("theme-current-pill");
+
+  function updateThemeUi(theme: "light" | "dark") {
+    const isDark = theme === "dark";
+    themeToggle?.classList.toggle("is-dark", isDark);
+
+    if (themeToggle) {
+      themeToggle.setAttribute("aria-checked", isDark ? "true" : "false");
+      themeToggle.setAttribute("aria-label", isDark ? "Activar modo claro" : "Activar modo oscuro");
+    }
+
+    if (themeIcon) {
+      themeIcon.textContent = isDark ? "🌙" : "☀️";
+    }
+
+    if (themeLabel) {
+      themeLabel.textContent = isDark ? "Modo oscuro" : "Modo claro";
+    }
+
+    if (themePill) {
+      themePill.textContent = isDark ? "Oscuro" : "Claro";
+    }
+  }
+
+  function setTheme(theme: "light" | "dark") {
+    document.documentElement.setAttribute("data-theme", theme);
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch (_) {
+      // Ignore storage write errors.
+    }
+    updateThemeUi(theme);
+  }
+
+  const initialTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+  updateThemeUi(initialTheme);
+
+  themeToggle?.addEventListener("click", () => {
+    const currentTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    setTheme(currentTheme === "dark" ? "light" : "dark");
+  });
+</script>

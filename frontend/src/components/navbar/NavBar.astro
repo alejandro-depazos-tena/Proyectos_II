@@ -37,19 +37,17 @@ import Links from "./Links.astro";
 
             <!-- Right Side: Icons -->
             <div class="navbar-end gap-2 sm:gap-4">
-                <button
-                    id="theme-toggle"
-                    class="theme-switch"
-                    type="button"
-                    role="switch"
-                    aria-checked="false"
-                    aria-label="Activar modo oscuro"
-                    title="Cambiar tema"
+                <a
+                    href="/settings"
+                    class="btn btn-ghost btn-circle hover:bg-primary/10 transition-colors"
+                    aria-label="Ajustes"
+                    title="Ajustes"
                 >
-                    <span class="theme-switch-thumb">
-                        <span id="theme-thumb-icon" class="theme-switch-icon">☀️</span>
-                    </span>
-                </button>
+                    <Icon
+                        name="lucide:settings"
+                        class="w-6 h-6 hover:text-primary transition-colors"
+                    />
+                </a>
                 <a
                     href="/favorites"
                     class="btn btn-ghost btn-circle hover:bg-primary/10 transition-colors"
@@ -104,9 +102,6 @@ import Links from "./Links.astro";
     const nombre = localStorage.getItem("ufvshares_nombre");
     const email = localStorage.getItem("ufvshares_email");
     const adminFlag = localStorage.getItem("ufvshares_admin") === "1";
-    const THEME_KEY = "ufvshares_theme";
-    const themeToggle = document.getElementById("theme-toggle");
-    const themeThumbIcon = document.getElementById("theme-thumb-icon");
 
     function clearSession() {
         localStorage.removeItem("ufvshares_token");
@@ -114,39 +109,6 @@ import Links from "./Links.astro";
         localStorage.removeItem("ufvshares_nombre");
         localStorage.removeItem("ufvshares_id");
         localStorage.removeItem("ufvshares_admin");
-    }
-
-    function updateThemeButton(theme: "light" | "dark") {
-        const isDark = theme === "dark";
-        themeToggle?.classList.toggle("is-dark", isDark);
-        if (themeToggle) {
-            themeToggle.setAttribute("aria-checked", isDark ? "true" : "false");
-        }
-        if (themeThumbIcon) {
-            themeThumbIcon.textContent = isDark ? "🌙" : "☀️";
-        }
-        if (themeToggle) {
-            themeToggle.setAttribute("aria-label", isDark ? "Activar modo claro" : "Activar modo oscuro");
-        }
-    }
-
-    function setTheme(theme: "light" | "dark") {
-        document.documentElement.setAttribute("data-theme", theme);
-        try {
-            localStorage.setItem(THEME_KEY, theme);
-        } catch (_) {
-            // Ignore storage issues and keep in-memory theme.
-        }
-        updateThemeButton(theme);
-    }
-
-    if (themeToggle) {
-        const initialTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
-        updateThemeButton(initialTheme);
-        themeToggle.addEventListener("click", () => {
-            const current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
-            setTheme(current === "dark" ? "light" : "dark");
-        });
     }
 
     if (mainLogoLink) {
