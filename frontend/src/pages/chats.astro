@@ -65,7 +65,7 @@ import Layout from "../layouts/Layout.astro";
             <p id="chat-header-product" class="text-xs text-base-content/50 truncate leading-snug mt-px"></p>
           </div>
           <div class="flex items-center gap-0.5 shrink-0 relative">
-            <button class="btn btn-ghost btn-circle btn-sm text-base-content/50" title="Buscar en el chat">
+            <button id="chat-in-search-btn" class="btn btn-ghost btn-circle btn-sm text-base-content/50" title="Buscar en el chat" aria-label="Buscar en el chat">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             </button>
             <button id="chat-more-btn" class="btn btn-ghost btn-circle btn-sm text-base-content/50" title="Mas opciones" aria-label="Mas opciones" aria-expanded="false" aria-controls="chat-more-menu">
@@ -86,6 +86,20 @@ import Layout from "../layouts/Layout.astro";
               </button>
             </div>
           </div>
+        </div>
+        <div id="chat-inline-search" class="hidden px-3 py-2 bg-base-100 border-b border-base-200 items-center gap-2">
+          <div class="relative flex-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input id="chat-inline-search-input" type="text" placeholder="Buscar palabras en esta conversacion" class="input input-sm w-full pl-9 rounded-full" />
+          </div>
+          <span id="chat-inline-search-count" class="text-xs text-base-content/60 min-w-[64px] text-center">0/0</span>
+          <button id="chat-inline-search-prev" type="button" class="btn btn-ghost btn-circle btn-sm" aria-label="Resultado anterior" title="Resultado anterior">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <button id="chat-inline-search-next" type="button" class="btn btn-ghost btn-circle btn-sm" aria-label="Siguiente resultado" title="Siguiente resultado">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+          <button id="chat-inline-search-close" type="button" class="btn btn-ghost btn-sm" aria-label="Cerrar busqueda">Cerrar</button>
         </div>
         <!-- Mensajes (fondo beige WhatsApp) -->
         <div id="chat-messages" class="flex-1 overflow-y-auto flex flex-col px-[4%] md:px-[8%] lg:px-[14%] py-4 gap-px chat-bg">
@@ -305,6 +319,7 @@ import Layout from "../layouts/Layout.astro";
 
   html[data-theme='dark'] #chat-sidebar-header,
   html[data-theme='dark'] #chat-header,
+  html[data-theme='dark'] #chat-inline-search,
   html[data-theme='dark'] #chat-input-area {
     background: #162338 !important;
     border-color: rgba(147, 170, 206, 0.24) !important;
@@ -318,6 +333,7 @@ import Layout from "../layouts/Layout.astro";
   }
 
   html[data-theme='dark'] #chat-search,
+  html[data-theme='dark'] #chat-inline-search-input,
   html[data-theme='dark'] #msg-input,
   html[data-theme='dark'] #loc-search-input,
   html[data-theme='dark'] #emoji-picker,
@@ -329,6 +345,7 @@ import Layout from "../layouts/Layout.astro";
   }
 
   html[data-theme='dark'] #chat-search::placeholder,
+  html[data-theme='dark'] #chat-inline-search-input::placeholder,
   html[data-theme='dark'] #msg-input::placeholder,
   html[data-theme='dark'] #loc-search-input::placeholder {
     color: #9fb0c9 !important;
@@ -375,6 +392,17 @@ import Layout from "../layouts/Layout.astro";
 
   html[data-theme='dark'] .text-\[\#3b4a54\] {
     color: #e5eef9 !important;
+  }
+
+  .msg-search-hit {
+    background: #fde68a;
+    color: #111827;
+    border-radius: 4px;
+    padding: 0 1px;
+  }
+
+  .msg-bubble-hit-active > div {
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.65);
   }
 
   /* Ocultar sidebar solo en movil cuando hay chat abierto */
@@ -723,6 +751,13 @@ import Layout from "../layouts/Layout.astro";
   const archivedShortcut  = document.getElementById('archived-shortcut');
   const chatMoreBtn       = document.getElementById('chat-more-btn')  as HTMLButtonElement | null;
   const chatMoreMenu      = document.getElementById('chat-more-menu');
+  const chatInSearchBtn   = document.getElementById('chat-in-search-btn') as HTMLButtonElement | null;
+  const chatInlineSearch  = document.getElementById('chat-inline-search');
+  const chatInlineSearchInput = document.getElementById('chat-inline-search-input') as HTMLInputElement | null;
+  const chatInlineSearchCount = document.getElementById('chat-inline-search-count');
+  const chatInlineSearchPrev = document.getElementById('chat-inline-search-prev') as HTMLButtonElement | null;
+  const chatInlineSearchNext = document.getElementById('chat-inline-search-next') as HTMLButtonElement | null;
+  const chatInlineSearchClose = document.getElementById('chat-inline-search-close') as HTMLButtonElement | null;
   const chatArchiveBtn    = document.getElementById('chat-archive-btn') as HTMLButtonElement | null;
   const chatReportBtn     = document.getElementById('chat-report-btn') as HTMLButtonElement | null;
   const chatBlockBtn      = document.getElementById('chat-block-btn')  as HTMLButtonElement | null;
@@ -739,6 +774,104 @@ import Layout from "../layouts/Layout.astro";
   const blockConfirmAccept = document.getElementById('block-confirm-accept') as HTMLButtonElement | null;
   let pendingBlockAction: { userId: number; blocked: boolean; userName: string } | null = null;
   const SIDEBAR_COLLAPSED_KEY = 'ufvshares_chat_sidebar_collapsed';
+  let inChatSearchMatches: HTMLElement[] = [];
+  let inChatSearchActiveIndex = -1;
+
+  function escapeRegExp(text: string): string {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function escapeHtmlText(text: string): string {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function renderMessageTextHtml(raw: string): string {
+    return escapeHtmlText(raw).replace(/\n/g, '<br>');
+  }
+
+  function restoreMessageTexts() {
+    chatMessages.querySelectorAll<HTMLElement>('.msg-text[data-plain-text]').forEach((el) => {
+      const raw = el.dataset.plainText ?? '';
+      el.innerHTML = renderMessageTextHtml(raw);
+      el.closest('.msg-bubble')?.classList.remove('msg-bubble-hit-active');
+    });
+  }
+
+  function updateInChatSearchCount() {
+    if (!chatInlineSearchCount) return;
+    if (inChatSearchMatches.length === 0) {
+      chatInlineSearchCount.textContent = '0/0';
+      return;
+    }
+    chatInlineSearchCount.textContent = (inChatSearchActiveIndex + 1) + '/' + inChatSearchMatches.length;
+  }
+
+  function jumpToInChatSearchResult(index: number) {
+    if (inChatSearchMatches.length === 0) {
+      inChatSearchActiveIndex = -1;
+      updateInChatSearchCount();
+      return;
+    }
+    if (index < 0) index = inChatSearchMatches.length - 1;
+    if (index >= inChatSearchMatches.length) index = 0;
+    inChatSearchActiveIndex = index;
+
+    inChatSearchMatches.forEach((el) => el.classList.remove('msg-bubble-hit-active'));
+    const active = inChatSearchMatches[inChatSearchActiveIndex];
+    active.classList.add('msg-bubble-hit-active');
+    active.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    updateInChatSearchCount();
+  }
+
+  function refreshInChatSearchResults() {
+    restoreMessageTexts();
+    inChatSearchMatches = [];
+    inChatSearchActiveIndex = -1;
+
+    const query = (chatInlineSearchInput?.value ?? '').trim();
+    if (!query) {
+      updateInChatSearchCount();
+      return;
+    }
+
+    const reg = new RegExp('(' + escapeRegExp(query) + ')', 'gi');
+
+    chatMessages.querySelectorAll<HTMLElement>('.msg-text[data-plain-text]').forEach((el) => {
+      const raw = el.dataset.plainText ?? '';
+      if (!raw.toLowerCase().includes(query.toLowerCase())) return;
+
+      const highlighted = renderMessageTextHtml(raw).replace(reg, '<mark class="msg-search-hit">$1</mark>');
+      el.innerHTML = highlighted;
+
+      const bubble = el.closest('.msg-bubble') as HTMLElement | null;
+      if (bubble) inChatSearchMatches.push(bubble);
+    });
+
+    jumpToInChatSearchResult(0);
+  }
+
+  function closeInChatSearch() {
+    chatInlineSearch?.classList.add('hidden');
+    chatInlineSearch?.classList.remove('flex');
+    if (chatInlineSearchInput) chatInlineSearchInput.value = '';
+    restoreMessageTexts();
+    inChatSearchMatches = [];
+    inChatSearchActiveIndex = -1;
+    updateInChatSearchCount();
+  }
+
+  function openInChatSearch() {
+    if (activeConvId === null) {
+      showSystemToast('Abre una conversacion para buscar dentro del chat.');
+      return;
+    }
+    chatInlineSearch?.classList.remove('hidden');
+    chatInlineSearch?.classList.add('flex');
+    setTimeout(() => chatInlineSearchInput?.focus(), 20);
+  }
 
   function setSidebarCollapsed(collapsed: boolean) {
     if (!chatShell) return;
@@ -1091,8 +1224,11 @@ import Layout from "../layouts/Layout.astro";
     wrapper.className = 'msg-bubble flex ' + (isMe ? 'justify-end' : 'justify-start') + ' ' + (isCont ? 'mt-0.5' : 'mt-2');
     wrapper.dataset.msgId = String(msg.idMensaje);
     const pad = isLoc ? 'p-1.5' : 'px-3 pt-2 pb-1.5';
+    const plainTextAttr = !isLoc
+      ? (' data-plain-text="' + escapeHtmlText(msg.contenido).replace(/"/g, '&quot;') + '"')
+      : '';
     wrapper.innerHTML = '<div class="' + bubbleCls + ' ' + pad + ' max-w-[75%] min-w-[180px] text-sm leading-relaxed overflow-hidden">'
-      + '<div>' + innerContent + '</div>'
+      + '<div class="msg-text"' + plainTextAttr + '>' + innerContent + '</div>'
       + (!isLoc ? '<div class="flex items-center justify-end gap-1 mt-0.5">'
         + '<span class="text-[10px] text-[#8696a0] whitespace-nowrap">' + formatTs(msg.fechaEnvio) + '</span>'
         + (isMe ? '<span class="msg-status">' + ticksSvg(msg.leido) + '</span>' : '')
@@ -1101,6 +1237,9 @@ import Layout from "../layouts/Layout.astro";
     chatMessages.appendChild(wrapper);
     if (isMe) messageReadSnapshot.set(msg.idMensaje, msg.leido);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+    if ((chatInlineSearchInput?.value ?? '').trim()) {
+      refreshInChatSearchResults();
+    }
   }
 
   function refreshReadReceipts(msgs: ApiMsg[]) {
@@ -1121,6 +1260,7 @@ import Layout from "../layouts/Layout.astro";
   function clearMessages() {
     lastMsgDateStr = ''; lastMsgSender = null;
     messageReadSnapshot.clear();
+    closeInChatSearch();
     chatEmptyState.classList.add('hidden');
     chatMessages.querySelectorAll('.msg-bubble, .msg-date-sep').forEach(el => el.remove());
   }
@@ -1384,6 +1524,25 @@ import Layout from "../layouts/Layout.astro";
   })();
 
   chatSearch?.addEventListener('input', () => { filteredConvs = applyFilter(conversations); renderConvList(); });
+  chatInSearchBtn?.addEventListener('click', openInChatSearch);
+  chatInlineSearchClose?.addEventListener('click', closeInChatSearch);
+  chatInlineSearchInput?.addEventListener('input', refreshInChatSearchResults);
+  chatInlineSearchInput?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      jumpToInChatSearchResult(inChatSearchActiveIndex + 1);
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeInChatSearch();
+    }
+  });
+  chatInlineSearchPrev?.addEventListener('click', () => {
+    jumpToInChatSearchResult(inChatSearchActiveIndex - 1);
+  });
+  chatInlineSearchNext?.addEventListener('click', () => {
+    jumpToInChatSearchResult(inChatSearchActiveIndex + 1);
+  });
 
   sidebarTabs.forEach((btn) => {
     btn.addEventListener('click', () => {
