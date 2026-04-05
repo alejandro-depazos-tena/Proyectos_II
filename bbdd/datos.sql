@@ -1,5 +1,15 @@
 USE ufvshare;
 
+CREATE TABLE IF NOT EXISTS app_review (
+	id_review BIGINT AUTO_INCREMENT PRIMARY KEY,
+	id_usuario BIGINT NOT NULL,
+	nombre_usuario VARCHAR(120) NOT NULL,
+	puntuacion INT NOT NULL,
+	comentario VARCHAR(280) NOT NULL,
+	fecha_actualizacion DATETIME NOT NULL,
+	CONSTRAINT uk_app_review_usuario UNIQUE (id_usuario)
+);
+
 -- Limpieza mínima para poder re-ejecutar este script sin errores de UNIQUE/FK
 DELETE FROM mensaje;
 DELETE FROM conversacion;
@@ -11,6 +21,7 @@ DELETE FROM reporte_producto;
 DELETE FROM reporte_usuario;
 DELETE FROM pending_cambio;
 DELETE FROM sessions;
+DELETE FROM app_review;
 DELETE FROM producto;
 DELETE FROM usuario;
 
@@ -79,4 +90,27 @@ INSERT INTO producto (
 (12, 'Mando PS5', 'Mando original con poco uso.', 'ELECTRONICA', 'VENTA', 'DISPONIBLE', 45.00, 8),
 (13, 'Patinete plegable', 'Patinete urbano con freno trasero.', 'DEPORTE', 'VENTA', 'NO_DISPONIBLE', 55.00, 8),
 (14, 'Otros: Kit de herramientas', 'Caja con herramientas basicas para bricolaje.', 'OTROS', 'PRESTAMO', 'DISPONIBLE', NULL, 9);
+
+-- Reseñas de app de prueba (1 por usuario)
+INSERT INTO app_review (id_usuario, nombre_usuario, puntuacion, comentario, fecha_actualizacion) VALUES
+(1, 'Lucia', 5, 'La app me ha ayudado a mover cosas del campus rapido. El flujo general es muy comodo.', '2026-04-01 10:20:00'),
+(2, 'Pablo', 4, 'Muy util para alquilar material de clase. Mejoraria un poco la busqueda en categorias.', '2026-04-01 12:05:00'),
+(3, 'Marta', 5, 'Me gusta el enfoque entre estudiantes y que todo sea sencillo de entender.', '2026-04-01 15:40:00'),
+(4, 'Carlos', 4, 'He vendido varios productos sin complicaciones. Buena experiencia en general.', '2026-04-02 09:15:00'),
+(5, 'Elena', 5, 'Interfaz clara y agradable. El chat funciona bien para cerrar acuerdos.', '2026-04-02 11:32:00'),
+(6, 'Javier', 4, 'Publicar anuncios es rapido. Estaria bien afinar algun detalle visual en movil.', '2026-04-02 13:27:00'),
+(7, 'Andrea', 5, 'Me sorprendio para bien. Todo va fluido y sin pasos innecesarios.', '2026-04-02 18:08:00'),
+(8, 'Diego', 4, 'Buen proyecto para comunidad universitaria. Lo uso sobre todo para electronica.', '2026-04-03 08:52:00'),
+(9, 'Nuria', 5, 'Muy buena idea y muy bien ejecutada. El perfil y favoritos me parecen top.', '2026-04-03 10:44:00'),
+(10, 'Alberto', 3, 'Cumple su objetivo, aunque en algunas pantallas todavia hay margen de mejora.', '2026-04-03 12:19:00'),
+(11, 'Sergio', 4, 'El rendimiento es bueno y la navegacion bastante intuitiva.', '2026-04-03 16:03:00'),
+(12, 'Irene', 5, 'La recomendaria para estudiantes. Facil encontrar cosas utiles del dia a dia.', '2026-04-03 19:50:00'),
+(13, 'Rocio', 4, 'Me gusta la estructura general. La seccion de ajustes es un acierto.', '2026-04-04 09:36:00'),
+(14, 'Hugo', 5, 'Muy completa para ser una app universitaria. Buen trabajo en la experiencia.', '2026-04-04 11:11:00'),
+(15, 'Noelia', 4, 'El flujo de publicar y contactar funciona bien. Bastante comoda de usar.', '2026-04-04 13:48:00'),
+(16, 'Raul', 5, 'La he usado varios dias y me ha resultado super practica.', '2026-04-04 17:20:00'),
+(17, 'Paula', 4, 'Buen nivel general. El chat y favoritos aportan mucho.', '2026-04-04 19:02:00'),
+(18, 'Adrian', 5, 'Experiencia positiva de principio a fin. Rapida y clara.', '2026-04-05 09:14:00'),
+(19, 'Clara', 4, 'Muy buen punto de partida. Con pequeños ajustes quedara redonda.', '2026-04-05 11:06:00'),
+(20, 'Tomas', 5, 'App util de verdad para el entorno UFV. La seguiria usando sin duda.', '2026-04-05 13:33:00');
 

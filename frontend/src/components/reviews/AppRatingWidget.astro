@@ -1,0 +1,57 @@
+<aside data-app-rating-widget class="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
+  <p class="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">Comunidad</p>
+  <h3 class="text-lg font-extrabold text-base-content mt-2">Valoración de la app</h3>
+
+  <div class="mt-3 flex items-end gap-2">
+    <span data-widget-avg class="text-3xl font-black text-base-content">--</span>
+    <span data-widget-stars class="text-yellow-500 tracking-[0.12em] text-lg">☆☆☆☆☆</span>
+  </div>
+
+  <p data-widget-count class="text-sm text-base-content/70 mt-2">Cargando reseñas...</p>
+
+  <a href="/about#app-reviews" class="btn btn-ghost btn-sm mt-4 px-0 text-primary hover:bg-transparent hover:underline">
+    Ver todas las reseñas
+  </a>
+</aside>
+
+<script>
+  const widgetRoots = Array.from(document.querySelectorAll("[data-app-rating-widget]"));
+  const API_BASE = (import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api").replace(/\/$/, "");
+
+  function paint(root, avg, count) {
+    const avgEl = root.querySelector("[data-widget-avg]");
+    const starsEl = root.querySelector("[data-widget-stars]");
+    const countEl = root.querySelector("[data-widget-count]");
+    if (!avgEl || !starsEl || !countEl) return;
+
+    if (!count) {
+      avgEl.textContent = "0.0";
+      starsEl.textContent = "☆☆☆☆☆";
+      countEl.textContent = "Todavía sin reseñas";
+      return;
+    }
+
+    const rounded = Math.max(1, Math.min(5, Math.round(avg)));
+    avgEl.textContent = avg.toFixed(1);
+    starsEl.textContent = "★★★★★".slice(0, rounded).padEnd(5, "☆");
+    countEl.textContent = count + " reseña" + (count === 1 ? "" : "s");
+  }
+
+  (async () => {
+    try {
+      const response = await fetch(API_BASE + "/app-reviews");
+      if (!response.ok) throw new Error();
+      const data = await response.json();
+      const rows = Array.isArray(data) ? data : [];
+      const count = rows.length;
+      const total = rows.reduce((sum, item) => sum + Number(item?.puntuacion || 0), 0);
+      const avg = count ? total / count : 0;
+      widgetRoots.forEach((root) => paint(root, avg, count));
+    } catch (_) {
+      widgetRoots.forEach((root) => {
+        const countEl = root.querySelector("[data-widget-count]");
+        if (countEl) countEl.textContent = "No se pudo cargar ahora";
+      });
+    }
+  })();
+</script>

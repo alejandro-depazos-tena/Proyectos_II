@@ -1,0 +1,123 @@
+<section class="py-24 bg-base-100" id="home-reviews">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between mb-10">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Comunidad UFV</p>
+        <h2 class="text-4xl font-black mt-2">Lo que dicen los estudiantes</h2>
+        <p class="text-base-content/60 mt-2 max-w-2xl">
+          Valoraciones reales de la app para ayudarte a decidir antes de empezar.
+        </p>
+      </div>
+      <a href="/about#app-reviews" class="btn btn-outline btn-primary rounded-full self-start md:self-auto">
+        Ver todas
+      </a>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-home-reviews-list>
+      <article class="rounded-2xl border border-base-300 bg-base-200/50 p-5">
+        <p class="text-sm text-base-content/60">Cargando reseñas...</p>
+      </article>
+      <article class="rounded-2xl border border-base-300 bg-base-200/50 p-5 hidden sm:block"></article>
+      <article class="rounded-2xl border border-base-300 bg-base-200/50 p-5 hidden lg:block"></article>
+    </div>
+
+    <div class="mt-6 inline-flex items-center gap-3 rounded-xl border border-base-300 bg-base-200/50 px-4 py-3">
+      <span data-home-reviews-avg class="text-2xl font-black">--</span>
+      <span data-home-reviews-stars class="text-yellow-500 tracking-[0.12em]">☆☆☆☆☆</span>
+      <span data-home-reviews-count class="text-sm text-base-content/65">Cargando...</span>
+    </div>
+  </div>
+</section>
+
+<script>
+  const API_BASE = (import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api").replace(/\/$/, "");
+  const listEl = document.querySelector("[data-home-reviews-list]");
+  const avgEl = document.querySelector("[data-home-reviews-avg]");
+  const starsEl = document.querySelector("[data-home-reviews-stars]");
+  const countEl = document.querySelector("[data-home-reviews-count]");
+
+  function renderSummary(avg, count) {
+    if (!avgEl || !starsEl || !countEl) return;
+    if (!count) {
+      avgEl.textContent = "0.0";
+      starsEl.textContent = "☆☆☆☆☆";
+      countEl.textContent = "Sin reseñas";
+      return;
+    }
+
+    const rounded = Math.max(1, Math.min(5, Math.round(avg)));
+    avgEl.textContent = avg.toFixed(1);
+    starsEl.textContent = "★★★★★".slice(0, rounded).padEnd(5, "☆");
+    countEl.textContent = count + " reseñas";
+  }
+
+  function dateValue(item) {
+    const raw = item?.fechaActualizacion;
+    const ts = raw ? Date.parse(raw) : NaN;
+    return Number.isFinite(ts) ? ts : 0;
+  }
+
+  function esc(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  function renderCards(rows) {
+    if (!listEl) return;
+    if (!rows.length) {
+      listEl.innerHTML = '<article class="rounded-2xl border border-base-300 bg-base-200/50 p-5 sm:col-span-2 lg:col-span-3"><p class="text-sm text-base-content/60">Todavía no hay reseñas disponibles.</p></article>';
+      return;
+    }
+
+    const cards = rows.map((item) => {
+      const name = esc(item?.nombreUsuario || "Usuario");
+      const rating = Math.max(1, Math.min(5, Number(item?.puntuacion || 0)));
+      const stars = "★★★★★".slice(0, rating).padEnd(5, "☆");
+      const commentRaw = String(item?.comentario || "").trim();
+      const comment = esc(commentRaw.length > 120 ? commentRaw.slice(0, 117) + "..." : commentRaw);
+      return [
+        '<article class="rounded-2xl border border-base-300 bg-base-200/50 p-5 h-full">',
+        '<div class="flex items-center justify-between gap-2">',
+        '<p class="font-semibold text-base-content">' + name + '</p>',
+        '<p class="text-yellow-500 tracking-[0.12em] text-sm">' + stars + '</p>',
+        '</div>',
+        '<p class="text-sm text-base-content/70 mt-3 leading-relaxed">' + comment + '</p>',
+        '</article>'
+      ].join("");
+    });
+
+    listEl.innerHTML = cards.join("");
+  }
+
+  (async () => {
+    try {
+      const response = await fetch(API_BASE + "/app-reviews");
+      if (!response.ok) throw new Error();
+      const data = await response.json();
+      const rows = Array.isArray(data) ? data : [];
+      const count = rows.length;
+      const total = rows.reduce((sum, item) => sum + Number(item?.puntuacion || 0), 0);
+      const avg = count ? total / count : 0;
+      renderSummary(avg, count);
+
+      const highlighted = rows
+        .slice()
+        .sort((a, b) => {
+          const ratingDiff = Number(b?.puntuacion || 0) - Number(a?.puntuacion || 0);
+          if (ratingDiff !== 0) return ratingDiff;
+          return dateValue(b) - dateValue(a);
+        })
+        .slice(0, 3);
+
+      renderCards(highlighted);
+    } catch (_) {
+      renderSummary(0, 0);
+      renderCards([]);
+      if (countEl) countEl.textContent = "No se pudo cargar ahora";
+    }
+  })();
+</script>
