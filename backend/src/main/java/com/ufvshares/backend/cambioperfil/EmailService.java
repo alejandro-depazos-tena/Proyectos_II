@@ -22,6 +22,9 @@ public class EmailService {
   @Value("${app.api.url:http://localhost:8080/api}")
   private String apiUrl;
 
+  @Value("${app.mail.support-to:${MAIL_SUPPORT_TO:${MAIL_USERNAME:soporteufvshares@gmail.com}}}")
+  private String supportTo;
+
   public EmailService(JavaMailSender mailSender) {
     this.mailSender = mailSender;
   }
@@ -182,6 +185,78 @@ public class EmailService {
     helper.setSubject("Restablece tu contraseña · UFV Shares");
     helper.setText(plainText, html);
     System.out.println("[MAIL] Password reset email sent to " + to + " from " + from);
+    mailSender.send(msg);
+  }
+
+  public void enviarConsultaContacto(String nombre, String apellidos, String correo, String motivo, String mensaje)
+      throws MessagingException {
+    String fromUserName = ((nombre == null ? "" : nombre.trim()) + " " + (apellidos == null ? "" : apellidos.trim())).trim();
+    String fromUserEmail = correo == null ? "" : correo.trim().toLowerCase();
+    String subjectReason = motivo == null ? "Consulta" : motivo.trim();
+    String messageBody = mensaje == null ? "" : mensaje.trim();
+
+    String plainText = """
+      Nueva consulta desde el formulario de contacto de UFV Shares
+
+      Nombre: %s
+      Correo: %s
+      Motivo: %s
+
+      Mensaje:
+      %s
+      """.formatted(fromUserName, fromUserEmail, subjectReason, messageBody);
+
+    String html = """
+        <!DOCTYPE html>
+        <html lang="es">
+        <head><meta charset="UTF-8" /></head>
+        <body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif;">
+          <table width="100%%" cellpadding="0" cellspacing="0">
+            <tr><td align="center" style="padding:32px 16px;">
+              <table width="620" cellpadding="0" cellspacing="0"
+                style="background:#ffffff;border-radius:14px;overflow:hidden;
+                       box-shadow:0 2px 8px rgba(0,0,0,.08);">
+                <tr>
+                  <td style="background:#0f5a86;padding:24px 28px;">
+                    <p style="margin:0;color:#fff;font-size:19px;font-weight:700;">UFV Shares · Contacto</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:26px 28px;">
+                    <p style="margin:0 0 16px;font-size:15px;color:#111;">
+                      Se ha recibido una nueva consulta desde la web.
+                    </p>
+                    <table width="100%%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
+                      <tr>
+                        <td style="padding:6px 0;font-size:14px;color:#444;"><strong>Nombre:</strong> %s</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:6px 0;font-size:14px;color:#444;"><strong>Correo:</strong> %s</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:6px 0;font-size:14px;color:#444;"><strong>Motivo:</strong> %s</td>
+                      </tr>
+                    </table>
+                    <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;">
+                      <p style="margin:0 0 8px;font-size:13px;color:#6b7280;font-weight:700;">Mensaje</p>
+                      <p style="margin:0;font-size:14px;line-height:1.6;color:#111;white-space:pre-line;">%s</p>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td></tr>
+          </table>
+        </body>
+        </html>
+        """.formatted(fromUserName, fromUserEmail, subjectReason, messageBody);
+
+    MimeMessage msg = mailSender.createMimeMessage();
+    MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8");
+    helper.setFrom(from);
+    helper.setReplyTo(fromUserEmail);
+    helper.setTo(supportTo);
+    helper.setSubject("[CONTACTO] " + subjectReason + " · " + fromUserName);
+    helper.setText(plainText, html);
     mailSender.send(msg);
   }
 }

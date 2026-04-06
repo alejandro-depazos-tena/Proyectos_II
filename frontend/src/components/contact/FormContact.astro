@@ -117,50 +117,133 @@ const motivos = [
     <div class="text-center md:text-right mt-6">
         <button
             type="submit"
+            id="contact-submit"
             class="bg-primary text-primary-content hover:bg-primary/90 font-bold px-12 py-4 rounded-full cursor-pointer transition text-lg shadow-lg hover:shadow-xl hover:scale-105 transform duration-200"
         >
             Enviar mensaje
         </button>
     </div>
+
+    <p id="contact-feedback" class="hidden mt-4 text-sm font-medium"></p>
 </form>
 
 <script define:vars={{ API_BASE }}>
 (async () => {
+    const form = document.getElementById("contact-form");
+    const submitBtn = document.getElementById("contact-submit");
+    const feedback = document.getElementById("contact-feedback");
     const token = localStorage.getItem("ufvshares_token");
-    if (!token) return; // usuario no identificado: formulario completo
+    let userLoaded = false;
 
-    try {
-        const res = await fetch(API_BASE + "/me", {
-            headers: { Authorization: "Bearer " + token },
-        });
-        if (!res.ok) return;
+    if (token) {
+        try {
+            const res = await fetch(API_BASE + "/me", {
+                headers: { Authorization: "Bearer " + token },
+            });
+            if (res.ok) {
+                const user = await res.json();
 
-        const user = await res.json();
+                // Rellenar campos ocultos para que el envío los incluya
+                const inputNombre = document.getElementById("nombre");
+                const inputApellido = document.getElementById("apellido");
+                const inputCorreo = document.getElementById("correo");
 
-        // Rellenar campos ocultos para que el envío los incluya
-        const inputNombre = document.getElementById("nombre");
-        const inputApellido = document.getElementById("apellido");
-        const inputCorreo = document.getElementById("correo");
+                if (inputNombre) { inputNombre.value = user.nombre ?? ""; inputNombre.removeAttribute("required"); }
+                if (inputApellido) { inputApellido.value = user.apellidos ?? ""; inputApellido.removeAttribute("required"); }
+                if (inputCorreo) { inputCorreo.value = user.correo ?? ""; inputCorreo.removeAttribute("required"); }
 
-        if (inputNombre) { inputNombre.value = user.nombre ?? ""; inputNombre.removeAttribute("required"); }
-        if (inputApellido) { inputApellido.value = user.apellidos ?? ""; inputApellido.removeAttribute("required"); }
-        if (inputCorreo) { inputCorreo.value = user.correo ?? ""; inputCorreo.removeAttribute("required"); }
+                // Ocultar el bloque de campos personales
+                const guestFields = document.getElementById("contact-guest-fields");
+                if (guestFields) guestFields.classList.add("hidden");
 
-        // Ocultar el bloque de campos personales
-        const guestFields = document.getElementById("contact-guest-fields");
-        if (guestFields) guestFields.classList.add("hidden");
-
-        // Mostrar aviso con nombre y correo del usuario
-        const infoBar = document.getElementById("contact-user-info");
-        const nameEl = document.getElementById("contact-user-name");
-        const emailEl = document.getElementById("contact-user-email");
-        if (infoBar && nameEl && emailEl) {
-            nameEl.textContent = [user.nombre, user.apellidos].filter(Boolean).join(" ");
-            emailEl.textContent = user.correo;
-            infoBar.classList.remove("hidden");
+                // Mostrar aviso con nombre y correo del usuario
+                const infoBar = document.getElementById("contact-user-info");
+                const nameEl = document.getElementById("contact-user-name");
+                const emailEl = document.getElementById("contact-user-email");
+                if (infoBar && nameEl && emailEl) {
+                    nameEl.textContent = [user.nombre, user.apellidos].filter(Boolean).join(" ");
+                    emailEl.textContent = user.correo;
+                    infoBar.classList.remove("hidden");
+                }
+                userLoaded = true;
+            }
+        } catch {
+            // Si falla la petición dejamos el formulario completo sin cambios
         }
-    } catch {
-        // Si falla la petición dejamos el formulario completo sin cambios
     }
+
+    if (!form) return;
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const payload = {
+            nombre: String(formData.get("nombre") ?? "").trim(),
+            apellido: String(formData.get("apellido") ?? "").trim(),
+            correo: String(formData.get("correo") ?? "").trim().toLowerCase(),
+            motivo: String(formData.get("motivo") ?? "").trim(),
+            mensaje: String(formData.get("mensaje") ?? "").trim(),
+        };
+
+        if (feedback) {
+            feedback.className = "hidden mt-4 text-sm font-medium";
+            feedback.textContent = "";
+        }
+
+        if (!payload.nombre || !payload.apellido || !payload.correo || !payload.motivo || !payload.mensaje) {
+            if (feedback) {
+                feedback.className = "mt-4 text-sm font-medium text-red-600";
+                feedback.textContent = "Completa todos los campos antes de enviar.";
+            }
+            return;
+        }
+
+        if (submitBtn) {
+            submitBtn.setAttribute("disabled", "true");
+            submitBtn.classList.add("opacity-60", "cursor-not-allowed");
+            submitBtn.textContent = "Enviando...";
+        }
+
+        try {
+            const response = await fetch(API_BASE + "/contact", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token ? { Authorization: "Bearer " + token } : {}),
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                throw new Error("CONTACT_SEND_FAILED");
+            }
+
+            const motivoEl = document.getElementById("motivo");
+            const mensajeEl = document.getElementById("mensaje");
+            if (motivoEl) motivoEl.value = "";
+            if (mensajeEl) mensajeEl.value = "";
+
+            if (!userLoaded) {
+                form.reset();
+            }
+
+            if (feedback) {
+                feedback.className = "mt-4 text-sm font-medium text-green-700";
+                feedback.textContent = "Tu consulta se ha enviado correctamente. Te responderemos por correo en cuanto podamos.";
+            }
+        } catch {
+            if (feedback) {
+                feedback.className = "mt-4 text-sm font-medium text-red-600";
+                feedback.textContent = "No se pudo enviar tu consulta. Intentalo de nuevo en unos minutos.";
+            }
+        } finally {
+            if (submitBtn) {
+                submitBtn.removeAttribute("disabled");
+                submitBtn.classList.remove("opacity-60", "cursor-not-allowed");
+                submitBtn.textContent = "Enviar mensaje";
+            }
+        }
+    });
 })();
 </script>
