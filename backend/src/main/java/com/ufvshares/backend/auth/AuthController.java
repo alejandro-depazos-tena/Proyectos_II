@@ -3,6 +3,7 @@ package com.ufvshares.backend.auth;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,9 +36,27 @@ public class AuthController {
     return new SecurityQuestionResponse(question);
   }
 
+  @PostMapping("/forgot-password")
+  public ForgotPasswordResponse forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+    String resetUrl = auth.requestPasswordResetByEmail(request.email());
+    return new ForgotPasswordResponse(true, resetUrl);
+  }
+
+  @PostMapping("/reset-password-token")
+  public OkResponse resetPasswordToken(@Valid @RequestBody ResetPasswordWithTokenRequest request) {
+    auth.resetPasswordWithToken(request.token(), request.password());
+    return new OkResponse(true);
+  }
+
   @PostMapping("/reset-password-security")
   public OkResponse resetPasswordSecurity(@Valid @RequestBody ResetPasswordWithSecurityRequest request) {
     auth.resetPasswordWithSecurityQuestion(request.email(), request.securityAnswer(), request.password());
+    return new OkResponse(true);
+  }
+
+  @PostMapping("/logout")
+  public OkResponse logout(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+    auth.logout(extractToken(authHeader));
     return new OkResponse(true);
   }
 
@@ -52,12 +71,33 @@ public class AuthController {
     if ("INVALID_CREDENTIALS".equals(code)) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(code));
     }
-    if ("USER_NOT_FOUND".equals(code) || "SECURITY_QUESTION_NOT_CONFIGURED".equals(code) || "INVALID_SECURITY_ANSWER".equals(code)) {
+    if ("USER_NOT_FOUND".equals(code)
+        || "SECURITY_QUESTION_NOT_CONFIGURED".equals(code)
+        || "INVALID_SECURITY_ANSWER".equals(code)
+        || "INVALID_RESET_TOKEN".equals(code)
+        || "RESET_TOKEN_EXPIRED".equals(code)) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(code));
     }
     return ResponseEntity.badRequest().body(new ErrorResponse(code));
   }
 
+  @ExceptionHandler(IllegalStateException.class)
+  public ResponseEntity<?> handleIllegalState(IllegalStateException ex) {
+    var code = ex.getMessage();
+    if ("MAIL_SEND_FAILED".equals(code)) {
+      return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ErrorResponse(code));
+    }
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(code));
+  }
+
+  private String extractToken(String authHeader) {
+    if (authHeader == null || authHeader.isBlank()) {
+      return null;
+    }
+    return authHeader.startsWith("Bearer ") ? authHeader.substring(7).trim() : authHeader.trim();
+  }
+
   public record ErrorResponse(String error) {}
   public record OkResponse(boolean ok) {}
+  public record ForgotPasswordResponse(boolean ok, String resetUrl) {}
 }

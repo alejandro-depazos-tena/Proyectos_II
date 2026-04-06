@@ -122,7 +122,17 @@ import Links from "./Links.astro";
                 ${isAdmin ? '<a href="/admin" class="btn btn-outline btn-xs">Admin</a>' : ''}
                 <button id="nav-logout" class="btn btn-ghost btn-sm">Cerrar sesi&oacute;n</button>
             `;
-            document.getElementById("nav-logout")?.addEventListener("click", () => {
+            document.getElementById("nav-logout")?.addEventListener("click", async () => {
+                try {
+                    if (token) {
+                        await fetch(API_BASE_NAV + "/auth/logout", {
+                            method: "POST",
+                            headers: { Authorization: "Bearer " + token },
+                        });
+                    }
+                } catch {
+                    /* ignore logout network failures */
+                }
                 clearSession();
                 window.location.href = "/auth";
             });

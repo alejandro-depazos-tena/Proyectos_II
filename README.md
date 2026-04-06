@@ -179,6 +179,18 @@ Notas:
 	- `mvn`: instala Maven y asegúrate de tenerlo en el `PATH`.
 	- `npm`: instala Node.js LTS (incluye npm).
 
+### Correo real con Outlook
+
+Si quieres que los correos de recuperación lleguen de verdad a Outlook o Microsoft 365, configura estas variables antes de arrancar el backend:
+
+- `MAIL_HOST=smtp.office365.com`
+- `MAIL_PORT=587`
+- `MAIL_USERNAME=tu_correo@outlook.com`
+- `MAIL_PASSWORD=tu_app_password`
+- `MAIL_FROM=tu_correo@outlook.com`
+
+En cuentas con verificación en dos pasos, normalmente necesitas una contraseña de aplicación. Si usas una cuenta personal de Outlook y el host anterior no funciona, prueba `smtp-mail.outlook.com` con el mismo puerto 587 y TLS activado.
+
 ---
 
 ## 🐳 Docker (frontend + backend + MariaDB)

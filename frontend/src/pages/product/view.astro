@@ -40,7 +40,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             </div>
 
             <!-- Product detail -->
-            <div id="product-detail" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div id="product-detail" class="grid grid-cols-1 lg:grid-cols-2 gap-12" style="display:none;">
 
                 <!-- LEFT: Gallery -->
                 <div class="space-y-3">
@@ -68,7 +68,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                     <div class="flex flex-wrap gap-2" id="product-meta"></div>
 
                     <!-- Unavailability banner -->
-                    <div id="unavailability-banner" class="hidden rounded-2xl p-4 border font-semibold text-sm flex items-start gap-3"></div>
+                    <div id="unavailability-banner" class="rounded-2xl p-4 border font-semibold text-sm flex items-start gap-3" style="display:none;"></div>
 
                     <!-- Rental dates block (shown when ALQUILADO) -->
                     <div id="rental-dates" class="hidden rounded-2xl border border-amber-200 bg-amber-50 p-4">
@@ -130,9 +130,9 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                     <div id="seller-card" class="hidden rounded-2xl border border-slate-100 bg-slate-50 p-5">
                         <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-3" id="seller-role-label">Vendedor</p>
                         <div class="flex items-center gap-4">
-                            <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-white shadow">
+                            <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden border-2 border-white shadow">
                                 <img id="seller-avatar" src="" alt="" class="hidden w-14 h-14 rounded-full object-cover" />
-                                <svg id="seller-avatar-placeholder" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <svg id="seller-avatar-placeholder" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                             </div>
@@ -166,6 +166,12 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                             </svg>
                             Guardar
+                        </button>
+                        <button id="report-product-btn" class="btn btn-outline btn-error flex-1 gap-2 text-base font-bold" type="button">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86l-8 14A2 2 0 004 21h16a2 2 0 001.71-3.14l-8-14a2 2 0 00-3.42 0z"/>
+                            </svg>
+                            Reportar
                         </button>
                     </div>
 
@@ -211,7 +217,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
     </div>
 
     <!-- Lightbox modal -->
-    <div id="lightbox" class="fixed inset-0 z-50 hidden bg-black/90 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Galería de fotos">
+    <div id="lightbox" class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" style="display:none;" role="dialog" aria-modal="true" aria-label="Galería de fotos">
         <button id="lightbox-close" class="absolute top-4 right-4 text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors" aria-label="Cerrar">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
@@ -226,7 +232,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
     </div>
 
     <!-- Reserva: confirmación -->
-    <div id="reserve-confirm-modal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 bg-black/55">
+    <div id="reserve-confirm-modal" class="fixed inset-0 z-60 items-center justify-center p-4 bg-black/55" style="display:none;">
         <div class="w-full max-w-md rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100">
                 <p class="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-2">Confirmar solicitud</p>
@@ -251,7 +257,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
     </div>
 
     <!-- Reserva: resultado -->
-    <div id="reserve-feedback-modal" class="fixed inset-0 z-[61] hidden items-center justify-center p-4 bg-black/55">
+    <div id="reserve-feedback-modal" class="fixed inset-0 z-61 items-center justify-center p-4 bg-black/55" style="display:none;">
         <div class="w-full max-w-md rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100">
                 <p id="reserve-feedback-tag" class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-2">Información</p>
@@ -261,6 +267,39 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             <div class="px-6 py-4 flex justify-end bg-slate-50/70">
                 <button id="reserve-feedback-close" type="button" class="btn btn-primary btn-sm rounded-full">Aceptar</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Reporte de producto -->
+    <div id="report-product-modal" class="fixed inset-0 z-62 items-center justify-center p-4 bg-black/55" style="display:none;">
+        <div class="w-full max-w-md rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-100">
+                <p class="text-[10px] font-black uppercase tracking-[0.3em] text-red-500 mb-2">Reportar producto</p>
+                <h3 class="text-lg font-black text-slate-900">Ayúdanos a moderar contenido</h3>
+                <p class="text-sm text-slate-600 mt-2">Tu reporte será revisado por el equipo de administración.</p>
+            </div>
+            <form id="report-product-form" class="px-6 py-5 grid gap-4">
+                <div>
+                    <label for="report-product-reason" class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Motivo</label>
+                    <select id="report-product-reason" class="select select-bordered w-full" required>
+                        <option value="">Selecciona un motivo</option>
+                        <option value="Contenido inapropiado">Contenido inapropiado</option>
+                        <option value="Producto fraudulento">Producto fraudulento</option>
+                        <option value="Información incorrecta">Información incorrecta</option>
+                        <option value="Spam">Spam</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="report-product-comment" class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Comentario (opcional)</label>
+                    <textarea id="report-product-comment" rows="4" class="textarea textarea-bordered w-full" placeholder="Describe brevemente el problema"></textarea>
+                </div>
+                <p id="report-product-error" class="text-xs font-semibold text-red-600 min-h-4"></p>
+                <div class="flex justify-end gap-3 pt-1">
+                    <button id="report-product-cancel" type="button" class="btn btn-ghost">Cancelar</button>
+                    <button id="report-product-submit" type="submit" class="btn btn-error text-white">Enviar reporte</button>
+                </div>
+            </form>
         </div>
     </div>
 </Layout>
@@ -412,8 +451,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
 
             const close = (accepted) => {
                 const selectedDate = rentalDateInput instanceof HTMLInputElement ? rentalDateInput.value || null : null;
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
+                modal.style.display = 'none';
                 btnCancel.onclick = null;
                 btnAccept.onclick = null;
                 modal.onclick = null;
@@ -438,8 +476,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                 if (e.target === modal) close(false);
             };
 
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            modal.style.display = 'flex';
         });
     }
 
@@ -472,8 +509,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             text.textContent = message;
 
             const close = () => {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
+                modal.style.display = 'none';
                 btnClose.onclick = null;
                 modal.onclick = null;
                 resolve();
@@ -483,9 +519,26 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             modal.onclick = (e) => {
                 if (e.target === modal) close();
             };
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            modal.style.display = 'flex';
         });
+    }
+
+    function openReportProductModal() {
+        const modal = document.getElementById('report-product-modal');
+        const errorEl = document.getElementById('report-product-error');
+        const reason = document.getElementById('report-product-reason');
+        const comment = document.getElementById('report-product-comment');
+        if (!modal) return;
+        if (errorEl) errorEl.textContent = '';
+        if (reason instanceof HTMLSelectElement) reason.value = 'Contenido inapropiado';
+        if (comment instanceof HTMLTextAreaElement) comment.value = '';
+        modal.style.display = 'flex';
+    }
+
+    function closeReportProductModal() {
+        const modal = document.getElementById('report-product-modal');
+        if (!modal) return;
+        modal.style.display = 'none';
     }
 
     function formatEsDate(isoDate) {
@@ -773,12 +826,13 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         if (lbCounter) lbCounter.textContent = galleryPhotos.length > 1 ? `${index + 1} / ${galleryPhotos.length}` : '';
         if (lbPrev) lbPrev.style.display = galleryPhotos.length > 1 ? '' : 'none';
         if (lbNext) lbNext.style.display = galleryPhotos.length > 1 ? '' : 'none';
-        lb.classList.remove('hidden');
+        lb.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
 
     function closeLightbox() {
-        document.getElementById('lightbox')?.classList.add('hidden');
+        const lightbox = document.getElementById('lightbox');
+        if (lightbox) lightbox.style.display = 'none';
         document.body.style.overflow = '';
     }
 
@@ -861,7 +915,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                 </svg>
                 <span class="text-red-700">Este producto ya ha sido <strong>vendido</strong> y no está disponible.</span>`;
             banner.className = 'rounded-2xl p-4 border border-red-200 bg-red-50 font-semibold text-sm flex items-start gap-3';
-            banner.classList.remove('hidden');
+            banner.style.display = 'flex';
         } else {
             // ALQUILER o PRESTAMO
             const fmtDate = (iso) => {
@@ -874,7 +928,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                 </svg>
                 <span class="text-amber-700">Este producto está actualmente <strong>${tipo === 'PRESTAMO' ? 'en préstamo' : 'alquilado'}</strong> y no está disponible hasta que se devuelva.</span>`;
             banner.className = 'rounded-2xl p-4 border border-amber-200 bg-amber-50 font-semibold text-sm flex items-start gap-3';
-            banner.classList.remove('hidden');
+            banner.style.display = 'flex';
 
             // Mostrar fechas
             if (rentalDates) {
@@ -882,7 +936,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
                 const endEl = document.getElementById('rental-end');
                 if (startEl) startEl.textContent = fmtDate(t.fechaInicio);
                 if (endEl) endEl.textContent = fmtDate(t.fechaDevolucion);
-                rentalDates.classList.remove('hidden');
+                rentalDates.style.display = 'block';
             }
         }
     }
@@ -1033,6 +1087,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         const sellerContactQuick = document.getElementById('seller-contact-quick');
         const reserveBtn = document.getElementById('reserve-btn');
         const addFavBtn = document.getElementById('add-fav-btn');
+        const reportBtn = document.getElementById('report-product-btn');
         if (contactBtnLabel) contactBtnLabel.textContent = `Contactar al ${p.tipoTransaccion === 'ALQUILER' ? 'arrendador' : 'vendedor'}`;
 
         if (isOwner) {
@@ -1040,6 +1095,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             reserveBtn?.classList.add('hidden');
             sellerContactQuick?.classList.add('hidden');
             addFavBtn?.classList.add('hidden');
+            reportBtn?.classList.add('hidden');
             document.getElementById('my-requests-panel')?.classList.add('hidden');
             await loadOwnerProductRequests(id, token);
             setupOwnerRequestsActions(id, token);
@@ -1049,6 +1105,17 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         } else {
             document.getElementById('owner-requests-panel')?.classList.add('hidden');
             document.getElementById('my-requests-panel')?.classList.add('hidden');
+        }
+
+        if (reportBtn) {
+            reportBtn.classList.toggle('hidden', isOwner || !p.idPropietario);
+            reportBtn.onclick = () => {
+                if (!token) {
+                    window.location.href = '/auth?mode=login&next=' + encodeURIComponent(window.location.pathname + window.location.search);
+                    return;
+                }
+                openReportProductModal();
+            };
         }
 
         if (reserveBtn) {
@@ -1214,14 +1281,93 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
             });
         }
 
+        const reportModal = document.getElementById('report-product-modal');
+        const reportForm = document.getElementById('report-product-form');
+        const reportCancel = document.getElementById('report-product-cancel');
+        const reportSubmit = document.getElementById('report-product-submit');
+        const reportError = document.getElementById('report-product-error');
+
+        reportCancel?.addEventListener('click', closeReportProductModal);
+        reportModal?.addEventListener('click', (event) => {
+            if (event.target === reportModal) closeReportProductModal();
+        });
+        reportForm?.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (!token) {
+                window.location.href = '/auth?mode=login&next=' + encodeURIComponent(window.location.pathname + window.location.search);
+                return;
+            }
+
+            const reasonValue = (document.getElementById('report-product-reason') instanceof HTMLSelectElement)
+                ? document.getElementById('report-product-reason').value.trim()
+                : '';
+            const commentValue = (document.getElementById('report-product-comment') instanceof HTMLTextAreaElement)
+                ? document.getElementById('report-product-comment').value.trim()
+                : '';
+
+            if (!reasonValue) {
+                if (reportError) reportError.textContent = 'Selecciona un motivo.';
+                return;
+            }
+
+            if (reportError) reportError.textContent = '';
+            if (reportSubmit instanceof HTMLButtonElement) {
+                reportSubmit.disabled = true;
+                reportSubmit.textContent = 'Enviando...';
+            }
+
+            try {
+                const meRes = await fetch(API_BASE + '/me', { headers: { 'Authorization': 'Bearer ' + token } });
+                if (!meRes.ok) {
+                    await showReserveFeedbackModal('Tu sesión ha caducado. Vuelve a iniciar sesión.', 'error');
+                    return;
+                }
+                const me = await meRes.json();
+                const res = await fetch(API_BASE + '/reportes-producto', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        idUsuarioReportante: me.idUsuario,
+                        idProductoReportado: Number(id),
+                        motivo: reasonValue,
+                        comentario: commentValue || null,
+                    }),
+                });
+
+                if (!res.ok) {
+                    const raw = await res.text().catch(() => '');
+                    let message = 'No se pudo enviar el reporte.';
+                    if (raw) {
+                        try {
+                            const parsed = JSON.parse(raw);
+                            message = parsed?.message ?? parsed?.error ?? message;
+                        } catch {
+                            message = raw;
+                        }
+                    }
+                    await showReserveFeedbackModal(message, 'error');
+                    return;
+                }
+
+                closeReportProductModal();
+                await showReserveFeedbackModal('Reporte enviado correctamente. Gracias por avisarnos.', 'success');
+            } catch {
+                await showReserveFeedbackModal('No se pudo conectar con el servidor.', 'error');
+            } finally {
+                if (reportSubmit instanceof HTMLButtonElement) {
+                    reportSubmit.disabled = false;
+                    reportSubmit.textContent = 'Enviar reporte';
+                }
+            }
+        });
+
         // Load photos before showing the detail (elements exist in DOM even when hidden)
         await loadPhotos(id, token, fallbackImg);
 
         // Show detail only once photos are ready — avoids the placeholder flash
         document.getElementById('product-loading')?.classList.add('hidden');
         const detail = document.getElementById('product-detail');
-        detail?.classList.remove('hidden');
-        detail?.classList.add('grid');
+        if (detail) detail.style.display = 'grid';
 
         // Reinit favorites listeners
         document.dispatchEvent(new CustomEvent('view:product-loaded'));

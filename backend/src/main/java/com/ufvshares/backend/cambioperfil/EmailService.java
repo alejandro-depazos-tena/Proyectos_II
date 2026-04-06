@@ -96,11 +96,92 @@ public class EmailService {
         """.formatted(nombreCompleto, campoLabel, valorNuevo, confirmUrl);
 
     MimeMessage msg = mailSender.createMimeMessage();
-    MimeMessageHelper helper = new MimeMessageHelper(msg, "UTF-8");
+    MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8");
     helper.setFrom(from);
     helper.setTo(destinatario);
     helper.setSubject("Confirma el cambio de tu " + campoLabel + " · UFV Shares");
     helper.setText(html, true);
+    mailSender.send(msg);
+  }
+
+  public void enviarResetPassword(String destinatario, String nombreCompleto, String token) throws MessagingException {
+    String resetUrl = frontendUrl + "/forgot-password?token=" + token;
+    String to = destinatario == null ? "" : destinatario.trim().toLowerCase();
+
+    String plainText = """
+      Hola, %s
+
+      Hemos recibido una solicitud para restablecer tu contraseña.
+
+      Abre este enlace para crear una nueva contraseña:
+      %s
+
+      El enlace expira en 30 minutos.
+
+      Si no has solicitado este cambio, ignora este correo.
+      """.formatted(nombreCompleto, resetUrl);
+
+    String html = """
+        <!DOCTYPE html>
+        <html lang="es">
+        <head><meta charset="UTF-8" /></head>
+        <body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif;">
+          <table width="100%%" cellpadding="0" cellspacing="0">
+            <tr><td align="center" style="padding:40px 16px;">
+              <table width="520" cellpadding="0" cellspacing="0"
+                style="background:#ffffff;border-radius:16px;overflow:hidden;
+                       box-shadow:0 2px 8px rgba(0,0,0,.08);">
+                <tr>
+                  <td style="background:#0f5a86;padding:28px 32px;">
+                    <p style="margin:0;color:#fff;font-size:20px;font-weight:700;">
+                      UFV Shares
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:32px;">
+                    <p style="margin:0 0 12px;font-size:16px;color:#111;">
+                      Hola, <strong>%s</strong>
+                    </p>
+                    <p style="margin:0 0 24px;font-size:15px;color:#444;line-height:1.6;">
+                      Hemos recibido una solicitud para restablecer tu contraseña.
+                    </p>
+                    <p style="margin:0 0 28px;font-size:14px;color:#666;">
+                      El enlace expira en <strong>30 minutos</strong>.
+                    </p>
+                    <a href="%s"
+                      style="display:inline-block;background:#0f5a86;color:#fff;
+                             text-decoration:none;font-weight:700;font-size:15px;
+                             padding:14px 32px;border-radius:50px;">
+                      Restablecer contraseña
+                    </a>
+                    <p style="margin:28px 0 0;font-size:12px;color:#999;">
+                      Si no has solicitado este cambio, ignora este correo.
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background:#f9f9f9;padding:16px 32px;border-top:1px solid #eee;">
+                    <p style="margin:0;font-size:11px;color:#bbb;text-align:center;">
+                      UFV Shares · Universidad Francisco de Vitoria
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td></tr>
+          </table>
+        </body>
+        </html>
+        """.formatted(nombreCompleto, resetUrl);
+
+    MimeMessage msg = mailSender.createMimeMessage();
+    MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8");
+    helper.setFrom(from);
+    helper.setReplyTo(from);
+    helper.setTo(to);
+    helper.setSubject("Restablece tu contraseña · UFV Shares");
+    helper.setText(plainText, html);
+    System.out.println("[MAIL] Password reset email sent to " + to + " from " + from);
     mailSender.send(msg);
   }
 }

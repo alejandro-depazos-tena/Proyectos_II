@@ -36,6 +36,29 @@ function Test-UrlOk([string]$url) {
   }
 }
 
+function Import-EnvFile([string]$path) {
+  if (-not (Test-Path -LiteralPath $path)) {
+    return
+  }
+
+  Get-Content -LiteralPath $path | ForEach-Object {
+    $line = $_.Trim()
+    if (-not $line -or $line.StartsWith('#')) { return }
+
+    $pair = $line -split '=', 2
+    if ($pair.Count -ne 2) { return }
+
+    $name = $pair[0].Trim()
+    $value = $pair[1].Trim().Trim('"')
+    if ($name) {
+      Set-Item -Path ("Env:" + $name) -Value $value
+    }
+  }
+}
+
+$rootEnv = Join-Path $workspace '.env'
+Import-EnvFile $rootEnv
+
 # Backend
 $backendHello = 'http://localhost:8080/api/hello'
 if (Test-UrlOk $backendHello) {

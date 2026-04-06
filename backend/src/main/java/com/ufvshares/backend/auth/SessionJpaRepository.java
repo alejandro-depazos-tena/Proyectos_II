@@ -1,5 +1,6 @@
 package com.ufvshares.backend.auth;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,4 +11,10 @@ public interface SessionJpaRepository extends JpaRepository<Session, String> {
 
     @Transactional
     void deleteByEmail(String email);
+
+    @Transactional
+    void deleteByToken(String token);
+
+    @Transactional
+    void deleteByExpiresAtBefore(LocalDateTime expiresAt);
 }

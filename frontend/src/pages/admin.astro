@@ -104,6 +104,28 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
         <div id="chart-top-productos" class="chart-rank"></div>
       </article>
     </section>
+
+    <section class="moderation-grid">
+      <article class="panel moderation-panel">
+        <header class="chart-head">
+          <h3>Reportes de producto</h3>
+          <p>Contenido del marketplace pendiente de revisión</p>
+        </header>
+        <div id="reportes-producto-list" class="moderation-list">
+          <p class="chart-empty">Cargando reportes...</p>
+        </div>
+      </article>
+
+      <article class="panel moderation-panel">
+        <header class="chart-head">
+          <h3>Reportes de usuario</h3>
+          <p>Usuarios señalados por la comunidad</p>
+        </header>
+        <div id="reportes-usuario-list" class="moderation-list">
+          <p class="chart-empty">Cargando reportes...</p>
+        </div>
+      </article>
+    </section>
   </section>
 </Layout>
 
@@ -301,6 +323,103 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
       .join("");
   }
 
+  function formatReportDate(isoDate) {
+    if (!isoDate) return '—';
+    try {
+      return new Date(isoDate).toLocaleString('es-ES', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return isoDate;
+    }
+  }
+
+  function reportStateClass(state) {
+    if (state === 'CERRADO') return 'badge-success';
+    if (state === 'EN_REVISION') return 'badge-warning';
+    return 'badge-error';
+  }
+
+  function renderModerationReports(containerId, items, kind) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+
+    const data = Array.isArray(items) ? items : [];
+    if (!data.length) {
+      el.innerHTML = '<p class="chart-empty">No hay reportes</p>';
+      return;
+    }
+
+    el.innerHTML = data.map((item) => {
+      const reportante = item.reportante || {};
+      const target = kind === 'product' ? (item.producto || {}) : (item.reportado || {});
+      const targetName = kind === 'product'
+        ? (target.titulo || `Producto #${item.producto?.idProducto ?? '—'}`)
+        : [`${target.nombre || ''} ${target.apellidos || ''}`.trim(), target.correo].filter(Boolean).join(' · ') || `Usuario #${item.reportado?.idUsuario ?? '—'}`;
+      const reportanteName = [`${reportante.nombre || ''} ${reportante.apellidos || ''}`.trim(), reportante.correo].filter(Boolean).join(' · ') || `Usuario #${reportante.idUsuario ?? '—'}`;
+      const state = item.estadoReporte || 'ABIERTO';
+      return `
+        <article class="moderation-card" data-report-id="${item.idReporte}" data-report-kind="${kind}">
+          <div class="moderation-card-head">
+            <div>
+              <p class="moderation-title">${formatLabel(item.motivo)}</p>
+              <p class="moderation-subtitle">${targetName}</p>
+            </div>
+            <span class="badge ${reportStateClass(state)} border-none">${formatLabel(state)}</span>
+          </div>
+          <p class="moderation-meta">Reportado por: ${reportanteName}</p>
+          <p class="moderation-meta">Fecha: ${formatReportDate(item.fechaReporte)}</p>
+          ${item.comentario ? `<p class="moderation-comment">${item.comentario}</p>` : ''}
+          <div class="moderation-actions">
+            ${state !== 'CERRADO' ? `<button type="button" class="btn btn-sm btn-primary rounded-full" data-report-close>Marcar como cerrado</button>` : '<span class="moderation-closed">Cerrado</span>'}
+          </div>
+        </article>
+      `;
+    }).join('');
+  }
+
+  async function loadModerationReports() {
+    const productRes = await fetch(API_BASE + '/admin/reportes-producto', { headers: { Authorization: 'Bearer ' + token } });
+    const userRes = await fetch(API_BASE + '/admin/reportes-usuario', { headers: { Authorization: 'Bearer ' + token } });
+
+    if (productRes.ok) {
+      const productReports = await productRes.json().catch(() => []);
+      renderModerationReports('reportes-producto-list', productReports, 'product');
+    } else {
+      const el = document.getElementById('reportes-producto-list');
+      if (el) el.innerHTML = '<p class="chart-empty">No se pudieron cargar los reportes</p>';
+    }
+
+    if (userRes.ok) {
+      const userReports = await userRes.json().catch(() => []);
+      renderModerationReports('reportes-usuario-list', userReports, 'user');
+    } else {
+      const el = document.getElementById('reportes-usuario-list');
+      if (el) el.innerHTML = '<p class="chart-empty">No se pudieron cargar los reportes</p>';
+    }
+  }
+
+  async function closeReport(kind, id) {
+    const endpoint = kind === 'product'
+      ? `/admin/reportes-producto/${id}/cerrar`
+      : `/admin/reportes-usuario/${id}/cerrar`;
+
+    const res = await fetch(API_BASE + endpoint, {
+      method: 'PUT',
+      headers: { Authorization: 'Bearer ' + token },
+    });
+
+    if (!res.ok) {
+      throw new Error('No se pudo cerrar el reporte');
+    }
+
+    return await res.json().catch(() => null);
+  }
+
   function renderStackedShare(containerId, rows) {
     const el = document.getElementById(containerId);
     if (!el) return;
@@ -485,10 +604,38 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
       renderDonut("chart-categorias-donut", charts.productosPorCategoria || []);
       renderBarChart("chart-productos-tipo", charts.productosPorTipoTransaccion || []);
       renderRankList("chart-top-productos", charts.topProductosSolicitados || []);
+      await loadModerationReports();
     } catch {
       showError("Error de conexion al cargar el panel de admin.");
     }
   }
+
+  document.addEventListener('click', async (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+
+    const button = target.closest('[data-report-close]');
+    if (!button) return;
+
+    const card = button.closest('[data-report-id]');
+    const reportId = card?.getAttribute('data-report-id');
+    const reportKind = card?.getAttribute('data-report-kind');
+    if (!reportId || !reportKind) return;
+
+    button.disabled = true;
+    const oldText = button.textContent;
+    button.textContent = 'Cerrando...';
+
+    try {
+      await closeReport(reportKind, reportId);
+      await loadModerationReports();
+    } catch (error) {
+      showError(error instanceof Error ? error.message : 'No se pudo cerrar el reporte.');
+    } finally {
+      button.disabled = false;
+      button.textContent = oldText || 'Marcar como cerrado';
+    }
+  });
 
   loadDashboard();
 </script>
@@ -653,6 +800,75 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
     display: grid;
     grid-template-columns: repeat(2, minmax(320px, 1fr));
     gap: 0.9rem;
+  }
+
+  .moderation-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(320px, 1fr));
+    gap: 0.9rem;
+    margin-top: 0.9rem;
+  }
+
+  .moderation-panel {
+    min-height: 280px;
+  }
+
+  .moderation-list {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .moderation-card {
+    border: 1px solid #dce6ef;
+    border-radius: 0.85rem;
+    padding: 0.85rem;
+    background: #f9fbfd;
+  }
+
+  .moderation-card-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: start;
+  }
+
+  .moderation-title {
+    margin: 0;
+    font-weight: 700;
+    color: #143a5d;
+  }
+
+  .moderation-subtitle,
+  .moderation-meta,
+  .moderation-comment {
+    margin: 0.25rem 0 0;
+    color: #496178;
+    font-size: 0.84rem;
+    line-height: 1.35;
+  }
+
+  .moderation-comment {
+    margin-top: 0.55rem;
+    padding: 0.65rem;
+    border-radius: 0.65rem;
+    background: #ffffff;
+    border: 1px solid #e1eaf2;
+    color: #24455f;
+  }
+
+  .moderation-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .moderation-closed {
+    font-size: 0.8rem;
+    color: #4d6b57;
+    background: #e7f6ec;
+    border: 1px solid #c8e7d3;
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
   }
 
   .chart-card {

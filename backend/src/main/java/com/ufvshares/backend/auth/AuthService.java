@@ -3,11 +3,15 @@ package com.ufvshares.backend.auth;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ufvshares.backend.cambioperfil.EmailService;
 import com.ufvshares.backend.usuario.Usuario;
 import com.ufvshares.backend.usuario.UsuarioRepository;
 
@@ -15,12 +19,30 @@ import com.ufvshares.backend.usuario.UsuarioRepository;
 public class AuthService {
   private final UsuarioRepository usuarios;
   private final SessionRepository sessions;
+  private final PasswordResetTokenRepository resetTokens;
+  private final PasswordEncoder passwordEncoder;
+  private final EmailService emailService;
+
+  @Value("${app.auth.password-reset-token-ttl-minutes:30}")
+  private long passwordResetTokenTtlMinutes;
+
+  @Value("${app.mail.dev-fallback:true}")
+  private boolean devMailFallback;
+
+  @Value("${app.frontend.url:http://localhost:4321}")
+  private String frontendUrl;
 
   public AuthService(
       UsuarioRepository usuarios,
-      SessionRepository sessions) {
+      SessionRepository sessions,
+      PasswordResetTokenRepository resetTokens,
+      PasswordEncoder passwordEncoder,
+      EmailService emailService) {
     this.usuarios = usuarios;
     this.sessions = sessions;
+    this.resetTokens = resetTokens;
+    this.passwordEncoder = passwordEncoder;
+    this.emailService = emailService;
   }
 
   public AuthResponse register(RegisterRequest req) {
@@ -42,7 +64,7 @@ public class AuthService {
     usuario.setCorreo(normalized);
     usuario.setTelefono(req.telefono().trim());
     usuario.setDni(req.dni().trim().toUpperCase());
-    usuario.setPasswordHash(hashSha256(req.password()));
+    usuario.setPasswordHash(passwordEncoder.encode(req.password()));
     usuario.setPreguntaSeguridad(req.preguntaSeguridad().trim());
     usuario.setRespuestaSeguridadHash(hashSha256(normalizeSecurityAnswer(req.respuestaSeguridad())));
     usuarios.save(usuario);
@@ -57,8 +79,24 @@ public class AuthService {
     var usuario = usuarios.findByCorreoIgnoreCase(normalized)
         .orElseThrow(() -> new IllegalArgumentException("INVALID_CREDENTIALS"));
 
-    String incomingHash = hashSha256(password);
-    if (usuario.getPasswordHash() == null || !incomingHash.equalsIgnoreCase(usuario.getPasswordHash())) {
+    String storedHash = usuario.getPasswordHash();
+    if (storedHash == null || storedHash.isBlank()) {
+      throw new IllegalArgumentException("INVALID_CREDENTIALS");
+    }
+
+    boolean valid;
+    try {
+      valid = passwordEncoder.matches(password, storedHash);
+    } catch (IllegalArgumentException ex) {
+      valid = false;
+    }
+    if (!valid && hashSha256(password).equalsIgnoreCase(storedHash)) {
+      usuario.setPasswordHash(passwordEncoder.encode(password));
+      usuarios.save(usuario);
+      valid = true;
+    }
+
+    if (!valid) {
       throw new IllegalArgumentException("INVALID_CREDENTIALS");
     }
 
@@ -94,13 +132,69 @@ public class AuthService {
       throw new IllegalArgumentException("INVALID_SECURITY_ANSWER");
     }
 
-    usuario.setPasswordHash(hashSha256(newPassword));
+    usuario.setPasswordHash(passwordEncoder.encode(newPassword));
     usuarios.save(usuario);
     sessions.deleteByEmail(usuario.getCorreo());
   }
 
+  public String requestPasswordResetByEmail(String email) {
+    var normalized = normalize(email);
+    var usuario = usuarios.findByCorreoIgnoreCase(normalized)
+        .orElseThrow(() -> new IllegalArgumentException("USER_NOT_FOUND"));
+
+    resetTokens.deleteByEmailIgnoreCase(normalized);
+
+    String token = UUID.randomUUID().toString().replace("-", "");
+    LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(passwordResetTokenTtlMinutes);
+    resetTokens.save(new PasswordResetToken(token, normalized, expiresAt));
+
+    String resetUrl = frontendUrl + "/forgot-password?token=" + token;
+
+    try {
+      emailService.enviarResetPassword(usuario.getCorreo(), buildFullName(usuario), token);
+      return null;
+    } catch (Exception ex) {
+      System.out.println("[MAIL ERROR] destinatario=" + normalized + " causa=" + ex.getClass().getName() + " mensaje=" + ex.getMessage());
+      if (ex.getCause() != null) {
+        System.out.println("[MAIL ERROR CAUSE] " + ex.getCause().getClass().getName() + ": " + ex.getCause().getMessage());
+      }
+      if (devMailFallback) {
+        System.out.println("[DEV MAIL FALLBACK] Reset URL for " + normalized + ": " + resetUrl);
+        return resetUrl;
+      }
+      throw new IllegalStateException("MAIL_SEND_FAILED", ex);
+    }
+  }
+
+  public void resetPasswordWithToken(String token, String newPassword) {
+    LocalDateTime now = LocalDateTime.now();
+    PasswordResetToken resetToken = resetTokens.findByTokenAndUsedAtIsNullAndExpiresAtAfter(token, now)
+        .orElseThrow(() -> new IllegalArgumentException("INVALID_RESET_TOKEN"));
+
+    Usuario usuario = usuarios.findByCorreoIgnoreCase(resetToken.getEmail())
+        .orElseThrow(() -> new IllegalArgumentException("USER_NOT_FOUND"));
+
+    usuario.setPasswordHash(passwordEncoder.encode(newPassword));
+    usuarios.save(usuario);
+
+    resetToken.setUsedAt(now);
+    resetTokens.save(resetToken);
+    sessions.deleteByEmail(usuario.getCorreo());
+  }
+
+  public void logout(String token) {
+    if (token == null || token.isBlank()) {
+      return;
+    }
+    sessions.deleteByToken(token);
+  }
+
   private String normalizeSecurityAnswer(String answer) {
     return answer == null ? "" : answer.trim().toLowerCase(Locale.ROOT);
+  }
+
+  private String buildFullName(Usuario usuario) {
+    return (usuario.getNombre() + " " + usuario.getApellidos()).trim();
   }
 
   private String hashSha256(String rawValue) {

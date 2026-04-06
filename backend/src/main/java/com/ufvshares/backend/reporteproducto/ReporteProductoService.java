@@ -1,8 +1,10 @@
 package com.ufvshares.backend.reporteproducto;
 
 import java.util.List;
+import java.util.Comparator;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ufvshares.backend.common.NotFoundException;
 
@@ -16,7 +18,9 @@ public class ReporteProductoService {
   }
 
   public List<ReporteProducto> findAll() {
-    return repository.findAll();
+    return repository.findAll().stream()
+        .sorted(Comparator.comparing(ReporteProducto::getFechaReporte).reversed())
+        .toList();
   }
 
   public ReporteProducto findById(Long id) {
@@ -25,6 +29,13 @@ public class ReporteProductoService {
 
   public ReporteProducto create(ReporteProducto reporteProducto) {
     return repository.save(reporteProducto);
+  }
+
+  @Transactional
+  public ReporteProducto close(Long id) {
+    ReporteProducto existing = findById(id);
+    existing.setEstadoReporte(com.ufvshares.backend.reporte.EstadoReporte.CERRADO);
+    return repository.save(existing);
   }
 
   public ReporteProducto update(Long id, ReporteProducto data) {
