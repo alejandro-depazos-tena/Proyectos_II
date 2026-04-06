@@ -1,6 +1,5 @@
 ---
 import "../styles/global.css";
-import HomeAppReviews from "../components/home/HomeAppReviews.astro";
 ---
 
 <!doctype html>
@@ -60,11 +59,6 @@ import HomeAppReviews from "../components/home/HomeAppReviews.astro";
         </a>
       </div>
       <div class="navbar-end gap-2">
-        <button id="theme-toggle-floating" type="button" class="theme-switch" role="switch" aria-checked="false" aria-label="Cambiar tema" title="Cambiar tema">
-          <span class="theme-switch-thumb">
-            <span id="theme-thumb-icon" class="theme-switch-icon">☀️</span>
-          </span>
-        </button>
         <a href="/auth?mode=login&next=%2Fapp&src=nav" class="btn btn-ghost btn-sm hidden sm:flex">Iniciar sesión</a>
         <a href="/auth?mode=register&next=%2Fapp&src=nav" class="btn btn-primary btn-sm rounded-full px-5 shadow">Registrarse</a>
       </div>
@@ -196,40 +190,6 @@ import HomeAppReviews from "../components/home/HomeAppReviews.astro";
         </svg>
       </div>
     </section>
-
-    <script is:inline>
-      (function () {
-        var THEME_KEY = "ufvshares_theme";
-        var themeToggleFloating = document.getElementById("theme-toggle-floating");
-        var themeThumbIcon = document.getElementById("theme-thumb-icon");
-
-        function updateThemeButton(theme) {
-          var isDark = theme === "dark";
-          themeToggleFloating && themeToggleFloating.classList.toggle("is-dark", isDark);
-          themeToggleFloating && themeToggleFloating.setAttribute("aria-checked", isDark ? "true" : "false");
-          if (themeThumbIcon) {
-            themeThumbIcon.textContent = isDark ? "🌙" : "☀️";
-          }
-        }
-
-        function setTheme(theme) {
-          document.documentElement.setAttribute("data-theme", theme);
-          try {
-            localStorage.setItem(THEME_KEY, theme);
-          } catch (_) {}
-          updateThemeButton(theme);
-        }
-
-        if (themeToggleFloating) {
-          var initialTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
-          updateThemeButton(initialTheme);
-          themeToggleFloating.addEventListener("click", function () {
-            var current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
-            setTheme(current === "dark" ? "light" : "dark");
-          });
-        }
-      })();
-    </script>
 
     <!-- ══════════════════════════════════════════════════════════ -->
     <!-- BENTO FEATURES                                             -->
@@ -439,8 +399,6 @@ import HomeAppReviews from "../components/home/HomeAppReviews.astro";
         </div>
       </div>
     </section>
-
-    <HomeAppReviews />
 
     <!-- ══════════════════════════════════════════════════════════ -->
     <!-- TRUST — dark band with stats                               -->

@@ -1,6 +1,6 @@
 #FileLock
-#Mon Apr 06 15:36:15 CEST 2026
-hostName=Gonzalo
-id=19d630218ff3d5f8561111dd3431fd609b9dd1eaa75
+#Mon Apr 06 16:07:02 CEST 2026
+hostName=Laptopdealex
+id=19d631e477b26e5491fdab64074e605b057094c48e4
 method=file
-server=192.168.1.48\:63522
+server=192.168.1.42\:57727

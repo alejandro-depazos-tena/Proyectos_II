@@ -90,8 +90,9 @@ import Links from "./Links.astro";
     const navAuthLinks = document.getElementById("nav-auth-links");
     const mainLogoLink = document.getElementById("main-logo-link");
     const isAdminRoute = location.pathname === "/admin";
+    const isChatsRoute = location.pathname === "/chats";
 
-    if (isAdminRoute && navbar) {
+    if ((isAdminRoute || isChatsRoute) && navbar) {
         navbar.classList.remove("navbar-hidden");
         navbar.style.transform = "translateY(0)";
     }
@@ -180,7 +181,7 @@ import Links from "./Links.astro";
     });
 
     window.addEventListener("scroll", () => {
-        if (isAdminRoute) return;
+        if (isAdminRoute || isChatsRoute) return;
         if (!navbar) return;
 
         const currentScrollY = window.scrollY;

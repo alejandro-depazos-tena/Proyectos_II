@@ -1,30 +1,31 @@
-<section class="py-24 bg-base-100" id="home-reviews">
+<section class="py-24 bg-gradient-to-b from-base-100 via-base-200/40 to-base-100" id="blog-reviews">
   <div class="max-w-6xl mx-auto px-6">
-    <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between mb-10">
-      <div>
-        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Comunidad UFV</p>
-        <h2 class="text-4xl font-black mt-2">Lo que dicen los estudiantes</h2>
-        <p class="text-base-content/60 mt-2 max-w-2xl">
-          Valoraciones reales de la app para ayudarte a decidir antes de empezar.
+    <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between mb-10">
+      <div class="max-w-2xl">
+        <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-primary/80 bg-primary/10 px-3 py-1 rounded-full">
+          Reseñas UFV
+        </span>
+        <h2 class="text-4xl md:text-5xl font-black mt-4">Opiniones que importan</h2>
+        <p class="text-base-content/60 mt-3">
+          Experiencias reales de estudiantes que ya usan UFV Shares. Transparente, útil y sin filtros.
         </p>
       </div>
-      <a href="/about#app-reviews" class="btn btn-outline btn-primary rounded-full self-start md:self-auto">
-        Ver todas
-      </a>
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="inline-flex items-center gap-3 rounded-2xl border border-base-300 bg-base-100/70 px-4 py-3 shadow-sm">
+          <span data-home-reviews-avg class="text-2xl font-black">--</span>
+          <span data-home-reviews-stars class="text-yellow-500 tracking-[0.14em]">☆☆☆☆☆</span>
+          <span data-home-reviews-count class="text-sm text-base-content/65">Cargando...</span>
+        </div>
+        <a href="/blog" class="btn btn-primary rounded-full">Ver más en el blog</a>
+      </div>
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-home-reviews-list>
-      <article class="rounded-2xl border border-base-300 bg-base-200/50 p-5">
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-home-reviews-list>
+      <article class="rounded-3xl border border-base-300 bg-base-100 p-6 shadow-sm">
         <p class="text-sm text-base-content/60">Cargando reseñas...</p>
       </article>
-      <article class="rounded-2xl border border-base-300 bg-base-200/50 p-5 hidden sm:block"></article>
-      <article class="rounded-2xl border border-base-300 bg-base-200/50 p-5 hidden lg:block"></article>
-    </div>
-
-    <div class="mt-6 inline-flex items-center gap-3 rounded-xl border border-base-300 bg-base-200/50 px-4 py-3">
-      <span data-home-reviews-avg class="text-2xl font-black">--</span>
-      <span data-home-reviews-stars class="text-yellow-500 tracking-[0.12em]">☆☆☆☆☆</span>
-      <span data-home-reviews-count class="text-sm text-base-content/65">Cargando...</span>
+      <article class="rounded-3xl border border-base-300 bg-base-100 p-6 shadow-sm hidden sm:block"></article>
+      <article class="rounded-3xl border border-base-300 bg-base-100 p-6 shadow-sm hidden lg:block"></article>
     </div>
   </div>
 </section>
@@ -36,7 +37,9 @@
   const starsEl = document.querySelector("[data-home-reviews-stars]");
   const countEl = document.querySelector("[data-home-reviews-count]");
 
-  function renderSummary(avg, count) {
+  type ReviewRow = { puntuacion?: number; comentario?: string; nombreUsuario?: string; fechaActualizacion?: string };
+
+  function renderSummary(avg: number, count: number) {
     if (!avgEl || !starsEl || !countEl) return;
     if (!count) {
       avgEl.textContent = "0.0";
@@ -51,13 +54,13 @@
     countEl.textContent = count + " reseñas";
   }
 
-  function dateValue(item) {
+  function dateValue(item: ReviewRow) {
     const raw = item?.fechaActualizacion;
     const ts = raw ? Date.parse(raw) : NaN;
     return Number.isFinite(ts) ? ts : 0;
   }
 
-  function esc(value) {
+  function esc(value: unknown) {
     return String(value ?? "")
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
@@ -66,26 +69,32 @@
       .replaceAll("'", "&#39;");
   }
 
-  function renderCards(rows) {
+  function renderCards(rows: ReviewRow[]) {
     if (!listEl) return;
     if (!rows.length) {
-      listEl.innerHTML = '<article class="rounded-2xl border border-base-300 bg-base-200/50 p-5 sm:col-span-2 lg:col-span-3"><p class="text-sm text-base-content/60">Todavía no hay reseñas disponibles.</p></article>';
+      listEl.innerHTML = '<article class="rounded-3xl border border-base-300 bg-base-100 p-6 shadow-sm sm:col-span-2 lg:col-span-3"><p class="text-sm text-base-content/60">Todavía no hay reseñas disponibles.</p></article>';
       return;
     }
 
-    const cards = rows.map((item) => {
+    const cards = rows.map((item: ReviewRow) => {
       const name = esc(item?.nombreUsuario || "Usuario");
       const rating = Math.max(1, Math.min(5, Number(item?.puntuacion || 0)));
       const stars = "★★★★★".slice(0, rating).padEnd(5, "☆");
       const commentRaw = String(item?.comentario || "").trim();
       const comment = esc(commentRaw.length > 120 ? commentRaw.slice(0, 117) + "..." : commentRaw);
       return [
-        '<article class="rounded-2xl border border-base-300 bg-base-200/50 p-5 h-full">',
-        '<div class="flex items-center justify-between gap-2">',
-        '<p class="font-semibold text-base-content">' + name + '</p>',
-        '<p class="text-yellow-500 tracking-[0.12em] text-sm">' + stars + '</p>',
+        '<article class="rounded-3xl border border-base-300 bg-base-100 p-6 h-full shadow-sm">',
+        '<div class="flex items-center justify-between gap-3">',
+        '<div class="flex items-center gap-3">',
+        '<div class="h-10 w-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center">' + name.charAt(0).toUpperCase() + '</div>',
+        '<div>',
+        '<p class="font-semibold text-base-content leading-tight">' + name + '</p>',
+        '<p class="text-xs text-base-content/50">Estudiante UFV</p>',
         '</div>',
-        '<p class="text-sm text-base-content/70 mt-3 leading-relaxed">' + comment + '</p>',
+        '</div>',
+        '<p class="text-yellow-500 tracking-[0.14em] text-sm">' + stars + '</p>',
+        '</div>',
+        '<p class="text-sm text-base-content/70 mt-4 leading-relaxed">' + comment + '</p>',
         '</article>'
       ].join("");
     });
@@ -98,7 +107,7 @@
       const response = await fetch(API_BASE + "/app-reviews");
       if (!response.ok) throw new Error();
       const data = await response.json();
-      const rows = Array.isArray(data) ? data : [];
+      const rows: ReviewRow[] = Array.isArray(data) ? data : [];
       const count = rows.length;
       const total = rows.reduce((sum, item) => sum + Number(item?.puntuacion || 0), 0);
       const avg = count ? total / count : 0;

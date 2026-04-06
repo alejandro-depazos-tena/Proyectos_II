@@ -1,25 +1,27 @@
 ---
 ---
 
-<section class="bg-base-200 py-16 sm:py-20" id="app-reviews">
-  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+<section class="bg-gradient-to-b from-base-100 via-base-200/40 to-base-100 py-16 sm:py-20" id="app-reviews">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="mb-8 sm:mb-10">
-      <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Comunidad</p>
-      <h2 class="text-3xl sm:text-4xl font-black text-base-content mt-2">Reseñas de la app</h2>
+      <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-primary/80 bg-primary/10 px-3 py-1 rounded-full">
+        Reseñas UFV
+      </span>
+      <h2 class="text-3xl sm:text-4xl font-black text-base-content mt-3">Reseñas de la app</h2>
       <p class="text-base text-base-content/70 mt-3 max-w-2xl">
-        Queremos mejorar UFV Shares en cada iteracion. Deja una reseña sobre tu experiencia general.
+        Queremos mejorar UFV Shares en cada iteración. Deja una reseña sobre tu experiencia general.
       </p>
     </div>
 
-    <div class="grid gap-5 lg:grid-cols-5">
-      <article class="lg:col-span-2 rounded-2xl border border-base-300 bg-base-100 shadow-sm p-5 sm:p-6">
-        <p class="text-sm text-base-content/60">Valoracion media</p>
+    <div class="grid gap-6 lg:grid-cols-5">
+      <article class="lg:col-span-2 rounded-3xl border border-base-300 bg-base-100/90 shadow-sm p-6">
+        <p class="text-sm text-base-content/60">Valoración media</p>
         <p id="reviews-avg" class="text-4xl font-black text-base-content mt-2">0.0</p>
         <p id="reviews-stars" class="text-yellow-500 text-xl mt-1 tracking-[0.15em]">-----</p>
-        <p id="reviews-count" class="text-sm text-base-content/60 mt-2">Sin reseñas todavia</p>
+        <p id="reviews-count" class="text-sm text-base-content/60 mt-2">Sin reseñas todavía</p>
 
-        <div class="mt-5 rounded-xl border border-base-300 bg-base-200/50 p-4">
-          <h3 class="text-sm font-semibold text-base-content">Como evaluamos</h3>
+        <div class="mt-6 rounded-2xl border border-base-300 bg-base-200/60 p-4">
+          <h3 class="text-sm font-semibold text-base-content">Cómo evaluamos</h3>
           <p class="text-xs text-base-content/65 mt-1 leading-relaxed">
             Las reseñas se guardan en tu cuenta y se sincronizan entre dispositivos.
             Cada usuario mantiene una reseña activa que puede actualizar cuando quiera.
@@ -27,18 +29,21 @@
         </div>
       </article>
 
-      <article class="lg:col-span-3 rounded-2xl border border-base-300 bg-base-100 shadow-sm p-5 sm:p-6">
-        <h3 class="text-xl font-bold text-base-content">Deja tu reseña</h3>
+      <article class="lg:col-span-3 rounded-3xl border border-base-300 bg-base-100/90 shadow-sm p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <h3 class="text-xl font-bold text-base-content">Deja tu reseña</h3>
+          <span class="text-xs text-base-content/60 leading-relaxed">Máx. 280 caracteres</span>
+        </div>
         <form id="app-review-form" class="mt-4 space-y-4">
           <div class="form-control w-full">
-            <span class="label-text text-sm font-medium">Puntuacion</span>
+            <span class="label-text text-sm font-medium">Puntuación</span>
             <div id="rating-picker" class="flex items-center gap-1.5 mt-2" role="radiogroup" aria-label="Puntuacion de 1 a 5">
               <button type="button" data-rating="1" class="rating-star" aria-label="1 estrella">★</button>
               <button type="button" data-rating="2" class="rating-star" aria-label="2 estrellas">★</button>
               <button type="button" data-rating="3" class="rating-star" aria-label="3 estrellas">★</button>
               <button type="button" data-rating="4" class="rating-star" aria-label="4 estrellas">★</button>
               <button type="button" data-rating="5" class="rating-star" aria-label="5 estrellas">★</button>
-              <span id="rating-label" class="ml-2 text-xs text-base-content/60">Selecciona una puntuacion</span>
+              <span id="rating-label" class="ml-2 text-xs text-base-content/60 leading-relaxed">Selecciona una puntuación</span>
             </div>
           </div>
 
@@ -46,28 +51,34 @@
             <span class="label-text text-sm font-medium">Comentario</span>
             <textarea
               id="review-comment"
-              class="textarea textarea-bordered min-h-[120px]"
+              class="textarea textarea-bordered min-h-[120px] bg-base-100/80"
               maxlength="280"
-              placeholder="Que te esta gustando y que mejorarias..."
+              placeholder="¿Qué te está gustando y qué mejorarías?"
               required
             ></textarea>
-            <span id="review-help" class="text-xs text-base-content/55 mt-1">Minimo 10 caracteres, maximo 280.</span>
+            <span id="review-help" class="text-xs text-base-content/55 mt-1 leading-relaxed">Mínimo 10 caracteres, máximo 280.</span>
           </label>
 
-          <div class="flex items-center justify-between gap-3">
-            <p id="review-feedback" class="text-sm text-base-content/70"></p>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <p id="review-feedback" class="text-sm text-base-content/70 leading-relaxed break-words"></p>
             <button type="submit" class="btn btn-primary rounded-full px-6">Publicar reseña</button>
           </div>
         </form>
       </article>
     </div>
 
-    <article class="mt-6 rounded-2xl border border-base-300 bg-base-100 shadow-sm p-5 sm:p-6">
-      <div class="flex items-center justify-between gap-3 mb-4">
-        <h3 class="text-xl font-bold text-base-content">Ultimas reseñas</h3>
+    <article class="mt-6 rounded-3xl border border-base-300 bg-base-100/95 shadow-sm p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <div>
+          <h3 class="text-xl font-bold text-base-content">Últimas reseñas</h3>
+          <p class="text-sm text-base-content/60">Lo más reciente de la comunidad.</p>
+        </div>
         <button id="reviews-clear" type="button" class="btn btn-ghost btn-sm">Eliminar mi reseña</button>
       </div>
-      <div id="reviews-list" class="space-y-3"></div>
+      <div id="reviews-list" class="grid gap-4 sm:grid-cols-2"></div>
+      <div class="mt-6 flex justify-center">
+        <button id="reviews-load-more" type="button" class="btn btn-outline rounded-full">Ver más</button>
+      </div>
     </article>
   </div>
 </section>
@@ -80,12 +91,13 @@
     line-height: 1;
     color: #c7cbd3;
     cursor: pointer;
-    transition: transform 0.15s ease, color 0.15s ease;
+    transition: transform 0.15s ease, color 0.15s ease, filter 0.15s ease;
     padding: 0;
   }
 
   .rating-star:hover {
     transform: translateY(-1px);
+    filter: drop-shadow(0 2px 6px rgba(245, 158, 11, 0.4));
   }
 
   .rating-star.is-active {
@@ -98,21 +110,35 @@
   const token = localStorage.getItem("ufvshares_token");
   const currentUserId = Number(localStorage.getItem("ufvshares_id") || "0");
 
+  type Review = {
+    idReview: number;
+    idUsuario: number;
+    name: string;
+    rating: number;
+    comment: string;
+    createdAt: string;
+    mine: boolean;
+  };
+
   const form = document.getElementById("app-review-form");
   const listEl = document.getElementById("reviews-list");
   const avgEl = document.getElementById("reviews-avg");
   const starsEl = document.getElementById("reviews-stars");
   const countEl = document.getElementById("reviews-count");
   const clearBtn = document.getElementById("reviews-clear");
+  const loadMoreBtn = document.getElementById("reviews-load-more");
   const feedbackEl = document.getElementById("review-feedback");
-  const commentInput = document.getElementById("review-comment");
+  const commentInput = document.getElementById("review-comment") as HTMLTextAreaElement | null;
   const ratingLabel = document.getElementById("rating-label");
   const starButtons = Array.from(document.querySelectorAll("#rating-picker [data-rating]"));
 
   let selectedRating = 0;
-  let reviews = [];
+  /** @type {Review[]} */
+  let reviews: Review[] = [];
+  let visibleCount = 6;
 
-  function normalizeReview(item) {
+  /** @param {any} item */
+  function normalizeReview(item: any): Review {
     const idUsuario = Number(item?.idUsuario || 0);
     return {
       idReview: Number(item?.idReview || 0),
@@ -153,6 +179,17 @@
     countEl.textContent = count + " reseña" + (count === 1 ? "" : "s");
   }
 
+  /** @param {Review[]} rows */
+  function sortReviews(rows: Review[]) {
+    return rows
+      .slice()
+      .sort((a, b) => {
+        if (a.mine && !b.mine) return -1;
+        if (!a.mine && b.mine) return 1;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+  }
+
   function renderList() {
     if (!listEl) return;
     listEl.innerHTML = "";
@@ -162,12 +199,16 @@
       empty.className = "text-sm text-base-content/60";
       empty.textContent = "Todavia no hay reseñas. Se la primera persona en opinar.";
       listEl.appendChild(empty);
+      if (loadMoreBtn) loadMoreBtn.classList.add("hidden");
       return;
     }
 
-    reviews.forEach((item) => {
+    const ordered = sortReviews(reviews);
+    const slice = ordered.slice(0, visibleCount);
+
+    slice.forEach((item: Review) => {
       const card = document.createElement("article");
-      card.className = "rounded-xl border border-base-300 bg-base-200/45 p-4";
+      card.className = "rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm";
 
       const top = document.createElement("div");
       top.className = "flex items-center justify-between gap-3";
@@ -203,6 +244,11 @@
       card.appendChild(date);
       listEl.appendChild(card);
     });
+
+    if (loadMoreBtn) {
+      const hasMore = ordered.length > visibleCount;
+      loadMoreBtn.classList.toggle("hidden", !hasMore);
+    }
   }
 
   function renderStars() {
@@ -262,6 +308,7 @@
       }
 
       reviews = await loadReviewsFromApi();
+      visibleCount = Math.max(6, visibleCount);
       renderSummary();
       renderList();
 
@@ -293,6 +340,7 @@
       }
 
       reviews = await loadReviewsFromApi();
+      visibleCount = 6;
       renderSummary();
       renderList();
       selectedRating = 0;
@@ -303,11 +351,17 @@
     }
   });
 
+  loadMoreBtn?.addEventListener("click", () => {
+    visibleCount += 6;
+    renderList();
+  });
+
   renderStars();
 
   (async () => {
     try {
       reviews = await loadReviewsFromApi();
+      visibleCount = 6;
       renderSummary();
       renderList();
     } catch (_) {
