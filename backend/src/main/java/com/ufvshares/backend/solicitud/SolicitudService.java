@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.ufvshares.backend.cambioperfil.EmailService;
 import com.ufvshares.backend.common.NotFoundException;
 import com.ufvshares.backend.contrato.ContratoService;
 import com.ufvshares.backend.producto.EstadoProducto;
@@ -31,17 +32,20 @@ public class SolicitudService {
   private final TransaccionRepository transaccionRepository;
   private final ContratoService contratoService;
   private final UsuarioRepository usuarioRepository;
+  private final EmailService emailService;
 
   public SolicitudService(SolicitudRepository repository,
       ProductoRepository productoRepository,
       TransaccionRepository transaccionRepository,
       ContratoService contratoService,
-      UsuarioRepository usuarioRepository) {
+      UsuarioRepository usuarioRepository,
+      EmailService emailService) {
     this.repository = repository;
     this.productoRepository = productoRepository;
     this.transaccionRepository = transaccionRepository;
     this.contratoService = contratoService;
     this.usuarioRepository = usuarioRepository;
+    this.emailService = emailService;
   }
 
   public List<Solicitud> findAll() {
@@ -109,7 +113,30 @@ public class SolicitudService {
       solicitud.setFechaFin(fechaFinDateTime);
     }
 
-    return repository.save(solicitud);
+    Solicitud solicitudGuardada = repository.save(solicitud);
+
+    Usuario propietario = usuarioRepository.findById(producto.getIdPropietario())
+        .orElseThrow(() -> new NotFoundException("USUARIO_NOT_FOUND"));
+    Usuario solicitante = usuarioRepository.findById(idSolicitante)
+        .orElseThrow(() -> new NotFoundException("USUARIO_NOT_FOUND"));
+
+    try {
+      emailService.enviarNotificacionNuevaSolicitud(
+          propietario.getCorreo(),
+          buildFullName(propietario),
+          buildFullName(solicitante),
+          solicitante.getCorreo(),
+          producto.getTitulo(),
+          producto.getIdProducto());
+    } catch (Exception ex) {
+      System.out.println("[MAIL ERROR SOLICITUD] idProducto=" + producto.getIdProducto()
+          + " propietario=" + propietario.getCorreo()
+          + " causa=" + ex.getClass().getName()
+          + " mensaje=" + ex.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "MAIL_SEND_FAILED");
+    }
+
+    return solicitudGuardada;
   }
 
   @Transactional
@@ -179,6 +206,10 @@ public class SolicitudService {
   public void delete(Long id) {
     Solicitud existing = findById(id);
     repository.delete(existing);
+  }
+
+  private String buildFullName(Usuario usuario) {
+    return (usuario.getNombre() + " " + usuario.getApellidos()).trim();
   }
 }
 

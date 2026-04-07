@@ -13,7 +13,7 @@ public class EmailService {
 
   private final JavaMailSender mailSender;
 
-  @Value("${app.mail.from:noreply@ufvshares.com}")
+  @Value("${app.mail.from:${MAIL_FROM:${MAIL_USERNAME:soporteufvshares@gmail.com}}}")
   private String from;
 
   @Value("${app.frontend.url:http://localhost:4321}")
@@ -256,6 +256,77 @@ public class EmailService {
     helper.setReplyTo(fromUserEmail);
     helper.setTo(supportTo);
     helper.setSubject("[CONTACTO] " + subjectReason + " · " + fromUserName);
+    helper.setText(plainText, html);
+    mailSender.send(msg);
+  }
+
+  public void enviarNotificacionNuevaSolicitud(String destinatario, String nombrePropietario,
+      String nombreSolicitante, String correoSolicitante, String tituloProducto, Long idProducto)
+      throws MessagingException {
+
+    String productUrl = frontendUrl + "/product/view?id=" + idProducto;
+
+    String plainText = """
+      Hola, %s
+
+      %s (%s) te ha solicitado el producto "%s".
+
+      Puedes revisar el producto aquí:
+      %s
+
+      Equipo UFV Shares
+      """.formatted(nombrePropietario, nombreSolicitante, correoSolicitante, tituloProducto, productUrl);
+
+    String html = """
+        <!DOCTYPE html>
+        <html lang="es">
+        <head><meta charset="UTF-8" /></head>
+        <body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif;">
+          <table width="100%%" cellpadding="0" cellspacing="0">
+            <tr><td align="center" style="padding:32px 16px;">
+              <table width="620" cellpadding="0" cellspacing="0"
+                style="background:#ffffff;border-radius:14px;overflow:hidden;
+                       box-shadow:0 2px 8px rgba(0,0,0,.08);">
+                <tr>
+                  <td style="background:#0f5a86;padding:24px 28px;">
+                    <p style="margin:0;color:#fff;font-size:19px;font-weight:700;">UFV Shares</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:26px 28px;">
+                    <p style="margin:0 0 12px;font-size:16px;color:#111;">
+                      Hola, <strong>%s</strong>
+                    </p>
+                    <p style="margin:0 0 18px;font-size:15px;color:#444;line-height:1.6;">
+                      <strong>%s</strong> (%s) te ha solicitado el producto:
+                    </p>
+                    <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;">
+                      <p style="margin:0;font-size:15px;color:#111;"><strong>%s</strong></p>
+                    </div>
+                    <p style="margin:18px 0 22px;font-size:14px;color:#666;">
+                      Revisa los detalles del producto en UFV Shares.
+                    </p>
+                    <a href="%s"
+                      style="display:inline-block;background:#0f5a86;color:#fff;
+                             text-decoration:none;font-weight:700;font-size:15px;
+                             padding:12px 24px;border-radius:40px;">
+                      Ver producto
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td></tr>
+          </table>
+        </body>
+        </html>
+        """.formatted(nombrePropietario, nombreSolicitante, correoSolicitante, tituloProducto, productUrl);
+
+    MimeMessage msg = mailSender.createMimeMessage();
+    MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8");
+    helper.setFrom(from);
+    helper.setReplyTo(from);
+    helper.setTo(destinatario);
+    helper.setSubject("Nueva solicitud de producto · UFV Shares");
     helper.setText(plainText, html);
     mailSender.send(msg);
   }
