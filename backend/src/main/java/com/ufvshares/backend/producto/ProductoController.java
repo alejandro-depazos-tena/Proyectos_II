@@ -19,9 +19,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ufvshares.backend.auth.SessionRepository;
+import com.ufvshares.backend.favorito.FavoritoRepository;
 import com.ufvshares.backend.fotoproducto.FotoProducto;
 import com.ufvshares.backend.fotoproducto.FotoProductoRepository;
+import com.ufvshares.backend.usuario.Usuario;
 import com.ufvshares.backend.usuario.UsuarioRepository;
+import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.validation.Valid;
 
@@ -32,17 +35,20 @@ public class ProductoController {
   private final ProductoService service;
   private final SessionRepository sessions;
   private final UsuarioRepository usuarios;
+  private final FavoritoRepository favoritosRepo;
   private final FotoProductoRepository fotosRepo;
   private final MarketplaceKeepaService marketplaceKeepaService;
 
   public ProductoController(ProductoService service,
       SessionRepository sessions,
       UsuarioRepository usuarios,
+      FavoritoRepository favoritosRepo,
       FotoProductoRepository fotosRepo,
       MarketplaceKeepaService marketplaceKeepaService) {
     this.service = service;
     this.sessions = sessions;
     this.usuarios = usuarios;
+    this.favoritosRepo = favoritosRepo;
     this.fotosRepo = fotosRepo;
     this.marketplaceKeepaService = marketplaceKeepaService;
   }
@@ -107,6 +113,17 @@ public class ProductoController {
         .orElse(null);
   }
 
+  private Usuario resolveUserRequired(String auth) {
+    if (auth == null || !auth.startsWith("Bearer ")) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token requerido");
+    }
+    String token = auth.substring(7);
+    String email = sessions.findEmailByToken(token)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sesion invalida"));
+    return usuarios.findByCorreoIgnoreCase(email)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no encontrado"));
+  }
+
   @GetMapping("/{id}")
   public Map<String, Object> getById(@PathVariable Long id) {
     Producto p = service.findById(id);
@@ -160,7 +177,20 @@ public class ProductoController {
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void delete(@PathVariable Long id) {
+  public void delete(
+      @RequestHeader("Authorization") String auth,
+      @PathVariable Long id) {
+    Usuario actor = resolveUserRequired(auth);
+    Producto producto = service.findById(id);
+
+    boolean isOwner = producto.getIdPropietario() != null
+        && producto.getIdPropietario().equals(actor.getIdUsuario());
+    if (!isOwner && !actor.isEsAdmin()) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No autorizado para eliminar este producto");
+    }
+
+    favoritosRepo.deleteByIdProducto(id);
+    fotosRepo.deleteByIdProducto(id);
     service.delete(id);
   }
 }

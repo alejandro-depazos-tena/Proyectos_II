@@ -1,6 +1,6 @@
 #FileLock
-#Tue Apr 07 18:20:44 CEST 2026
+#Wed Apr 08 13:04:39 CEST 2026
 hostName=Gonzalo
-id=19d68bf0a4eacda7432288b215475caa28e0de78be2
+id=19d6cc406cbed716adeae03c9b14aaf822719b2ae7f
 method=file
-server=10.10.25.64\:58880
+server=192.168.1.48\:60963

@@ -778,7 +778,8 @@ public class MeController {
     Usuario u = resolveUser(auth);
     Producto p = productos.findById(id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado"));
-    if (!p.getIdPropietario().equals(u.getIdUsuario())) {
+    boolean isOwner = p.getIdPropietario() != null && p.getIdPropietario().equals(u.getIdUsuario());
+    if (!isOwner && !u.isEsAdmin()) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No es tu producto");
     }
     favoritos.deleteByIdProducto(id);
