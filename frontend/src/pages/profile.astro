@@ -480,6 +480,20 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       </div>
     </div>
 
+    <div id="delete-product-modal" class="fixed inset-0 z-[1300] hidden items-center justify-center bg-black/55 p-4">
+      <div class="w-full max-w-sm rounded-2xl border border-base-200 bg-base-100 shadow-2xl">
+        <div class="p-6">
+          <p class="text-xs font-semibold uppercase tracking-[0.14em] text-base-content/45">Eliminar anuncio</p>
+          <h3 class="mt-2 text-lg font-bold leading-tight text-base-content">¿Quieres eliminar este anuncio?</h3>
+          <p class="mt-2 text-sm text-base-content/65">Esta acción no se puede deshacer y el anuncio dejará de estar disponible.</p>
+          <div class="mt-6 flex items-center justify-end gap-2">
+            <button id="delete-product-cancel" type="button" class="btn btn-ghost btn-sm rounded-full">Cancelar</button>
+            <button id="delete-product-confirm" type="button" class="btn btn-error btn-sm rounded-full">Sí, eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Loading -->
     <div id="loading" class="flex justify-center py-20">
       <span class="loading loading-spinner loading-lg text-primary"></span>
@@ -1356,6 +1370,61 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
     $('contract-detail-modal')?.classList.remove('flex');
   }
 
+  function openDeleteProductModal() {
+    $('delete-product-modal')?.classList.remove('hidden');
+    $('delete-product-modal')?.classList.add('flex');
+  }
+
+  function closeDeleteProductModal() {
+    $('delete-product-modal')?.classList.add('hidden');
+    $('delete-product-modal')?.classList.remove('flex');
+  }
+
+  function confirmDeleteProduct() {
+    return new Promise((resolve) => {
+      const modal = $('delete-product-modal');
+      const confirmBtn = $('delete-product-confirm');
+      const cancelBtn = $('delete-product-cancel');
+      if (!modal || !confirmBtn || !cancelBtn) {
+        resolve(false);
+        return;
+      }
+
+      const cleanup = () => {
+        confirmBtn.removeEventListener('click', onConfirm);
+        cancelBtn.removeEventListener('click', onCancel);
+        modal.removeEventListener('click', onBackdrop);
+        document.removeEventListener('keydown', onEscape);
+      };
+
+      const onConfirm = () => {
+        cleanup();
+        closeDeleteProductModal();
+        resolve(true);
+      };
+
+      const onCancel = () => {
+        cleanup();
+        closeDeleteProductModal();
+        resolve(false);
+      };
+
+      const onBackdrop = (e) => {
+        if (e.target === modal) onCancel();
+      };
+
+      const onEscape = (e) => {
+        if (e.key === 'Escape') onCancel();
+      };
+
+      confirmBtn.addEventListener('click', onConfirm);
+      cancelBtn.addEventListener('click', onCancel);
+      modal.addEventListener('click', onBackdrop);
+      document.addEventListener('keydown', onEscape);
+      openDeleteProductModal();
+    });
+  }
+
   $('contract-detail-close')?.addEventListener('click', closeContractDetail);
   $('contract-detail-modal')?.addEventListener('click', (e) => {
     if (e.target === $('contract-detail-modal')) closeContractDetail();
@@ -1406,7 +1475,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
 
   // ── Eliminar producto ────────────────────────────────────────
   async function deleteProduct(id, btn) {
-    if (!confirm('¿Seguro que quieres eliminar este anuncio? Esta acción no se puede deshacer.')) return;
+    if (!await confirmDeleteProduct()) return;
     btn.disabled = true;
     btn.textContent = '…';
     try {
