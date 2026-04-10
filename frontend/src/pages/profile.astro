@@ -1304,6 +1304,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       const fechaCreacion = formatEsDate(item.fechaCreacion);
       const fechaFirma = formatEsDate(item.fechaFirmaArrendatario);
       const canSign = item.rol === 'ARRENDATARIO' && estado === 'PENDIENTE_FIRMA';
+      const SiPuedeliberarObjeto = item.rol === 'ARRENDADOR' && item.puedeLiberarObjeto === true;
 
       const cpNombre = (cp.nombre || cp.apellidos)
         ? `${cp.nombre ?? ''} ${cp.apellidos ?? ''}`.trim()
@@ -1327,6 +1328,7 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
             </div>
             ${item.textoCondiciones ? `<p class="text-xs text-base-content/70 mt-3 line-clamp-3">${item.textoCondiciones}</p>` : ''}
             ${canSign ? `<div class="mt-3"><button type="button" class="btn btn-sm btn-primary rounded-full" data-sign-contract-id="${item.idContrato}">Firmar contrato</button></div>` : ''}
+            ${SiPuedeliberarObjeto ? `<div class="mt-3"><button type="button" class="btn btn-sm btn-secondary rounded-full" data-release-object-transaction-id="${item.idTransaccion}">Liberar objeto</button></div>` : ''}
           </div>
         </div>
       `);
@@ -1462,6 +1464,38 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
       } finally {
         btn.disabled = false;
         btn.textContent = originalText;
+      }
+      return;
+    }
+
+    const mostrarBotonLiberarObjeto = e.target.closest('[data-release-object-transaction-id]');
+    if (mostrarBotonLiberarObjeto) {
+      const idTransaccion = mostrarBotonLiberarObjeto.getAttribute('data-release-object-transaction-id');
+      if (!idTransaccion) return;
+
+      if (!confirm('Esta acción finaliza el contrato y libera el objeto para volver a alquilarse. ¿Deseas continuar?')) return;
+
+      mostrarBotonLiberarObjeto.disabled = true;
+      const originalText = mostrarBotonLiberarObjeto.textContent;
+      mostrarBotonLiberarObjeto.textContent = 'Liberando...';
+      try {
+        const res = await fetch(API_BASE + `/me/transacciones/${idTransaccion}/liberar-objeto`, {
+          method: 'PUT',
+          headers,
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          showToast(err.message ?? 'No se pudo liberar el objeto', 'error');
+          return;
+        }
+        showToast('Objeto liberado y contrato finalizado');
+        await loadProfile();
+        setActiveSection('contratos');
+      } catch {
+        showToast('No se pudo conectar con el servidor', 'error');
+      } finally {
+        mostrarBotonLiberarObjeto.disabled = false;
+        mostrarBotonLiberarObjeto.textContent = originalText;
       }
       return;
     }

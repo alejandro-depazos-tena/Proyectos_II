@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -60,6 +61,7 @@ import com.ufvshares.backend.solicitud.SolicitudService;
 import com.ufvshares.backend.transaccion.EstadoTransaccion;
 import com.ufvshares.backend.transaccion.Transaccion;
 import com.ufvshares.backend.transaccion.TransaccionRepository;
+import com.ufvshares.backend.transaccion.TransaccionService;
 import com.ufvshares.backend.usuario.Usuario;
 import com.ufvshares.backend.usuario.UsuarioRepository;
 
@@ -85,6 +87,7 @@ public class MeController {
   private final SolicitudRepository solicitudes;
   private final SolicitudService solicitudService;
   private final TransaccionRepository transacciones;
+  private final TransaccionService transaccionService;
   private final ContratoRepository contratosRepo;
   private final ContratoService contratos;
   private final PendingCambioRepository pendingRepo;
@@ -101,6 +104,7 @@ public class MeController {
       SolicitudRepository solicitudes,
       SolicitudService solicitudService,
       TransaccionRepository transacciones,
+      TransaccionService transaccionService,
       ContratoRepository contratosRepo,
       ContratoService contratos,
       PendingCambioRepository pendingRepo, EmailService emailService) {
@@ -112,6 +116,7 @@ public class MeController {
     this.solicitudes = solicitudes;
     this.solicitudService = solicitudService;
     this.transacciones = transacciones;
+    this.transaccionService = transaccionService;
     this.contratosRepo = contratosRepo;
     this.contratos = contratos;
     this.pendingRepo = pendingRepo;
@@ -561,6 +566,9 @@ public class MeController {
       Transaccion t = transacciones.findById(c.getIdTransaccion()).orElse(null);
       if (t != null) {
         item.put("estadoTransaccion", t.getEstadoTransaccion());
+        item.put("puedeLiberarObjeto", puedeLiberarObjetoManualmente(c, t, u));
+      } else {
+        item.put("puedeLiberarObjeto", false);
       }
 
       Producto p = productos.findById(c.getIdProducto()).orElse(null);
@@ -591,6 +599,52 @@ public class MeController {
     }
 
     return result;
+  }
+
+  @PutMapping("/transacciones/{idTransaccion}/liberar-objeto")
+  @Transactional
+  public Map<String, Object> liberarObjetoManual(
+      @RequestHeader("Authorization") String auth,
+      @PathVariable Long idTransaccion) {
+    Usuario u = resolveUser(auth);
+
+    Transaccion t = transacciones.findById(idTransaccion)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "TRANSACCION_NOT_FOUND"));
+
+    Solicitud s = solicitudes.findById(t.getIdSolicitud())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "SOLICITUD_NOT_FOUND"));
+
+    Producto p = productos.findById(s.getIdProducto())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "PRODUCTO_NOT_FOUND"));
+
+    if (!u.getIdUsuario().equals(p.getIdPropietario())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "SOLO_EL_ARRENDADOR_PUEDE_LIBERAR");
+    }
+
+    if (s.getTipoTransaccion() == null || !"ALQUILER".equals(s.getTipoTransaccion().name())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "SOLO_APLICA_A_ALQUILERES");
+    }
+
+    if (t.getEstadoTransaccion() != EstadoTransaccion.EN_CURSO) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "TRANSACCION_NO_EN_CURSO");
+    }
+
+    LocalDate fechaVencimiento = t.getFechaFinReal() != null ? t.getFechaFinReal().toLocalDate() : null;
+    if (fechaVencimiento == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "TRANSACCION_SIN_FECHA_FIN");
+    }
+    if (!LocalDate.now().equals(fechaVencimiento)) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "SOLO_SE_PUEDE_LIBERAR_EL_DIA_DEL_VENCIMIENTO");
+    }
+
+    Transaccion completada = transaccionService.completar(idTransaccion);
+
+    Map<String, Object> res = new LinkedHashMap<>();
+    res.put("idTransaccion", completada.getIdTransaccion());
+    res.put("estadoTransaccion", completada.getEstadoTransaccion());
+    res.put("productoLiberado", true);
+    res.put("contratoFinalizado", true);
+    return res;
   }
 
   @PutMapping("/contratos/{idContrato}/firmar")
@@ -653,6 +707,16 @@ public class MeController {
     map.put("estadoContrato", contrato.getEstadoContrato());
     map.put("textoCondiciones", contrato.getTextoCondiciones());
     return map;
+  }
+
+  private boolean puedeLiberarObjetoManualmente(Contrato c, Transaccion t, Usuario u) {
+    if (!u.getIdUsuario().equals(c.getIdPropietario())) return false;
+    if (t.getEstadoTransaccion() != EstadoTransaccion.EN_CURSO) return false;
+    if (t.getFechaFinReal() == null) return false;
+    if (c.getEstadoContrato() != EstadoContrato.ACTIVO) return false;
+    LocalDate hoy = LocalDate.now();
+    LocalDate vencimiento = t.getFechaFinReal().toLocalDate();
+    return hoy.equals(vencimiento);
   }
 
   // ── Actualizar dato de perfil directamente ─────────────────────
