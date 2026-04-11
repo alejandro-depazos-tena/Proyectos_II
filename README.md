@@ -241,6 +241,55 @@ Para borrar también datos persistidos de MariaDB:
 docker compose down -v
 ```
 
+### Modo simple: una sola imagen (frontend + backend + MariaDB)
+
+Si quieres desplegar con la menor friccion posible (una sola imagen), usa:
+
+- `Dockerfile.single`
+- `docker-compose.single.yml`
+
+Arranque local:
+
+```bash
+docker compose -f docker-compose.single.yml up --build -d
+```
+
+URL:
+
+- `http://localhost`
+
+Persistencia:
+
+- El volumen `ufvshares-data` guarda MariaDB y uploads en `/data`.
+- Si haces `docker compose -f docker-compose.single.yml down`, los datos se conservan.
+- Solo se eliminan si ejecutas `docker compose -f docker-compose.single.yml down -v`.
+
+Notas:
+
+- Este modo prioriza facilidad de despliegue para demos o proyectos academicos.
+- Para produccion, se recomienda mantener servicios separados (`frontend`, `backend`, `db`) como en `docker-compose.yml`.
+
+### Azure facil con una sola imagen (Container Apps)
+
+Esta ruta evita montar varias piezas por separado.
+
+1. Construye y sube la imagen a un registry (por ejemplo, Azure Container Registry).
+2. Crea un Azure Container App usando esa imagen.
+3. Crea un Azure File Share y montalo en el contenedor en la ruta `/data`.
+4. Define variables de entorno en el Container App:
+
+- `MARIADB_ROOT_PASSWORD`
+- `MARIADB_DATABASE`
+- `MARIADB_USER`
+- `MARIADB_PASSWORD`
+- `APP_FRONTEND_URL` (tu URL publica)
+- `APP_API_URL` (normalmente `https://tu-dominio/api`)
+- `MAIL_*` si quieres envio de correo real
+
+5. Expone puerto `80`.
+
+Con esto, al desplegar la imagen, la app levanta completa y la base de datos permanece persistente en el volumen montado.
+
 ---
 
 ## 🔄 Metodología de Desarrollo
