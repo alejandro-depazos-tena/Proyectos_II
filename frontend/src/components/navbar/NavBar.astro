@@ -49,23 +49,6 @@ import Links from "./Links.astro";
                     />
                 </a>
                 <a
-                    href="/favorites"
-                    class="btn btn-ghost btn-circle hover:bg-primary/10 transition-colors"
-                    aria-label="Favoritos"
-                >
-                    <div class="indicator">
-                        <Icon
-                            name="lucide:heart"
-                            class="w-6 h-6 hover:text-primary transition-colors"
-                        />
-                        <span
-                            id="nav-fav-count"
-                            class="badge badge-sm badge-primary indicator-item border-none hidden"
-                            >0</span
-                        >
-                    </div>
-                </a>
-                <a
                     href="/profile"
                     class="btn btn-ghost btn-circle hover:bg-primary/10 transition-colors"
                     aria-label="Perfil"
@@ -82,11 +65,8 @@ import Links from "./Links.astro";
 </div>
 
 <script>
-    import { totalFavorites } from "../../store/favoriteStore";
-
     let lastScrollY = window.scrollY;
     const navbar = document.getElementById("main-navbar");
-    const navFavCount = document.getElementById("nav-fav-count");
     const navAuthLinks = document.getElementById("nav-auth-links");
     const mainLogoLink = document.getElementById("main-logo-link");
     const isAdminRoute = location.pathname === "/admin";
@@ -168,17 +148,6 @@ import Links from "./Links.astro";
             renderGuest();
         }
     }
-
-    // Update favorites count in navbar
-    totalFavorites.subscribe((count) => {
-        if (!navFavCount) return;
-        if (count > 0) {
-            navFavCount.classList.remove("hidden");
-            navFavCount.textContent = String(count);
-        } else {
-            navFavCount.classList.add("hidden");
-        }
-    });
 
     window.addEventListener("scroll", () => {
         if (isAdminRoute || isChatsRoute) return;

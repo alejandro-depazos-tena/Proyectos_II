@@ -1,70 +1,313 @@
 ---
 import Layout from "../layouts/Layout.astro";
+const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
 ---
 
 <Layout title="Ajustes | UFV Shares">
-  <section class="max-w-5xl mx-auto px-4 py-8 sm:py-10">
-    <header class="mb-7">
-      <p class="text-xs uppercase tracking-[0.2em] text-primary/80 font-semibold">Preferencias</p>
-      <h1 class="text-3xl sm:text-4xl font-black text-base-content mt-2">Ajustes</h1>
-      <p class="text-sm sm:text-base text-base-content/65 mt-2 max-w-2xl">
-        Configura tu experiencia de uso y accede rapido a opciones de cuenta y seguridad.
-      </p>
+  <section class="max-w-7xl mx-auto px-4 py-10 sm:py-12 space-y-8">
+    <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div class="max-w-3xl">
+        <p class="text-xs uppercase tracking-[0.22em] text-base-content/55 font-semibold">Preferencias</p>
+        <h1 class="text-3xl sm:text-4xl font-black text-base-content mt-2">Ajustes</h1>
+        <p class="text-sm sm:text-base text-base-content/65 mt-3 leading-relaxed">
+          Gestiona tu cuenta, revisa tu actividad y consulta las normas de uso desde un panel lateral, claro y profesional.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <span id="settings-user-pill" class="badge badge-neutral badge-lg px-4 py-3">Sesión activa</span>
+        <span id="settings-theme-pill" class="badge badge-outline badge-lg px-4 py-3">Tema claro</span>
+      </div>
     </header>
 
-    <div class="grid gap-5 lg:grid-cols-3">
-      <article class="rounded-2xl border border-base-200 bg-base-100 shadow-sm p-5 lg:col-span-2">
-        <div class="flex items-start justify-between gap-4">
-          <div>
-            <h2 class="text-lg font-bold text-base-content">Tema de la aplicacion</h2>
-            <p class="text-sm text-base-content/65 mt-1">
-              Cambia entre modo claro y oscuro. Esta preferencia se guarda en tu navegador.
-            </p>
-          </div>
-          <span id="theme-current-pill" class="badge badge-outline">Claro</span>
-        </div>
-
-        <div class="mt-5 flex items-center gap-4">
-          <button
-            id="settings-theme-toggle"
-            class="theme-switch"
-            type="button"
-            role="switch"
-            aria-checked="false"
-            aria-label="Activar modo oscuro"
-            title="Cambiar tema"
-          >
-            <span class="theme-switch-thumb">
-              <span id="settings-theme-icon" class="theme-switch-icon">☀️</span>
-            </span>
+    <div class="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] items-start">
+      <aside class="sticky top-6 rounded-3xl border border-base-200 bg-base-100 shadow-sm p-4">
+        <p class="px-2 text-[11px] font-black uppercase tracking-[0.26em] text-base-content/45">Secciones</p>
+        <nav class="mt-4 flex flex-col gap-2" aria-label="Secciones de ajustes">
+          <button type="button" data-settings-tab="appearance" class="settings-nav-btn rounded-2xl border border-base-200 bg-base-50 px-4 py-3 text-left transition-colors">
+            <span class="block text-sm font-semibold text-base-content">Apariencia</span>
+            <span class="block text-xs text-base-content/55 mt-1">Tema y preferencias visuales</span>
           </button>
-          <div>
-            <p id="theme-current-label" class="font-semibold text-base-content">Modo claro</p>
-            <p class="text-xs text-base-content/55">Puedes cambiarlo cuando quieras.</p>
-          </div>
-        </div>
-      </article>
+          <button type="button" data-settings-tab="account" class="settings-nav-btn rounded-2xl border border-base-200 bg-base-50 px-4 py-3 text-left transition-colors">
+            <span class="block text-sm font-semibold text-base-content">Cuenta</span>
+            <span class="block text-xs text-base-content/55 mt-1">Perfil, datos y acceso</span>
+          </button>
+          <button type="button" data-settings-tab="activity" class="settings-nav-btn rounded-2xl border border-base-200 bg-base-50 px-4 py-3 text-left transition-colors">
+            <span class="block text-sm font-semibold text-base-content">Actividad</span>
+            <span class="block text-xs text-base-content/55 mt-1">Historial de operaciones</span>
+          </button>
+          <button type="button" data-settings-tab="legal" class="settings-nav-btn rounded-2xl border border-base-200 bg-base-50 px-4 py-3 text-left transition-colors">
+            <span class="block text-sm font-semibold text-base-content">Legal y normas</span>
+            <span class="block text-xs text-base-content/55 mt-1">Condiciones y uso responsable</span>
+          </button>
+        </nav>
 
-      <aside class="rounded-2xl border border-base-200 bg-base-100 shadow-sm p-5">
-        <h2 class="text-lg font-bold text-base-content">Acciones rapidas</h2>
-        <div class="mt-4 flex flex-col gap-2.5">
-          <a href="/profile" class="btn btn-outline justify-start">Editar perfil</a>
-          <a href="/forgot-password" class="btn btn-outline justify-start">Recuperar contraseña</a>
-          <a href="/profile#mis-anuncios" class="btn btn-outline justify-start">Mis anuncios</a>
+        <div class="mt-5 rounded-2xl border border-base-200 bg-base-50 p-4">
+          <p class="text-xs font-black uppercase tracking-[0.18em] text-base-content/45">Estado</p>
+          <div class="mt-3 grid gap-2 text-sm">
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-base-content/60">Tema</span>
+              <span id="theme-summary" class="font-semibold text-base-content">Claro</span>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-base-content/60">Historial</span>
+              <span id="history-summary" class="font-semibold text-base-content">Cargando…</span>
+            </div>
+          </div>
         </div>
       </aside>
+
+      <div class="space-y-6 min-w-0">
+        <section data-settings-panel="appearance" class="rounded-3xl border border-base-200 bg-base-100 shadow-sm p-6 sm:p-7">
+          <div class="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+            <div class="max-w-2xl">
+              <p class="text-[11px] font-black uppercase tracking-[0.26em] text-base-content/45">Apariencia</p>
+              <h2 class="text-xl sm:text-2xl font-black text-base-content mt-2">Tema de la aplicación</h2>
+              <p class="text-sm text-base-content/65 mt-2 leading-relaxed">
+                Cambia entre modo claro y oscuro. La preferencia se guarda de forma local para que tu entorno se mantenga consistente.
+              </p>
+            </div>
+            <div class="flex items-center gap-3 rounded-2xl border border-base-200 bg-base-50 px-4 py-3 shadow-sm">
+              <button
+                id="settings-theme-toggle"
+                class="theme-switch"
+                type="button"
+                role="switch"
+                aria-checked="false"
+                aria-label="Activar modo oscuro"
+                title="Cambiar tema"
+              >
+                <span class="theme-switch-thumb">
+                  <span id="settings-theme-icon" class="theme-switch-icon">☀️</span>
+                </span>
+              </button>
+              <div>
+                <p id="theme-current-label" class="font-semibold text-base-content">Modo claro</p>
+                <p class="text-xs text-base-content/55">Un clic y listo.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-7 grid gap-4 sm:grid-cols-3">
+            <div class="rounded-2xl border border-base-200 bg-base-50 p-5">
+              <p class="text-[11px] uppercase tracking-[0.16em] text-base-content/45">Legibilidad</p>
+              <p class="mt-2 text-sm font-semibold text-base-content">Mejor lectura en cualquier entorno.</p>
+            </div>
+            <div class="rounded-2xl border border-base-200 bg-base-50 p-5">
+              <p class="text-[11px] uppercase tracking-[0.16em] text-base-content/45">Persistencia</p>
+              <p class="mt-2 text-sm font-semibold text-base-content">Se recuerda en tu navegador automáticamente.</p>
+            </div>
+            <div class="rounded-2xl border border-base-200 bg-base-50 p-5">
+              <p class="text-[11px] uppercase tracking-[0.16em] text-base-content/45">Respuesta</p>
+              <p class="mt-2 text-sm font-semibold text-base-content">Cambio inmediato sin recargar.</p>
+            </div>
+          </div>
+        </section>
+
+        <section data-settings-panel="account" class="hidden rounded-3xl border border-base-200 bg-base-100 shadow-sm p-6 sm:p-7">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-[0.26em] text-base-content/45">Cuenta</p>
+              <h2 class="text-2xl font-black text-base-content mt-2">Perfil y acceso</h2>
+              <p class="text-sm text-base-content/65 mt-2 leading-relaxed">Gestiona tus datos personales y la recuperación de acceso desde un único panel.</p>
+            </div>
+            <span class="badge badge-outline">Cuenta</span>
+          </div>
+
+          <div class="mt-6 grid gap-4 md:grid-cols-2">
+            <article class="rounded-2xl border border-base-200 bg-base-50 p-5">
+              <p class="text-xs font-black uppercase tracking-[0.18em] text-base-content/45">Perfil</p>
+              <h3 class="mt-2 text-lg font-bold text-base-content">Datos personales</h3>
+              <p class="mt-2 text-sm text-base-content/65">Actualiza tu información desde la página de perfil.</p>
+              <a href="/profile" class="btn btn-outline btn-sm rounded-full mt-4">Abrir perfil</a>
+            </article>
+
+            <article class="rounded-2xl border border-base-200 bg-base-50 p-5">
+              <p class="text-xs font-black uppercase tracking-[0.18em] text-base-content/45">Antigüedad</p>
+              <h3 class="mt-2 text-lg font-bold text-base-content">Tiempo en la aplicación</h3>
+              <p class="mt-2 text-sm text-base-content/65">
+                Tu cuenta lleva activa desde <span id="account-since" class="font-semibold">—</span>.
+              </p>
+              <p id="account-duration" class="mt-2 text-sm text-base-content/55">Calculando antigüedad...</p>
+            </article>
+
+            <article class="rounded-2xl border border-base-200 bg-base-50 p-5 md:col-span-2">
+              <p class="text-xs font-black uppercase tracking-[0.18em] text-base-content/45">Privacidad</p>
+              <h3 class="mt-2 text-lg font-bold text-base-content">Gestión de datos</h3>
+              <p class="mt-2 text-sm text-base-content/65">
+                Mantén tus datos personales actualizados y revisa que la información compartida con otros usuarios sea la mínima necesaria para operar.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section data-settings-panel="activity" class="hidden rounded-3xl border border-base-200 bg-base-100 shadow-sm p-6 sm:p-7">
+          <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-3xl">
+              <p class="text-[11px] font-black uppercase tracking-[0.26em] text-base-content/45">Actividad reciente</p>
+              <h2 class="text-2xl font-black text-base-content mt-2">Historial de ventas, alquileres y préstamos</h2>
+              <p class="text-sm text-base-content/65 mt-2 leading-relaxed">
+                Un resumen claro de tu actividad para consultar operaciones cerradas desde ajustes.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2 text-sm text-base-content/60">
+              <span id="history-count" class="badge badge-outline badge-lg px-4 py-3">0 movimientos</span>
+            </div>
+          </div>
+
+          <div id="activity-loading" class="mt-6 flex items-center justify-center py-16">
+            <span class="loading loading-spinner loading-lg text-base-content/70"></span>
+          </div>
+
+          <div id="history-grid" class="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 hidden"></div>
+
+          <div id="no-history" class="hidden mt-6 text-center py-14 rounded-3xl border border-dashed border-base-300 bg-base-50">
+            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-base-200 text-base-content/50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 class="mt-4 text-lg font-bold text-base-content">Aún no hay historial disponible</h3>
+            <p class="mt-2 text-sm text-base-content/60 max-w-xl mx-auto">
+              Cuando realices ventas, alquileres o préstamos, aparecerán aquí.
+            </p>
+          </div>
+        </section>
+
+        <section data-settings-panel="legal" class="hidden rounded-3xl border border-base-200 bg-base-100 shadow-sm p-6 sm:p-7">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-[0.26em] text-base-content/45">Legal y normas</p>
+              <h2 class="text-2xl font-black text-base-content mt-2">Uso responsable de la plataforma</h2>
+              <p class="text-sm text-base-content/65 mt-2 leading-relaxed">
+                Como en cualquier marketplace, publicar, reservar y contactar implica seguir unas reglas básicas para mantener la plataforma segura y fiable.
+              </p>
+            </div>
+            <span class="badge badge-outline">Normativa</span>
+          </div>
+
+          <div class="mt-6 grid gap-4 md:grid-cols-3">
+            <article class="rounded-2xl border border-base-200 bg-base-50 p-5">
+              <p class="text-xs font-black uppercase tracking-[0.18em] text-base-content/45">Contenido</p>
+              <p class="mt-2 text-sm text-base-content/65">Publica solo productos, imágenes y textos sobre los que tengas derecho.</p>
+            </article>
+            <article class="rounded-2xl border border-base-200 bg-base-50 p-5">
+              <p class="text-xs font-black uppercase tracking-[0.18em] text-base-content/45">Comunidad</p>
+              <p class="mt-2 text-sm text-base-content/65">Evita spam, acoso, fraude o mensajes fuera de las normas del servicio.</p>
+            </article>
+            <article class="rounded-2xl border border-base-200 bg-base-50 p-5">
+              <p class="text-xs font-black uppercase tracking-[0.18em] text-base-content/45">Privacidad</p>
+              <p class="mt-2 text-sm text-base-content/65">Usa los datos personales solo para la gestión legítima de la operación.</p>
+            </article>
+          </div>
+
+          <div class="mt-6 flex flex-wrap gap-2">
+            <button type="button" data-legal-open="terms" class="btn btn-sm btn-outline rounded-full">Términos de uso</button>
+            <button type="button" data-legal-open="privacy" class="btn btn-sm btn-outline rounded-full">Privacidad</button>
+            <button type="button" data-legal-open="posting" class="btn btn-sm btn-outline rounded-full">Normas de publicación</button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div id="legal-modal" class="fixed inset-0 z-[1200] hidden items-center justify-center bg-black/40 p-4">
+      <div class="w-full max-w-2xl rounded-3xl border border-base-200 bg-base-100 shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between border-b border-base-200 px-6 py-4">
+          <div>
+            <p id="legal-modal-kicker" class="text-[10px] font-black uppercase tracking-[0.26em] text-base-content/45">Legal</p>
+            <h3 id="legal-modal-title" class="text-lg font-black text-base-content">Detalle legal</h3>
+          </div>
+          <button id="legal-modal-close" type="button" class="btn btn-ghost btn-sm btn-circle" aria-label="Cerrar">&times;</button>
+        </div>
+        <div class="px-6 py-5 space-y-4 text-sm text-base-content/70" id="legal-modal-content"></div>
+        <div class="px-6 py-4 border-t border-base-200 bg-base-50 flex justify-end">
+          <button id="legal-modal-accept" type="button" class="btn btn-primary btn-sm rounded-full">Aceptar</button>
+        </div>
+      </div>
     </div>
   </section>
 </Layout>
 
-<script>
+<script define:vars={{ API_BASE }}>
   const THEME_KEY = "ufvshares_theme";
-  const themeToggle = document.getElementById("settings-theme-toggle") as HTMLButtonElement | null;
+  const SETTINGS_TAB_KEY = "ufvshares_settings_tab";
+  const token = localStorage.getItem("ufvshares_token");
+  if (!token) {
+    window.location.href = "/auth?mode=login&next=" + encodeURIComponent("/settings");
+  }
+
+  const headers = { "Authorization": "Bearer " + token, "Content-Type": "application/json" };
+  const tabButtons = Array.from(document.querySelectorAll("[data-settings-tab]"));
+  const tabPanels = Array.from(document.querySelectorAll("[data-settings-panel]"));
+  const themeToggle = document.getElementById("settings-theme-toggle");
   const themeIcon = document.getElementById("settings-theme-icon");
   const themeLabel = document.getElementById("theme-current-label");
-  const themePill = document.getElementById("theme-current-pill");
+  const themePill = document.getElementById("settings-theme-pill");
+  const themeSummary = document.getElementById("theme-summary");
+  const historyGrid = document.getElementById("history-grid");
+  const noHistory = document.getElementById("no-history");
+  const loading = document.getElementById("activity-loading");
+  const historyCount = document.getElementById("history-count");
+  const historySummary = document.getElementById("history-summary");
+  const userPill = document.getElementById("settings-user-pill");
+  const legalModal = document.getElementById("legal-modal");
+  const legalModalTitle = document.getElementById("legal-modal-title");
+  const legalModalKicker = document.getElementById("legal-modal-kicker");
+  const legalModalContent = document.getElementById("legal-modal-content");
+  const legalModalClose = document.getElementById("legal-modal-close");
+  const legalModalAccept = document.getElementById("legal-modal-accept");
+  const accountSince = document.getElementById("account-since");
+  const accountDuration = document.getElementById("account-duration");
 
-  function updateThemeUi(theme: "light" | "dark") {
+  const tipoLabel = { VENTA: "Venta", ALQUILER: "Alquiler", PRESTAMO: "Préstamo" };
+
+  function setActiveTab(tab) {
+    const activeTab = tab || "appearance";
+    tabButtons.forEach((btn) => {
+      const isActive = btn.getAttribute("data-settings-tab") === activeTab;
+      btn.classList.toggle("bg-base-200", isActive);
+      btn.classList.toggle("border-base-300", isActive);
+      btn.classList.toggle("text-base-content", isActive);
+      btn.classList.toggle("shadow-sm", isActive);
+      btn.classList.toggle("bg-base-50", !isActive);
+      btn.classList.toggle("border-base-200", !isActive);
+    });
+
+    tabPanels.forEach((panel) => {
+      panel.classList.toggle("hidden", panel.getAttribute("data-settings-panel") !== activeTab);
+    });
+
+    try {
+      localStorage.setItem(SETTINGS_TAB_KEY, activeTab);
+    } catch (_) {
+      // Ignore storage write errors.
+    }
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function formatEsDate(raw) {
+    if (!raw) return "—";
+    const d = new Date(raw);
+    if (Number.isNaN(d.getTime())) return "—";
+    return d.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
+  }
+
+  function money(value) {
+    const num = Number(value);
+    if (!Number.isFinite(num) || num <= 0) return "Gratis";
+    return new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(num);
+  }
+
+  function updateThemeUi(theme) {
     const isDark = theme === "dark";
     themeToggle?.classList.toggle("is-dark", isDark);
 
@@ -73,20 +316,13 @@ import Layout from "../layouts/Layout.astro";
       themeToggle.setAttribute("aria-label", isDark ? "Activar modo claro" : "Activar modo oscuro");
     }
 
-    if (themeIcon) {
-      themeIcon.textContent = isDark ? "🌙" : "☀️";
-    }
-
-    if (themeLabel) {
-      themeLabel.textContent = isDark ? "Modo oscuro" : "Modo claro";
-    }
-
-    if (themePill) {
-      themePill.textContent = isDark ? "Oscuro" : "Claro";
-    }
+    if (themeIcon) themeIcon.textContent = isDark ? "🌙" : "☀️";
+    if (themeLabel) themeLabel.textContent = isDark ? "Modo oscuro" : "Modo claro";
+    if (themePill) themePill.textContent = isDark ? "Tema oscuro" : "Tema claro";
+    if (themeSummary) themeSummary.textContent = isDark ? "Oscuro" : "Claro";
   }
 
-  function setTheme(theme: "light" | "dark") {
+  function setTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
     try {
       localStorage.setItem(THEME_KEY, theme);
@@ -96,11 +332,253 @@ import Layout from "../layouts/Layout.astro";
     updateThemeUi(theme);
   }
 
+  function renderHistory(items) {
+    if (!historyGrid || !noHistory || !loading || !historyCount || !historySummary) return;
+
+    loading.classList.add("hidden");
+    historyGrid.classList.remove("hidden");
+    historyGrid.innerHTML = "";
+
+    const list = Array.isArray(items) ? items : [];
+    historyCount.textContent = `${list.length} movimiento${list.length === 1 ? "" : "s"}`;
+    historySummary.textContent = list.length > 0 ? "Disponible" : "Vacío";
+
+    if (list.length === 0) {
+      historyGrid.classList.add("hidden");
+      noHistory.classList.remove("hidden");
+      return;
+    }
+
+    noHistory.classList.add("hidden");
+
+    const backendOrigin = (() => {
+      try {
+        return new URL(API_BASE).origin;
+      } catch {
+        return "http://localhost:8080";
+      }
+    })();
+
+    list.slice(0, 12).forEach((item) => {
+      const tipo = tipoLabel[item?.tipoTransaccion] ?? item?.tipoTransaccion ?? "—";
+      const prod = item?.producto ?? {};
+      const persona = item?.persona ?? {};
+      const precio = money(prod?.precio);
+      const imgSrc = prod?.fotoUrl ? `${backendOrigin}${prod.fotoUrl}` : (prod?.imagenUrl ?? null);
+      const fecha = formatEsDate(item?.fechaTransaccion);
+      const inicio = formatEsDate(item?.fechaInicio);
+      const fin = formatEsDate(item?.fechaFin);
+      const dias = item?.diasAlquiler != null ? Number(item.diasAlquiler) : null;
+
+      const personaNombre = (persona?.nombre || persona?.apellidos)
+        ? `${escapeHtml(persona.nombre ?? "")} ${escapeHtml(persona.apellidos ?? "")}`.trim()
+        : "Usuario";
+      const personaEmail = persona?.correo ? `<p class="text-xs text-base-content/50 mt-1">${escapeHtml(persona.correo)}</p>` : "";
+      const timeline = (item?.tipoTransaccion === "ALQUILER" && (inicio !== "—" || fin !== "—"))
+        ? `<p class="text-xs text-base-content/60 mt-2">Periodo: ${inicio} → ${fin}${dias != null ? ` <span class="badge badge-sm badge-outline ml-2">${dias} día${dias !== 1 ? "s" : ""}</span>` : ""}</p>`
+        : `<p class="text-xs text-base-content/60 mt-2">Fecha: ${fecha}</p>`;
+
+      const imageHtml = imgSrc
+        ? `<img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(prod?.titulo ?? "Producto")}" class="h-40 w-full object-cover" />`
+        : `<div class="flex h-40 items-center justify-center bg-base-200 text-base-content/30 text-sm">Sin foto</div>`;
+
+      historyGrid.insertAdjacentHTML("beforeend", `
+        <article class="overflow-hidden rounded-3xl border border-base-200 bg-base-100 shadow-sm transition-shadow hover:shadow-md">
+          ${imageHtml}
+          <div class="p-5">
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="font-bold leading-tight text-base-content">${escapeHtml(prod?.titulo ?? "Producto")}</h3>
+              <span class="badge badge-primary badge-sm shrink-0">${escapeHtml(tipo)}</span>
+            </div>
+            <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-base-content/60">
+              <span class="rounded-full bg-base-200 px-2.5 py-1">${escapeHtml(fecha)}</span>
+              ${item?.estadoTransaccion ? `<span class="rounded-full bg-base-200 px-2.5 py-1">${escapeHtml(item.estadoTransaccion)}</span>` : ""}
+            </div>
+            ${timeline}
+            <div class="mt-4 rounded-2xl border border-base-200 bg-base-200/50 p-4">
+              <p class="text-[11px] uppercase tracking-[0.16em] text-base-content/45">Contraparte</p>
+              <p class="mt-1 font-semibold text-base-content">${personaNombre}</p>
+              ${personaEmail}
+            </div>
+            <div class="mt-4 flex items-center justify-between gap-3">
+              <span class="text-sm text-base-content/60">Importe</span>
+              <span class="text-base font-black text-primary">${escapeHtml(precio)}</span>
+            </div>
+          </div>
+        </article>
+      `);
+    });
+  }
+
+  function formatLongDate(date) {
+    return date.toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" });
+  }
+
+  function formatDuration(fromDate) {
+    const now = new Date();
+    const diffMs = Math.max(0, now.getTime() - fromDate.getTime());
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const months = Math.floor(days / 30);
+    const years = Math.floor(days / 365);
+
+    if (years >= 1) return `Más de ${years} año${years !== 1 ? "s" : ""} en UFV Shares`;
+    if (months >= 1) return `${months} mes${months !== 1 ? "es" : ""} usando la app`;
+    return `${Math.max(days, 1)} día${days !== 1 ? "s" : ""} en la plataforma`;
+  }
+
+  function updateAccountTenure() {
+    if (!accountSince || !accountDuration) return;
+    const storageKey = "ufvshares_first_seen";
+    let firstSeen = localStorage.getItem(storageKey);
+    if (!firstSeen) {
+      firstSeen = new Date().toISOString();
+      try {
+        localStorage.setItem(storageKey, firstSeen);
+      } catch (_) {
+        // Ignore storage write errors.
+      }
+    }
+
+    const firstDate = new Date(firstSeen);
+    if (Number.isNaN(firstDate.getTime())) {
+      accountSince.textContent = "—";
+      accountDuration.textContent = "No disponible";
+      return;
+    }
+
+    accountSince.textContent = formatLongDate(firstDate);
+    accountDuration.textContent = formatDuration(firstDate);
+  }
+
   const initialTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
   updateThemeUi(initialTheme);
+
+  const initialTab = window.location.hash ? window.location.hash.replace("#", "") : (localStorage.getItem(SETTINGS_TAB_KEY) || "appearance");
+  setActiveTab(["appearance", "account", "activity", "legal"].includes(initialTab) ? initialTab : "appearance");
+
+  tabButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tab = btn.getAttribute("data-settings-tab") || "appearance";
+      setActiveTab(tab);
+    });
+  });
+
+  updateAccountTenure();
+
+  const legalContent = {
+    terms: {
+      kicker: "Términos de uso",
+      title: "Condiciones generales",
+      body: `
+        <p>Al usar UFV Shares aceptas actuar con buena fe, respetar las normas de la comunidad y publicar información veraz.</p>
+        <ul class="list-disc list-inside space-y-1">
+          <li>No está permitido publicar contenido ilícito, ofensivo o engañoso.</li>
+          <li>Las operaciones deben seguir las reglas de la plataforma.</li>
+          <li>Nos reservamos el derecho de moderar contenido que incumpla las normas.</li>
+        </ul>
+        <p>Tu cuenta es personal. Eres responsable de todas las acciones realizadas con tus credenciales, incluyendo publicaciones, solicitudes y comunicaciones.</p>
+        <p>Si detectas actividad sospechosa, debes actualizar tu contraseña y comunicarlo a soporte lo antes posible.</p>
+        <p>Las publicaciones deben reflejar el estado real del artículo. Ocultar información relevante o manipular precios puede conllevar limitaciones en la cuenta.</p>
+        <p>El uso de lenguaje agresivo, discriminatorio o amenazante no está permitido. Estas conductas pueden provocar la suspensión temporal o definitiva.</p>
+        <p>UFV Shares puede actualizar estos términos para mejorar la seguridad del servicio. Se notificará a los usuarios cuando haya cambios relevantes.</p>
+        <p>El incumplimiento reiterado de las normas puede implicar la retirada de anuncios y la pérdida de acceso a funciones clave.</p>
+        <p>La plataforma no se responsabiliza de acuerdos externos a los canales oficiales, ni de pagos realizados fuera del flujo previsto.</p>
+        <p>En caso de conflicto entre usuarios, el equipo de moderación podrá solicitar información adicional para resolver la incidencia.</p>
+        <p>Si detectas contenido inapropiado, utiliza las herramientas de reporte para acelerar la revisión.</p>
+      `,
+    },
+    privacy: {
+      kicker: "Privacidad",
+      title: "Tratamiento de datos",
+      body: `
+        <p>Protegemos tu información y solo usamos los datos necesarios para gestionar tu cuenta y las operaciones.</p>
+        <ul class="list-disc list-inside space-y-1">
+          <li>Tus datos se almacenan de forma segura y solo para fines legítimos.</li>
+          <li>No compartimos información personal fuera de la plataforma sin consentimiento.</li>
+          <li>Puedes solicitar la actualización de tus datos desde tu perfil.</li>
+        </ul>
+        <p>Recopilamos datos mínimos para completar procesos como registro, autenticación y gestión de anuncios.</p>
+        <p>La información de contacto se muestra solo cuando es estrictamente necesaria para coordinar una operación.</p>
+        <p>Los registros de actividad se usan para seguridad, auditoría interna y mejora del servicio.</p>
+        <p>No vendemos datos personales a terceros. Cualquier integración externa se limita a funciones imprescindibles.</p>
+        <p>Si necesitas ejercer derechos de acceso, rectificación o eliminación, puedes solicitarlo desde soporte.</p>
+        <p>Las cookies se emplean para mantener sesiones activas y recordar preferencias. Puedes deshabilitarlas, aunque ciertas funciones dejarán de estar disponibles.</p>
+        <p>Al cerrar sesión se eliminan tokens de acceso del navegador para proteger tu cuenta.</p>
+        <p>En caso de incidencias de seguridad, notificaremos a los usuarios afectados de forma prioritaria.</p>
+      `,
+    },
+    posting: {
+      kicker: "Normas de publicación",
+      title: "Contenido permitido",
+      body: `
+        <p>Las publicaciones deben ser claras, reales y corresponder a productos autorizados.</p>
+        <ul class="list-disc list-inside space-y-1">
+          <li>Sube imágenes propias o con permiso explícito.</li>
+          <li>Describe el estado real del producto y su disponibilidad.</li>
+          <li>Evita lenguaje ofensivo o información engañosa.</li>
+        </ul>
+        <p>No se permiten productos prohibidos por la normativa vigente o por las reglas internas de la plataforma.</p>
+        <p>Incluye precio, estado y detalles relevantes para evitar dudas o reclamaciones posteriores.</p>
+        <p>Si un artículo ya no está disponible, actualiza el estado cuanto antes para evitar solicitudes innecesarias.</p>
+        <p>Las fotos deben ser recientes, nítidas y mostrar el producto real desde varios ángulos.</p>
+        <p>Se recomienda indicar claramente si se trata de venta, alquiler o préstamo.</p>
+        <p>El uso de marcas o imágenes protegidas debe respetar la normativa de propiedad intelectual.</p>
+        <p>Las publicaciones duplicadas o repetitivas pueden ser ocultadas para mantener la calidad del catálogo.</p>
+        <p>El equipo de moderación puede solicitar ajustes si detecta inconsistencias en la información.</p>
+      `,
+    },
+  };
+
+  function openLegalModal(key) {
+    const data = legalContent[key];
+    if (!data || !legalModal || !legalModalTitle || !legalModalContent || !legalModalKicker) return;
+    legalModalKicker.textContent = data.kicker;
+    legalModalTitle.textContent = data.title;
+    legalModalContent.innerHTML = data.body;
+    legalModal.classList.remove("hidden");
+    legalModal.classList.add("flex");
+  }
+
+  function closeLegalModal() {
+    if (!legalModal) return;
+    legalModal.classList.add("hidden");
+    legalModal.classList.remove("flex");
+  }
+
+  document.querySelectorAll("[data-legal-open]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      openLegalModal(btn.getAttribute("data-legal-open"));
+    });
+  });
+
+  legalModalClose?.addEventListener("click", closeLegalModal);
+  legalModalAccept?.addEventListener("click", closeLegalModal);
+  legalModal?.addEventListener("click", (event) => {
+    if (event.target === legalModal) closeLegalModal();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeLegalModal();
+  });
 
   themeToggle?.addEventListener("click", () => {
     const currentTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
     setTheme(currentTheme === "dark" ? "light" : "dark");
   });
+
+  async function loadActivity() {
+    try {
+      if (userPill) userPill.textContent = "Sesión verificada";
+      const res = await fetch(API_BASE + "/me/historial", { headers });
+      if (!res.ok) {
+        renderHistory([]);
+        return;
+      }
+      const historial = await res.json();
+      renderHistory(Array.isArray(historial) ? historial : []);
+    } catch {
+      renderHistory([]);
+    }
+  }
+
+  loadActivity();
 </script>

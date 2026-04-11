@@ -1,6 +1,6 @@
 #FileLock
-#Fri Apr 10 11:09:46 CEST 2026
-hostName=192.168.1.45
-id=19d769e8ebe870384768044db3ea6fff8fe7769901b
+#Sat Apr 11 16:13:59 CEST 2026
+hostName=Laptopdealex
+id=19d7ce467b98d4d67419f06e588e69b335ca6266069
 method=file
-server=192.168.1.45\:65207
+server=192.168.1.40\:63190

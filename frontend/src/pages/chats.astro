@@ -1239,8 +1239,8 @@ import Layout from "../layouts/Layout.astro";
     const plainTextAttr = !isLoc
       ? (' data-plain-text="' + escapeHtmlText(msg.contenido).replace(/"/g, '&quot;') + '"')
       : '';
-    wrapper.innerHTML = '<div class="' + bubbleCls + ' ' + pad + ' max-w-[75%] min-w-[180px] text-sm leading-relaxed overflow-hidden">'
-      + '<div class="msg-text"' + plainTextAttr + '>' + innerContent + '</div>'
+    wrapper.innerHTML = '<div class="' + bubbleCls + ' ' + pad + ' max-w-[75%] w-fit min-w-0 text-sm leading-relaxed overflow-hidden">'
+      + '<div class="msg-text break-words"' + plainTextAttr + '>' + innerContent + '</div>'
       + (!isLoc ? '<div class="flex items-center justify-end gap-1 mt-0.5">'
         + '<span class="text-[10px] text-[#8696a0] whitespace-nowrap">' + formatTs(msg.fechaEnvio) + '</span>'
         + (isMe ? '<span class="msg-status">' + ticksSvg(msg.leido) + '</span>' : '')

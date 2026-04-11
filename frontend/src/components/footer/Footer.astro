@@ -2,7 +2,7 @@
 import { Icon } from "astro-icon/components";
 ---
 
-<footer class="bg-base-300 text-base-content pt-16 pb-8 mt-auto">
+<footer class="bg-base-100 text-base-content pt-14 pb-8 mt-auto border-t border-base-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12"
@@ -18,14 +18,12 @@ import { Icon } from "astro-icon/components";
                             class="w-6 h-6 text-primary-content"
                         />
                     </div>
-                    <span
-                        class="text-2xl font-bold tracking-tighter gradient-text"
-                    >
+                    <span class="text-2xl font-bold tracking-tighter text-base-content">
                         UFV Shares
                     </span>
                 </a>
                 <p class="text-base-content/70 mb-6 leading-relaxed">
-                    Marketplace universitario para comprar, vender y alquilar entre estudiantes.
+                    Marketplace universitario para comprar, vender y alquilar entre estudiantes con seguridad y confianza.
                 </p>
                 <!-- Socials -->
                 <div class="flex gap-4">
@@ -72,16 +70,16 @@ import { Icon } from "astro-icon/components";
                     </li>
                     <li>
                         <a
-                            href="/favorites"
+                            href="/profile"
                             class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
-                            >Favoritos</a
+                            >Mi perfil</a
                         >
                     </li>
                     <li>
                         <a
-                            href="/auth?mode=login&next=%2Fapp"
+                            href="/settings"
                             class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
-                            >Iniciar sesión</a
+                            >Ajustes</a
                         >
                     </li>
                     <li>
@@ -96,15 +94,8 @@ import { Icon } from "astro-icon/components";
 
             <!-- Links Column 2 -->
             <div>
-                <h3 class="font-bold text-lg mb-6 text-base-content/90">Ayuda</h3>
+                <h3 class="font-bold text-lg mb-6 text-base-content/90">Recursos</h3>
                 <ul class="space-y-4">
-                    <li>
-                        <a
-                            href="/contact"
-                            class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
-                            >Contacto</a
-                        >
-                    </li>
                     <li>
                         <a
                             href="/about"
@@ -116,7 +107,14 @@ import { Icon } from "astro-icon/components";
                         <a
                             href="/blog"
                             class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
-                            >Blog</a
+                            >Blog y novedades</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            href="/contact"
+                            class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
+                            >Centro de ayuda</a
                         >
                     </li>
                     <li>
@@ -131,32 +129,48 @@ import { Icon } from "astro-icon/components";
 
             <!-- Newsletter -->
             <div>
-                <h3 class="font-bold text-lg mb-6 text-base-content/90">Mantente al día</h3>
-                <p class="text-base-content/70 mb-4 text-sm">Demo: este formulario no envía emails.</p>
-                <div class="form-control w-full">
-                    <label for="newsletter-email" class="sr-only">Correo electrónico para suscripción</label>
-                    <div class="relative">
-                        <input
-                            id="newsletter-email"
-                            type="text"
-                            placeholder="Tu email"
-                            class="input input-bordered w-full pr-12 focus:outline-hidden focus:border-primary"
-                        />
-                        <button
-                            class="absolute top-0 right-0 rounded-l-none btn btn-primary px-3"
-                            aria-label="Suscribirse"
+                <h3 class="font-bold text-lg mb-6 text-base-content/90">Legal</h3>
+                <ul class="space-y-4">
+                    <li>
+                        <a
+                            href="https://www.ufv.es/politica-de-privacidad/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
+                            >Política de privacidad</a
                         >
-                            <Icon name="lucide:arrow-right" class="w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
+                    </li>
+                    <li>
+                        <a
+                            href="https://www.ufv.es/aviso-legal/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
+                            >Aviso legal</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            href="/settings#legal"
+                            class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
+                            >Normas de publicación</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            href="/contact"
+                            class="text-base-content/60 hover:text-primary hover:translate-x-1 transition-all inline-block"
+                            >Contacto y soporte</a
+                        >
+                    </li>
+                </ul>
             </div>
         </div>
 
         <div
             class="border-t border-base-content/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-base-content/50"
         >
-            <p>&copy; {new Date().getFullYear()} UFV Shares (demo)</p>
+            <p>&copy; {new Date().getFullYear()} UFV Shares. Todos los derechos reservados.</p>
             <div class="flex gap-6">
                 <a href="https://www.ufv.es/politica-de-privacidad/" target="_blank" rel="noopener noreferrer" class="hover:text-base-content transition-colors"
                     >Privacidad</a
@@ -168,16 +182,3 @@ import { Icon } from "astro-icon/components";
         </div>
     </div>
 </footer>
-
-<style>
-    .gradient-text {
-        background: linear-gradient(
-            135deg,
-            var(--color-primary) 0%,
-            #6366f1 100%
-        );
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-</style>
