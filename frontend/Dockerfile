@@ -1,7 +1,7 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
-ARG PUBLIC_API_BASE=http://localhost:8080/api
+ARG PUBLIC_API_BASE=/api
 ENV PUBLIC_API_BASE=$PUBLIC_API_BASE
 
 COPY package*.json ./

@@ -78,7 +78,7 @@ import Links from "./Links.astro";
     }
 
     // Auth-aware nav links
-    const API_BASE_NAV = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
+    const API_BASE_NAV = import.meta.env.PUBLIC_API_BASE ?? "/api";
     const token = localStorage.getItem("ufvshares_token");
     const nombre = localStorage.getItem("ufvshares_nombre");
     const email = localStorage.getItem("ufvshares_email");

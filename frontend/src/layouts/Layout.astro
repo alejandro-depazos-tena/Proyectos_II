@@ -7,7 +7,7 @@ import ToasterComponent from "../components/ui/ToasterComponent";
 
 const { title, hideFooter } = Astro.props;
 const pageTitle = typeof title === "string" && title.trim().length > 0 ? title : "UFV Shares";
-const apiBase = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
+const apiBase = import.meta.env.PUBLIC_API_BASE ?? "/api";
 ---
 
 <!doctype html>
@@ -102,7 +102,7 @@ const apiBase = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
 		{hideFooter ? null : <Footer />}
 		<ToasterComponent client:load />
 		<script>
-			const API_BASE = (import.meta as any).env.PUBLIC_API_BASE ?? 'http://localhost:8080/api';
+			const API_BASE = (import.meta as any).env.PUBLIC_API_BASE ?? '/api';
 			const CHAT_POLL_MS = 3000;
 
 			interface LayoutChatConv {

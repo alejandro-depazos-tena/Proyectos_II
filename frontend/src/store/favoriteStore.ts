@@ -20,7 +20,7 @@ const SESSION_EMAIL_KEY = 'ufvshares_email';
 const SESSION_NAME_KEY = 'ufvshares_nombre';
 const SESSION_ADMIN_KEY = 'ufvshares_admin';
 const isBrowser = typeof window !== 'undefined' && typeof localStorage !== 'undefined';
-const API_BASE = (import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:8080/api').replace(/\/$/, '');
+const API_BASE = (import.meta.env.PUBLIC_API_BASE ?? '/api').replace(/\/$/, '');
 const BACKEND_BASE = API_BASE.replace(/\/api$/, '');
 
 let loadingPromise: Promise<void> | null = null;

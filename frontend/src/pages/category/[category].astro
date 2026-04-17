@@ -4,7 +4,7 @@ import CategoriesHeader from "../../components/categories/CategoriesHeader.astro
 import Breadcrumbs from "../../components/ui/Breadcrumbs.astro";
 import { categories as categoryImages } from "../../data/home";
 
-const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
+const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "/api";
 
 const CATEGORIES = [
     { slug: "libros",      name: "Libros",       apiCategory: "LIBROS"      },
