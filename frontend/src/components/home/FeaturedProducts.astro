@@ -666,6 +666,7 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
   async function loadProducts() {
     const loading = document.getElementById('products-loading');
     const noMsg = document.getElementById('no-products-msg');
+    const statEl = document.getElementById('stat-products');
     const token = localStorage.getItem('ufvshares_token');
     const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
     try {
@@ -673,16 +674,20 @@ const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:8080/api";
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const products = await res.json();
       loading?.classList.add('hidden');
-      if (!products.length) { noMsg?.classList.remove('hidden'); return; }
+      if (!products.length) {
+        noMsg?.classList.remove('hidden');
+        if (statEl) statEl.textContent = '0 anuncios activos';
+        return;
+      }
       _allProducts = products;
       window._allProducts = products;
       renderProducts(products);
       // Update hero stat counter
-      const statEl = document.getElementById('stat-products');
       if (statEl) statEl.textContent = products.length + ' anuncios activos';
     } catch (e) {
       loading?.classList.add('hidden');
       noMsg?.classList.remove('hidden');
+      if (statEl) statEl.textContent = 'Anuncios no disponibles';
       console.error('Error cargando productos:', e);
     }
   }

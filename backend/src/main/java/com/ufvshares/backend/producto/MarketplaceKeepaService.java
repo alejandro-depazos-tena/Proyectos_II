@@ -24,13 +24,15 @@ import org.springframework.stereotype.Service;
 public class MarketplaceKeepaService {
 
   private static final Pattern ASIN_PATTERN = Pattern.compile("^[A-Z0-9]{10}$");
+  private static final Pattern ASIN_IN_TEXT_PATTERN = Pattern.compile("\\b([A-Z0-9]{10})\\b", Pattern.CASE_INSENSITIVE);
   private static final String USER_AGENT = "Mozilla/5.0";
   private static final Pattern PRICE_JSON_PATTERN = Pattern.compile("\"price\"\\s*:\\s*\"?([0-9]+(?:[\\.,][0-9]{1,2})?)\"?");
 
   private record AsinCandidate(String asin, int score) {}
 
   public Map<String, Object> getMarketplaceData(Producto producto) {
-    String searchQuery = buildSearchQuery(producto);
+    String explicitAsin = extractExplicitAsin(producto);
+    String searchQuery = explicitAsin != null ? explicitAsin : buildSearchQuery(producto);
 
     Map<String, Object> result = new LinkedHashMap<>();
     result.put("source", "AMAZON_SCRAPING");
@@ -40,14 +42,20 @@ public class MarketplaceKeepaService {
     result.put("sellerPrice", producto.getPrecio());
 
     try {
-      List<String> asinCandidates = resolveAsinCandidatesFromAmazonSearch(searchQuery, 8);
-      if (asinCandidates.isEmpty()) {
-        result.put("available", false);
-        result.put("message", "No se encontró ASIN equivalente para este producto");
-        return result;
+      String selectedAsin;
+      if (explicitAsin != null) {
+        selectedAsin = explicitAsin;
+        result.put("asinSource", "PRODUCT_METADATA");
+      } else {
+        List<String> asinCandidates = resolveAsinCandidatesFromAmazonSearch(searchQuery, 8);
+        if (asinCandidates.isEmpty()) {
+          result.put("available", false);
+          result.put("message", "No se encontró ASIN equivalente para este producto");
+          return result;
+        }
+        selectedAsin = asinCandidates.get(0);
+        result.put("asinSource", "AMAZON_SEARCH");
       }
-
-      String selectedAsin = asinCandidates.get(0);
 
       result.put("available", true);
       result.put("asin", selectedAsin);
@@ -245,5 +253,26 @@ public class MarketplaceKeepaService {
 
   private String safe(String s) {
     return s == null ? "" : s;
+  }
+
+  private String extractExplicitAsin(Producto producto) {
+    String haystack = (safe(producto.getTitulo()) + " " + safe(producto.getDescripcion())).toUpperCase(Locale.ROOT);
+    Matcher matcher = ASIN_IN_TEXT_PATTERN.matcher(haystack);
+    while (matcher.find()) {
+      String candidate = matcher.group(1);
+      if (ASIN_PATTERN.matcher(candidate).matches() && containsDigit(candidate)) {
+        return candidate;
+      }
+    }
+    return null;
+  }
+
+  private boolean containsDigit(String value) {
+    for (int i = 0; i < value.length(); i++) {
+      if (Character.isDigit(value.charAt(i))) {
+        return true;
+      }
+    }
+    return false;
   }
 }

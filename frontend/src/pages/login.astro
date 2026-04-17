@@ -1,6 +1,7 @@
 ---
 import '../styles/site.css';
 const next = Astro.url.searchParams.get('next') ?? '/app';
+const LOGIN_API_BASE = import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:8080/api';
 ---
 
 <html lang="es">
@@ -59,8 +60,8 @@ const next = Astro.url.searchParams.get('next') ?? '/app';
 			</form>
 		</div>
 
-		<script type="module">
-			const API_BASE = 'http://localhost:8080/api';
+		<script type="module" define:vars={{ LOGIN_API_BASE }}>
+			const API_BASE = LOGIN_API_BASE;
 			const params = new URLSearchParams(window.location.search);
 			const next = params.get('next') || '/app';
 			const allowSwitchAccount = params.get('switch') === '1';

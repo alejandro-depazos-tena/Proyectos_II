@@ -193,13 +193,13 @@ En cuentas con verificación en dos pasos, normalmente necesitas una contraseña
 
 ---
 
-## 🐳 Docker (frontend + backend + MariaDB)
+## 🐳 Docker (frontend + backend + PostgreSQL)
 
 La dockerización de este repositorio está planteada en **3 servicios separados**:
 
 - `frontend` (Astro compilado y servido con Nginx)
 - `backend` (Spring Boot)
-- `db` (MariaDB)
+- `db` (PostgreSQL)
 
 Esto es preferible a meter todo en un solo contenedor porque permite:
 
@@ -212,11 +212,11 @@ Esto es preferible a meter todo en un solo contenedor porque permite:
 - `docker-compose.yml`
 - `backend/Dockerfile`
 - `frontend/Dockerfile`
-- `.env.docker.example`
+- `.env.example`
 
 ### Levantar el stack
 
-1. Copia `.env.docker.example` a `.env` y ajusta contraseñas.
+1. Copia `.env.example` a `.env` y ajusta contraseñas.
 2. Ejecuta:
 
 ```bash
@@ -227,7 +227,7 @@ docker compose up --build -d
 
 - Frontend: `http://localhost`
 - Backend: `http://localhost:8080`
-- MariaDB: `localhost:3306`
+- PostgreSQL: `localhost:5432`
 
 ### Apagar y limpiar
 
@@ -235,11 +235,44 @@ docker compose up --build -d
 docker compose down
 ```
 
-Para borrar también datos persistidos de MariaDB:
+Para borrar tambien datos persistidos de PostgreSQL:
 
 ```bash
 docker compose down -v
 ```
+
+### Variables recomendadas para Docker local
+
+- `POSTGRES_DB=ufvsharesdb`
+- `POSTGRES_USER=ufvshares`
+- `POSTGRES_PASSWORD=ufvshares_password_change_me`
+
+### Render + PostgreSQL gestionado
+
+Para desplegar el backend usando tu Postgres de Render, configura estas variables en el servicio backend:
+
+- `DATABASE_URL=postgresql://user:password@host:5432/database`
+- `JPA_DDL_AUTO=update`
+- `APP_SEED_JSON_ENABLED=false`
+- `APP_FRONTEND_URL=https://tu-frontend.onrender.com`
+- `APP_API_URL=https://tu-backend.onrender.com/api`
+
+Notas:
+
+- El backend ahora soporta `DATABASE_URL` de Render y la convierte automaticamente a JDBC.
+- Si prefieres, puedes definir directamente `DB_URL`, `DB_USER`, `DB_PASSWORD`, `DB_DRIVER` y `JPA_DIALECT`.
+
+### Migracion MySQL -> PostgreSQL (recomendada con pgloader)
+
+Con ambos motores accesibles en red, puedes migrar esquema y datos en un solo paso:
+
+```bash
+docker run --rm dimitri/pgloader:latest \
+	pgsql://POSTGRES_USER:POSTGRES_PASSWORD@POSTGRES_HOST:5432/POSTGRES_DB \
+	mysql://MYSQL_USER:MYSQL_PASSWORD@MYSQL_HOST:3306/MYSQL_DB
+```
+
+Despues de migrar, levanta el backend apuntando a PostgreSQL y valida endpoints clave (`/api/hello`, login, listados, chat y favoritos).
 
 ### Modo simple: una sola imagen (frontend + backend + MariaDB)
 
