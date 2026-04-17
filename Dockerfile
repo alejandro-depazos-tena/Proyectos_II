@@ -20,6 +20,8 @@ FROM eclipse-temurin:21-jre-jammy
 
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    postgresql \
+    postgresql-client \
      nginx \
     curl \
      ca-certificates \
@@ -33,7 +35,8 @@ COPY deploy/single/nginx.conf /etc/nginx/sites-available/default
 COPY deploy/single/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh \
-  && mkdir -p /data/uploads
+  && mkdir -p /data/uploads /data/postgres /run/postgresql \
+  && chown -R postgres:postgres /data/postgres /run/postgresql
 
 ENV APP_FRONTEND_URL=https://ufvshares.onrender.com
 ENV APP_API_URL=https://ufvshares.onrender.com/api
