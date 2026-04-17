@@ -101,6 +101,15 @@ public class JsonSeedDataLoader implements CommandLineRunner {
   @Value("${app.seed.bootstrap-admin.password:Admin1234!}")
   private String bootstrapAdminPassword;
 
+  @Value("${app.seed.bootstrap-mario.enabled:true}")
+  private boolean bootstrapMarioEnabled;
+
+  @Value("${app.seed.bootstrap-mario.email:9300322@ALUMNOS.UFV.ES}")
+  private String bootstrapMarioEmail;
+
+  @Value("${app.seed.bootstrap-mario.password:1234ASDF}")
+  private String bootstrapMarioPassword;
+
   public JsonSeedDataLoader(
       ObjectMapper objectMapper,
       ResourceLoader resourceLoader,
@@ -153,11 +162,15 @@ public class JsonSeedDataLoader implements CommandLineRunner {
     SeedMode mode = resolveSeedMode();
     if (!seedEnabled || mode == SeedMode.NEVER) {
       log.info("Seed JSON desactivado (enabled={}, mode={}).", seedEnabled, mode);
+      ensureBootstrapAdmin();
+      ensureBootstrapMario();
       return;
     }
 
     if (mode == SeedMode.IF_EMPTY && (usuarioRepository.count() > 0 || productoRepository.count() > 0)) {
       log.info("Seed JSON omitido: ya existen datos en la base de datos.");
+      ensureBootstrapAdmin();
+      ensureBootstrapMario();
       return;
     }
 
@@ -232,6 +245,7 @@ public class JsonSeedDataLoader implements CommandLineRunner {
     }
 
     ensureBootstrapAdmin();
+    ensureBootstrapMario();
 
     log.info(
         "Seed JSON aplicado: {} usuarios, {} productos, {} solicitudes, {} transacciones, {} favoritos, {} conversaciones y {} mensajes.",
@@ -268,6 +282,31 @@ public class JsonSeedDataLoader implements CommandLineRunner {
     admin.setPasswordHash(passwordEncoder.encode(bootstrapAdminPassword));
     usuarioRepository.save(admin);
     log.info("Usuario admin de arranque garantizado: {}", normalizedEmail);
+  }
+
+  private void ensureBootstrapMario() {
+    if (!bootstrapMarioEnabled) {
+      return;
+    }
+
+    if (bootstrapMarioEmail == null || bootstrapMarioEmail.isBlank()) {
+      return;
+    }
+
+    String normalizedEmail = bootstrapMarioEmail.trim().toLowerCase();
+    Usuario mario = usuarioRepository.findByCorreoIgnoreCase(normalizedEmail).orElseGet(Usuario::new);
+
+    if (mario.getIdUsuario() == null) {
+      mario.setNombre("Mario");
+      mario.setApellidos("UFV");
+      mario.setDni("00000021Y");
+      mario.setTelefono("600000021");
+      mario.setCorreo(normalizedEmail);
+    }
+
+    mario.setPasswordHash(passwordEncoder.encode(bootstrapMarioPassword));
+    usuarioRepository.save(mario);
+    log.info("Usuario Mario de arranque garantizado: {}", normalizedEmail);
   }
 
   private SeedMode resolveSeedMode() {
