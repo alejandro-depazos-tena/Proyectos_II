@@ -71,6 +71,26 @@ export APP_SEED_JSON_ENABLED="${APP_SEED_JSON_ENABLED:-false}"
 java -jar /app/app.jar &
 PID_BACKEND=$!
 
+BACKEND_READY=0
+for i in $(seq 1 90); do
+  if curl -fsS "http://127.0.0.1:8080/api/hello" >/dev/null 2>&1; then
+    BACKEND_READY=1
+    break
+  fi
+
+  if ! kill -0 "${PID_BACKEND}" 2>/dev/null; then
+    echo "Backend process exited before becoming ready" >&2
+    exit 1
+  fi
+
+  sleep 1
+done
+
+if [ "${BACKEND_READY}" -ne 1 ]; then
+  echo "Backend did not become ready in time" >&2
+  exit 1
+fi
+
 nginx -g 'daemon off;' &
 PID_NGINX=$!
 

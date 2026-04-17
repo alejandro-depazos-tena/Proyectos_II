@@ -23,6 +23,7 @@ RUN apt-get update \
      mariadb-server \
      mariadb-client \
      nginx \
+    curl \
      ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
