@@ -171,8 +171,22 @@ export JPA_DDL_AUTO="${JPA_DDL_AUTO:-update}"
 export APP_FRONTEND_URL="${APP_FRONTEND_URL:-https://ufvshares.onrender.com}"
 export APP_API_URL="${APP_API_URL:-https://ufvshares.onrender.com/api}"
 export APP_UPLOAD_DIR="${UPLOAD_DIR}"
+export APP_MAIL_DEV_FALLBACK="${APP_MAIL_DEV_FALLBACK:-false}"
+export MAIL_HOST="${MAIL_HOST:-smtp.gmail.com}"
+export MAIL_PORT="${MAIL_PORT:-587}"
+export MAIL_USERNAME="${MAIL_USERNAME:-soporteufvshares@gmail.com}"
+export MAIL_PASSWORD="${MAIL_PASSWORD:-uwozumaougrihsqb}"
+if [ -z "${MAIL_USERNAME:-}" ] && [ -n "${MAIL_USER:-}" ]; then
+  export MAIL_USERNAME="${MAIL_USER}"
+fi
+if [ -z "${MAIL_FROM:-}" ] && [ -n "${MAIL_USERNAME:-}" ]; then
+  export MAIL_FROM="${MAIL_USERNAME}"
+fi
 export APP_SEED_JSON_ENABLED="${APP_SEED_JSON_ENABLED:-true}"
 export APP_SEED_JSON_MODE="${APP_SEED_JSON_MODE:-always}"
+export APP_SEED_BOOTSTRAP_ADMIN_ENABLED="${APP_SEED_BOOTSTRAP_ADMIN_ENABLED:-true}"
+export APP_SEED_BOOTSTRAP_ADMIN_EMAIL="${APP_SEED_BOOTSTRAP_ADMIN_EMAIL:-admin@ufv.es}"
+export APP_SEED_BOOTSTRAP_ADMIN_PASSWORD="${APP_SEED_BOOTSTRAP_ADMIN_PASSWORD:-1234ASDF}"
 
 java -jar /app/app.jar &
 PID_BACKEND=$!

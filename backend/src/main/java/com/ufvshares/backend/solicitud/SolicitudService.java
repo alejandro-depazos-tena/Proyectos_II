@@ -6,6 +6,8 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,8 @@ import com.ufvshares.backend.usuario.UsuarioRepository;
 
 @Service
 public class SolicitudService {
+
+  private static final Logger log = LoggerFactory.getLogger(SolicitudService.class);
 
   private final SolicitudRepository repository;
   private final ProductoRepository productoRepository;
@@ -129,11 +133,12 @@ public class SolicitudService {
           producto.getTitulo(),
           producto.getIdProducto());
     } catch (Exception ex) {
-      System.out.println("[MAIL ERROR SOLICITUD] idProducto=" + producto.getIdProducto()
-          + " propietario=" + propietario.getCorreo()
-          + " causa=" + ex.getClass().getName()
-          + " mensaje=" + ex.getMessage());
-      throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "MAIL_SEND_FAILED");
+      // El correo es notificación secundaria: no debe tumbar la reserva si el SMTP falla.
+      log.warn("[MAIL ERROR SOLICITUD] idProducto={} propietario={} causa={} mensaje={}",
+          producto.getIdProducto(),
+          propietario.getCorreo(),
+          ex.getClass().getName(),
+          ex.getMessage());
     }
 
     return solicitudGuardada;
