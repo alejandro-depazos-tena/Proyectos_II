@@ -20,8 +20,6 @@ FROM eclipse-temurin:21-jre-jammy
 
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-     mariadb-server \
-     mariadb-client \
      nginx \
     curl \
      ca-certificates \
@@ -31,19 +29,12 @@ WORKDIR /app
 
 COPY --from=backend-build /build/backend/target/*.jar /app/app.jar
 COPY --from=frontend-build /build/frontend/dist /usr/share/nginx/html
-COPY bbdd/tablas.sql /docker-entrypoint-initdb.d/01_tablas.sql
-COPY bbdd/datos.sql /docker-entrypoint-initdb.d/02_datos.sql
 COPY deploy/single/nginx.conf /etc/nginx/sites-available/default
 COPY deploy/single/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh \
-  && mkdir -p /data/mysql /data/uploads /run/mysqld \
-  && chown -R mysql:mysql /data/mysql /run/mysqld
+  && mkdir -p /data/uploads
 
-ENV MARIADB_ROOT_PASSWORD=root_password_change_me
-ENV MARIADB_DATABASE=ufvshare
-ENV MARIADB_USER=ufvshares
-ENV MARIADB_PASSWORD=ufvshares_password_change_me
 ENV APP_FRONTEND_URL=https://ufvshares.onrender.com
 ENV APP_API_URL=https://ufvshares.onrender.com/api
 ENV APP_UPLOAD_DIR=/data/uploads

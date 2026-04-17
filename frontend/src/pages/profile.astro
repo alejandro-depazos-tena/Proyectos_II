@@ -1692,8 +1692,47 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
 
   // ── Google Books API integration ──────────────────────────────────────
   const GBOOKS_API = 'https://www.googleapis.com/books/v1/volumes';
+  const OPENLIB_API = 'https://openlibrary.org/search.json';
   const GBOOKS_KEY = GOOGLE_BOOKS_KEY ?? '';
   const _gBooksCache = new Map();
+
+  function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  function isTransientGoogleBooksError(status) {
+    return status === 429 || status === 503 || status >= 500;
+  }
+
+  function mapOpenLibraryToItems(data) {
+    const docs = Array.isArray(data?.docs) ? data.docs.slice(0, 6) : [];
+    return {
+      items: docs.map(doc => {
+        const isbn = Array.isArray(doc.isbn) && doc.isbn.length ? String(doc.isbn[0]) : '';
+        const cover = doc.cover_i
+          ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`
+          : null;
+        return {
+          id: doc.key ?? doc.cover_edition_key ?? doc.title,
+          volumeInfo: {
+            title: doc.title ?? 'Sin título',
+            authors: Array.isArray(doc.author_name) ? doc.author_name.slice(0, 3) : [],
+            publishedDate: doc.first_publish_year ? String(doc.first_publish_year) : undefined,
+            industryIdentifiers: isbn ? [{ type: 'ISBN_13', identifier: isbn }] : [],
+            imageLinks: cover ? { thumbnail: cover, smallThumbnail: cover } : undefined,
+          }
+        };
+      })
+    };
+  }
+
+  async function searchOpenLibrary(query) {
+    const params = new URLSearchParams({ q: query, limit: '6' });
+    const res = await fetch(OPENLIB_API + '?' + params.toString());
+    if (!res.ok) throw new Error('OPENLIB_HTTP_' + res.status);
+    const data = await res.json();
+    return mapOpenLibraryToItems(data);
+  }
 
   const categoriaSelect  = document.querySelector('select[name="categoria"]');
   const booksLookup      = $('books-lookup');
@@ -1730,14 +1769,52 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
     const params = new URLSearchParams(paramObj);
     const url = GBOOKS_API + '?' + params.toString();
 
-    const res = await fetch(url);
-    if (!res.ok) {
-      const body = await res.text().catch(() => '');
-      throw new Error('HTTP ' + res.status + (body ? ': ' + body.substring(0, 200) : ''));
+    let lastError = null;
+    let lastTransientStatus = 0;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 7000);
+
+      try {
+        const res = await fetch(url, { signal: controller.signal });
+        if (!res.ok) {
+          const err = new Error('HTTP ' + res.status);
+          err.status = res.status;
+          throw err;
+        }
+
+        const data = await res.json();
+        _gBooksCache.set(q, data); // guardar en caché
+        return data;
+      } catch (err) {
+        lastError = err;
+        const status = Number(err?.status ?? 0);
+        const aborted = err?.name === 'AbortError';
+        const transient = aborted || isTransientGoogleBooksError(status);
+        if (transient && status) {
+          lastTransientStatus = status;
+        }
+
+        if (!transient || attempt === 2) {
+          throw err;
+        }
+        await wait(500 * (attempt + 1));
+      } finally {
+        clearTimeout(timeoutId);
+      }
     }
-    const data = await res.json();
-    _gBooksCache.set(q, data); // guardar en caché
-    return data;
+
+    if (lastTransientStatus) {
+      try {
+        const fallback = await searchOpenLibrary(query);
+        _gBooksCache.set(q, fallback);
+        return fallback;
+      } catch (fallbackErr) {
+        console.warn('[OpenLibrary] fallback failed', fallbackErr?.message ?? fallbackErr);
+      }
+    }
+
+    throw lastError ?? new Error('Google Books unavailable');
   }
 
   function fillFormWithBook(item) {
@@ -1841,11 +1918,17 @@ const GOOGLE_BOOKS_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY ?? "";
         booksResultsEl.appendChild(btn2);
       });
     } catch (err) {
-      console.error('[Google Books]', err);
+      console.warn('[Google Books] request failed', { status: Number(err?.status ?? 0), name: err?.name ?? 'Error' });
       const isNetwork = err instanceof TypeError;
-      const msg = isNetwork
-        ? 'No se pudo contactar con Google Books. Comprueba tu conexión a internet.'
-        : 'Google Books respondió con un error (' + (err.message ?? '') + '). Inténtalo de nuevo.';
+      const status = Number(err?.status ?? 0);
+      const isTimeout = err?.name === 'AbortError';
+      const msg = isNetwork || isTimeout
+        ? 'Google Books no responde ahora mismo. Comprueba tu conexión e inténtalo de nuevo en unos segundos.'
+        : (status === 429
+            ? 'Google Books ha limitado temporalmente las consultas. Espera unos segundos e inténtalo de nuevo.'
+            : (status === 503
+                ? 'Google Books está temporalmente no disponible. Inténtalo de nuevo en unos instantes.'
+                : 'Google Books devolvió un error temporal. Inténtalo de nuevo.'));
       booksResultsEl.innerHTML =
         `<p class="text-sm text-center text-error/70 py-4 px-3">${msg}</p>`;
     } finally {

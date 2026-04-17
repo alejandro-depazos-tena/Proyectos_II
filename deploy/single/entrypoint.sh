@@ -1,78 +1,70 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DATADIR="${MARIADB_DATADIR:-/data/mysql}"
 UPLOAD_DIR="${APP_UPLOAD_DIR:-/data/uploads}"
-INIT_MARKER="${DATADIR}/.ufvshares_initialized"
+mkdir -p "${UPLOAD_DIR}"
 
-MARIADB_ROOT_PASSWORD="${MARIADB_ROOT_PASSWORD:-root_password_change_me}"
-MARIADB_DATABASE="${MARIADB_DATABASE:-ufvshare}"
-MARIADB_USER="${MARIADB_USER:-ufvshares}"
-MARIADB_PASSWORD="${MARIADB_PASSWORD:-ufvshares_password_change_me}"
+# Soporta DATABASE_URL estilo Render: postgresql://user:pass@host:5432/db
+if [ -z "${DB_URL:-}" ] && [ -n "${DATABASE_URL:-}" ]; then
+  raw="${DATABASE_URL#postgres://}"
+  raw="${raw#postgresql://}"
 
-mkdir -p "${DATADIR}" "${UPLOAD_DIR}" /run/mysqld
-chown -R mysql:mysql "${DATADIR}" /run/mysqld
+  creds="${raw%%@*}"
+  host_db="${raw#*@}"
 
-if [ ! -d "${DATADIR}/mysql" ]; then
-  mariadb-install-db --user=mysql --datadir="${DATADIR}" --skip-test-db
+  if [ "${host_db}" = "${raw}" ]; then
+    creds=""
+    host_db="${raw}"
+  fi
+
+  host_port="${host_db%%/*}"
+  db_part="${host_db#*/}"
+  db_name="${db_part%%\?*}"
+  query=""
+  if [ "${db_part}" != "${db_name}" ]; then
+    query="${db_part#*\?}"
+  fi
+
+  jdbc_url="jdbc:postgresql://${host_port}/${db_name}"
+  if [ -n "${query}" ]; then
+    jdbc_url="${jdbc_url}?${query}"
+  fi
+  export DB_URL="${jdbc_url}"
+
+  if [ -n "${creds}" ]; then
+    db_user="${creds%%:*}"
+    db_pass="${creds#*:}"
+    if [ "${db_user}" != "${creds}" ] && [ -z "${DB_USER:-}" ]; then
+      export DB_USER="${db_user}"
+    fi
+    if [ "${db_user}" != "${creds}" ] && [ -z "${DB_PASSWORD:-}" ]; then
+      export DB_PASSWORD="${db_pass}"
+    fi
+  fi
 fi
 
-mariadbd \
-  --user=mysql \
-  --datadir="${DATADIR}" \
-  --bind-address=127.0.0.1 \
-  --port=3306 \
-  --socket=/run/mysqld/mysqld.sock &
-PID_DB=$!
-
-for i in $(seq 1 60); do
-  if mysqladmin ping --host=127.0.0.1 --port=3306 --silent; then
-    break
-  fi
-  sleep 1
-done
-
-if ! mysqladmin ping --host=127.0.0.1 --port=3306 --silent; then
-  echo "MariaDB did not start correctly" >&2
+if [ -z "${DB_URL:-}" ]; then
+  echo "Missing DB_URL/DATABASE_URL for PostgreSQL connection" >&2
   exit 1
 fi
 
-if [ ! -f "${INIT_MARKER}" ]; then
-  mysql -uroot <<SQL
-ALTER USER 'root'@'localhost' IDENTIFIED BY '${MARIADB_ROOT_PASSWORD}';
-CREATE DATABASE IF NOT EXISTS \`${MARIADB_DATABASE}\`;
-CREATE USER IF NOT EXISTS '${MARIADB_USER}'@'%' IDENTIFIED BY '${MARIADB_PASSWORD}';
-GRANT ALL PRIVILEGES ON \`${MARIADB_DATABASE}\`.* TO '${MARIADB_USER}'@'%';
-FLUSH PRIVILEGES;
-SQL
-
-  if [ -f /docker-entrypoint-initdb.d/01_tablas.sql ]; then
-    mysql -uroot -p"${MARIADB_ROOT_PASSWORD}" "${MARIADB_DATABASE}" < /docker-entrypoint-initdb.d/01_tablas.sql
-  fi
-
-  if [ -f /docker-entrypoint-initdb.d/02_datos.sql ]; then
-    mysql -uroot -p"${MARIADB_ROOT_PASSWORD}" "${MARIADB_DATABASE}" < /docker-entrypoint-initdb.d/02_datos.sql
-  fi
-
-  touch "${INIT_MARKER}"
-fi
-
-export DB_URL="${DB_URL:-jdbc:mariadb://127.0.0.1:3306/${MARIADB_DATABASE}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC}"
-export DB_USER="${DB_USER:-${MARIADB_USER}}"
-export DB_PASSWORD="${DB_PASSWORD:-${MARIADB_PASSWORD}}"
-export DB_DRIVER="${DB_DRIVER:-org.mariadb.jdbc.Driver}"
-export JPA_DIALECT="${JPA_DIALECT:-org.hibernate.dialect.MariaDBDialect}"
+export DB_DRIVER="${DB_DRIVER:-org.postgresql.Driver}"
+export JPA_DIALECT="${JPA_DIALECT:-org.hibernate.dialect.PostgreSQLDialect}"
 export JPA_DDL_AUTO="${JPA_DDL_AUTO:-update}"
 export APP_FRONTEND_URL="${APP_FRONTEND_URL:-https://ufvshares.onrender.com}"
 export APP_API_URL="${APP_API_URL:-https://ufvshares.onrender.com/api}"
 export APP_UPLOAD_DIR="${UPLOAD_DIR}"
-export APP_SEED_JSON_ENABLED="${APP_SEED_JSON_ENABLED:-false}"
+export APP_SEED_JSON_ENABLED="${APP_SEED_JSON_ENABLED:-true}"
+export APP_SEED_JSON_MODE="${APP_SEED_JSON_MODE:-always}"
 
 java -jar /app/app.jar &
 PID_BACKEND=$!
 
+nginx -g 'daemon off;' &
+PID_NGINX=$!
+
 BACKEND_READY=0
-for i in $(seq 1 90); do
+for i in $(seq 1 180); do
   if curl -fsS "http://127.0.0.1:8080/api/hello" >/dev/null 2>&1; then
     BACKEND_READY=1
     break
@@ -87,15 +79,11 @@ for i in $(seq 1 90); do
 done
 
 if [ "${BACKEND_READY}" -ne 1 ]; then
-  echo "Backend did not become ready in time" >&2
-  exit 1
+  echo "Backend did not become ready in time, continuing with nginx up" >&2
 fi
 
-nginx -g 'daemon off;' &
-PID_NGINX=$!
-
 term_handler() {
-  kill -TERM "${PID_NGINX}" "${PID_BACKEND}" "${PID_DB}" 2>/dev/null || true
+  kill -TERM "${PID_NGINX}" "${PID_BACKEND}" 2>/dev/null || true
 }
 
 trap term_handler TERM INT
