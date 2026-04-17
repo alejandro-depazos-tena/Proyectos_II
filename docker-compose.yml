@@ -2,22 +2,19 @@ version: "3.9"
 
 services:
   db:
-    image: mariadb:11.4
+    image: postgres:16-alpine
     container_name: ufvshares-db
     restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-root_password_change_me}
-      MARIADB_DATABASE: ${MARIADB_DATABASE:-ufvshare}
-      MARIADB_USER: ${MARIADB_USER:-ufvshares}
-      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-ufvshares_password_change_me}
+      POSTGRES_DB: ${POSTGRES_DB:-ufvsharesdb}
+      POSTGRES_USER: ${POSTGRES_USER:-ufvshares}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ufvshares_password_change_me}
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - db-data:/var/lib/mysql
-      - ./bbdd/tablas.sql:/docker-entrypoint-initdb.d/01_tablas.sql:ro
-      - ./bbdd/datos.sql:/docker-entrypoint-initdb.d/02_datos.sql:ro
+      - pg-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ufvshares} -d ${POSTGRES_DB:-ufvsharesdb}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -33,15 +30,19 @@ services:
       db:
         condition: service_healthy
     environment:
-      DB_URL: jdbc:mariadb://db:3306/${MARIADB_DATABASE:-ufvshare}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
-      DB_USER: ${MARIADB_USER:-ufvshares}
-      DB_PASSWORD: ${MARIADB_PASSWORD:-ufvshares_password_change_me}
-      DB_DRIVER: org.mariadb.jdbc.Driver
-      JPA_DIALECT: org.hibernate.dialect.MariaDBDialect
+      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-ufvsharesdb}
+      DB_USER: ${POSTGRES_USER:-ufvshares}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-ufvshares_password_change_me}
+      DB_DRIVER: org.postgresql.Driver
+      JPA_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       JPA_DDL_AUTO: update
       APP_FRONTEND_URL: ${APP_FRONTEND_URL:-http://localhost}
       APP_API_URL: ${APP_API_URL:-http://localhost:8080/api}
-      APP_SEED_JSON_ENABLED: "false"
+      APP_SEED_JSON_ENABLED: ${APP_SEED_JSON_ENABLED:-true}
+      APP_SEED_JSON_MODE: ${APP_SEED_JSON_MODE:-always}
+      APP_SEED_BOOTSTRAP_ADMIN_ENABLED: ${APP_SEED_BOOTSTRAP_ADMIN_ENABLED:-true}
+      APP_SEED_BOOTSTRAP_ADMIN_EMAIL: ${APP_SEED_BOOTSTRAP_ADMIN_EMAIL:-admin@ufv.es}
+      APP_SEED_BOOTSTRAP_ADMIN_PASSWORD: ${APP_SEED_BOOTSTRAP_ADMIN_PASSWORD:-Admin1234!}
       MAIL_HOST: ${MAIL_HOST:-smtp.office365.com}
       MAIL_PORT: ${MAIL_PORT:-587}
       MAIL_USERNAME: ${MAIL_USERNAME:-}
@@ -66,5 +67,5 @@ services:
       - "80:80"
 
 volumes:
-  db-data:
+  pg-data:
   uploads-data:
