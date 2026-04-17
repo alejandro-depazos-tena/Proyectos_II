@@ -162,15 +162,12 @@ public class JsonSeedDataLoader implements CommandLineRunner {
     SeedMode mode = resolveSeedMode();
     if (!seedEnabled || mode == SeedMode.NEVER) {
       log.info("Seed JSON desactivado (enabled={}, mode={}).", seedEnabled, mode);
-      ensureBootstrapAdmin();
-      ensureBootstrapMario();
       return;
     }
 
     if (mode == SeedMode.IF_EMPTY && (usuarioRepository.count() > 0 || productoRepository.count() > 0)) {
       log.info("Seed JSON omitido: ya existen datos en la base de datos.");
-      ensureBootstrapAdmin();
-      ensureBootstrapMario();
+      ensureBootstrapUsersSafely();
       return;
     }
 
@@ -244,8 +241,7 @@ public class JsonSeedDataLoader implements CommandLineRunner {
       mensajeRepository.saveAll(mensajes);
     }
 
-    ensureBootstrapAdmin();
-    ensureBootstrapMario();
+    ensureBootstrapUsersSafely();
 
     log.info(
         "Seed JSON aplicado: {} usuarios, {} productos, {} solicitudes, {} transacciones, {} favoritos, {} conversaciones y {} mensajes.",
@@ -282,6 +278,15 @@ public class JsonSeedDataLoader implements CommandLineRunner {
     admin.setPasswordHash(passwordEncoder.encode(bootstrapAdminPassword));
     usuarioRepository.save(admin);
     log.info("Usuario admin de arranque garantizado: {}", normalizedEmail);
+  }
+
+  private void ensureBootstrapUsersSafely() {
+    try {
+      ensureBootstrapAdmin();
+      ensureBootstrapMario();
+    } catch (Exception ex) {
+      log.warn("No se pudieron garantizar los usuarios bootstrap: {}", ex.getMessage());
+    }
   }
 
   private void ensureBootstrapMario() {

@@ -43,8 +43,8 @@ ENV MARIADB_ROOT_PASSWORD=root_password_change_me
 ENV MARIADB_DATABASE=ufvshare
 ENV MARIADB_USER=ufvshares
 ENV MARIADB_PASSWORD=ufvshares_password_change_me
-ENV APP_FRONTEND_URL=http://localhost
-ENV APP_API_URL=http://localhost/api
+ENV APP_FRONTEND_URL=https://ufvshares.onrender.com
+ENV APP_API_URL=https://ufvshares.onrender.com/api
 ENV APP_UPLOAD_DIR=/data/uploads
 
 VOLUME ["/data"]

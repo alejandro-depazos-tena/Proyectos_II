@@ -21,7 +21,7 @@ public class CorsConfig implements WebMvcConfigurer {
   @Value("${app.frontend.url:http://localhost:4321}")
   private String frontendUrls;
 
-  private String[] resolveAllowedOrigins() {
+  private String[] resolveAllowedOriginPatterns() {
     Set<String> allowed = new LinkedHashSet<>();
 
     for (String origin : frontendUrls.split(",")) {
@@ -31,10 +31,12 @@ public class CorsConfig implements WebMvcConfigurer {
       }
     }
 
-    allowed.add("http://localhost:4321");
-    allowed.add("http://127.0.0.1:4321");
-    allowed.add("http://localhost");
-    allowed.add("http://127.0.0.1");
+    allowed.add("http://localhost:*");
+    allowed.add("https://localhost:*");
+    allowed.add("http://127.0.0.1:*");
+    allowed.add("https://127.0.0.1:*");
+    allowed.add("https://*.onrender.com");
+    allowed.add("http://*.onrender.com");
 
     List<String> result = new ArrayList<>(allowed);
     return result.toArray(new String[0]);
@@ -42,18 +44,18 @@ public class CorsConfig implements WebMvcConfigurer {
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {
-    String[] allowedOrigins = resolveAllowedOrigins();
+    String[] allowedOrigins = resolveAllowedOriginPatterns();
 
     registry
         .addMapping("/api/**")
-        .allowedOrigins(allowedOrigins)
+      .allowedOriginPatterns(allowedOrigins)
         .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
         .allowedHeaders("*")
         .allowCredentials(false);
 
     registry
         .addMapping("/uploads/**")
-        .allowedOrigins(allowedOrigins)
+      .allowedOriginPatterns(allowedOrigins)
         .allowedMethods("GET", "OPTIONS")
         .allowedHeaders("*")
         .allowCredentials(false);
