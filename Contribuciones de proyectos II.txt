@@ -1,0 +1,42 @@
+Contribuciones de proyectos II:
+	ALEJANDRO
+- Documento de propuesta de proyecto 
+- Logo
+- Diagrama Gannt ( crear el diagrama versión inicial )
+- Priorización del primer sprint con product backlog items
+- convocar reuniones 
+- Iniciar el proyecto (  id del commit : 4cf07 )  
+- Plan de trabajo en documento Objetivos y plan de trabajo
+- Arreglar diagramas iniciales en markdown
+- Busqueda de la plantilla del frontend
+- Incorporar un login, un registro , diseñar el landing page , cambiar la estructura de la plantilla, y cambiar el navbar + pantalla de favoritos y pantalla del perfil ( id del commit : b6c3ab7 )
+- validar los campos de los formularios + eliminar apartado de apuntes en el navbar ( id del commit : 8c5d2dda  )
+- Explicar las fotos de la aplicacion en la entrega de la documentacion del sprint 1
+- Sobre nosotros y blog ( id del commit : 29491 )
+- Apartado de Contacto ( id del commit : 1f4218a )
+- Subir Producto + editar producto + mejorar perfil + fotos producto + persistencia de H2 ( id del commit : fec166c )
+- cambio de muchas cosas , landing page mejorado , pagina de inicio , fotos de productos , sobre nosotros , filtros de busquedas , api libros incluida ,subir producto se ve en el inicio ya, inicio del apartado del chat ( todavia no implementado ) , navbar mejorado ( id del commit :  )
+- Implementacion del apartado del chat y correccion de algunos bugs + permitir compartir ubicacion en la app con la api ( id del commit : )
+- Markdown con implementaciones de la aplicacion posteriores, seguimiento y posibles cambios (id del commit : )
+- testing y seguimiento de la aplicación Bugs, cambios y diseño
+- Hacer 2 videos de usuarios con Nicolas
+- Mejora visual del apartado de ajustes 
+- Incluir historial en perfil
+
+	MARIO
+- Encargado de crear y configurar el contenedor Docker para la aplicación.
+- Crear cuenta en Render y desplegar la aplicación en Render con conexión a GitHub para despliegues automáticos tras commits en la rama `main` (automatizado).
+- Implementación de la feature de pregunta de seguridad.
+- Integración con APIs externas (Keepa y Amazon) para comparación de precios online.
+- Mejoras visuales en el apartado de perfil.
+- Incorporación de datos de ejemplo en la base de datos.
+- Desarrollo del dashboard de administrador con métricas de negocio.
+- Seguimiento y actualización del plan de trabajo en el diagrama Gantt.
+- Creación de diagramas de arquitectura del sistema.
+- Fix de la lista de favoritos con persistencia.
+- Aportación de conocimiento sobre Azure DevOps y organización ágil aprendido en prácticas y trabajo en empresa.
+- Estandarización de pies de foto y bibliografía.
+- Revisión de la memoria, especialemnte en sprint 3, ya que era mi rol en el equipo.
+- Edición de videos para adecuarlos al tiempo de la presentación
+- Incorporación del registro de cambios en la documentación.
+- Registro de horas invertidas: desglose de horas por miembro del equipo y rol por sprint.
