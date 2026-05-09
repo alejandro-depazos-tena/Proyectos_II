@@ -1,4 +1,5 @@
 Contribuciones de proyectos II:
+
 	ALEJANDRO
 - Documento de propuesta de proyecto 
 - Logo
@@ -90,3 +91,18 @@ Contribuciones de proyectos II:
 - Creacion de una encuesta de usabilidad junto con Pazos para recoger opiniones de usuarios y evaluar la experiencia de uso de la aplicacion.
 - Analisis de la encuesta de usabilidad en un archivo .ipynb, organizando los resultados por bloques de preguntas, viendo medidas descriptivas para las respuestas Likert, revisando la aceptacion de funcionalidades concretas y estimando una metrica tipo NPS para obtener una vision global de la satisfaccion, la disposicion a recomendar la aplicacion y los principales puntos de mejora.
 - Creacion del documento con plantilla y redaccion de apartados clave: introduccion, descripcion detallada del proyecto, aplicaciones similares y diferenciacion de la app, objetivos especificos con Chus, tecnologias, accesibilidad web, metodologia de desarrollo, algunas historias de usuario, sprint 1, sprint 2 completo salvo fotos, sprint 3 centrado en la firma de contratos, formato del plan de trabajo desarrollado por Pazos y analisis de la encuesta de usabilidad.
+
+	JESÚS DE ANDRÉS
+- Propuesta inicial de la idea del proyecto: planteé el concepto de UFV Share como aplicación web para la comunidad universitaria, orientada al préstamo, alquiler y compraventa de objetos entre estudiantes dentro de un entorno cerrado y seguro.
+- Redacción de la descripción detallada del proyecto y de la investigación previa: desarrollé los apartados de contexto, necesidad detectada en el entorno universitario, análisis del problema, comparación con soluciones similares y diferenciación de UFV Share frente a alternativas externas.
+- Redacción del apartado de impacto social y ético: trabajé la justificación del valor social del proyecto, la sostenibilidad, la confianza dentro de la comunidad universitaria, los riesgos sociales, la privacidad, la seguridad, el buen uso de los datos y la accesibilidad e inclusión.
+- Definición de objetivos en colaboración con Nicolás: participé en la redacción del objetivo general, los objetivos específicos y los métodos de validación, alineando la propuesta funcional con el alcance real del proyecto.
+- Elaboración de la mayoría de las historias de usuario: redacté prácticamente todas las historias de usuario de autenticación, gestión de objetos, búsqueda, solicitudes y transacciones, perfil, accesibilidad, administración y control de calidad, dejando los requisitos funcionales trazables y organizados por módulos.
+- Redacción del anexo de prototipo: documenté la plantilla utilizada como base visual, la justificación de su uso como prototipo, la adaptación a UFV Share, las vistas principales y la relación del prototipo con la arquitectura del sistema.
+- Redacción de los apartados de memoria relacionados con el sistema de reviews y el apartado de ajustes: describí el funcionamiento de las reseñas, su API, componentes de frontend, validación y la reorganización de Perfil/Ajustes para separar gestión de cuenta, actividad, preferencias y normativa.
+- Diseño, formato y maquetación general de la memoria: me encargué de unificar la presentación visual del documento, mantener la estructura de apartados, coherencia de títulos, figuras, anexos y estilo general para que la entrega final tuviera un formato consistente.
+- Sistema completo de reseñas de la aplicación (id del commit: 1021218): implementé el módulo de reseñas de extremo a extremo. En backend añadí la entidad AppReview, su repositorio, el DTO AppReviewRequest y AppReviewController para listar, crear y eliminar reseñas. También incorporé AppReviewSeedDataLoader, configuración en application.properties y datos SQL de ejemplo. En frontend desarrollé los componentes AboutAppReviews.astro, HomeAppReviews.astro y AppRatingWidget.astro, integrándolos en las páginas About e Inicio para mostrar valoraciones, recuento de reseñas y contenido visible para los usuarios.
+- Página de ajustes de usuario (id del commit: eae301b): creé settings.astro con opciones de tema y acciones rápidas, y adapté NavBar.astro para enlazar correctamente con esta nueva sección de configuración.
+- Mejora de la experiencia del chat (ids de commit: d61c413 y a3a248f): añadí búsqueda dentro del chat con resaltado de resultados, mejoré el estado visual cuando no existen conversaciones y refiné el modal de perfil dentro de la página de chats para que la interacción fuese más clara.
+- Mantenimiento del blog y del footer (id del commit: 2f84d42): actualicé enlaces del footer y mejoré la lógica de artículos relacionados en el blog, ajustando tanto el listado de artículos como la vista de detalle para ofrecer recomendaciones más coherentes.
+- Ajustes de consistencia visual y navegación: revisé componentes existentes como FavoritesList.tsx, Footer.astro, blog/index.astro y blog/[slug].astro para mantener una experiencia más consistente entre páginas y reducir pequeñas incoherencias de navegación.
