@@ -63,3 +63,30 @@ Contribuciones de proyectos II:
 - Notificación automática por email al vendedor cuando alguien solicita su producto: extendió EmailService con una plantilla de correo de aviso al propietario del anuncio, e integró el envío de esa notificación directamente en SolicitudService, de forma que el vendedor recibe un email en el momento en que otro usuario solicita su producto.
 - Funcionalidad para eliminar anuncios propios y modal de gestión en el perfil: añadió un endpoint DELETE en ProductoController para que los usuarios puedan borrar sus propios anuncios desde la aplicación, e implementó en profile.astro un modal minimalista de confirmación para la eliminación, además de mejoras visuales en la gestión de reservas recibidas desde el perfil.
 - Documentación de mejoras e implementaciones técnicas a lo largo de los sprints: redactó y actualizó en la memoria las secciones correspondientes a las funcionalidades desarrolladas en cada sprint (sistema de reservas, chat, notificaciones, modo oscuro, recuperación de contraseña y sistema de emails), describiendo su funcionamiento, decisiones de diseño y capturas de la aplicación.
+
+
+
+
+	NIC
+- Creacion del modelo entidad-relacion con su diagrama para definir la estructura principal de la aplicacion y las relaciones entre entidades.
+- Diseño del flujo del sistema.
+- Creacion de la base de datos H2 para el entorno de desarrollo, facilitando pruebas locales rapidas y una configuracion sencilla del backend, con carga de datos en json.
+- Creacion de la base SQL para produccion, adaptando la estructura de datos para su despliegue y uso en un entorno real.
+- Inserccion de datos de prueba para validar flujos, comprobar relaciones y facilitar el desarrollo de nuevas funcionalidades.
+- Flujo del backend. Creacion de las entidades y capas del backend  para usuario, transaccion, solicitud, reporteProducto, reporteUsuario, producto, contrato, fotoProducto y categoria. Incluyendo en todas ellas controlador, repositorio y servicio.
+- Soporte transversal entre backend y frontend para mantener la coherencia funcional entre los flujos de datos, estados de solicitud y comportamiento de la interfaz.
+- Validacion funcional continua de casos de uso criticos (registro, publicacion, solicitud, aceptacion y cierre), detectando incidencias y proponiendo ajustes antes de cada entrega.
+- Colaboracion en la estabilizacion del entorno de desarrollo, revisando configuraciones y datos de arranque para facilitar onboarding y pruebas del equipo.
+- Revision tecnica de funcionalidades implementadas en sprint, aportando mejoras de consistencia en reglas de negocio, nomenclatura y estructura de endpoints.
+- Seguridad del backend mediante el hasheo de contraseñas y el refuerzo del acceso a las funcionalidades principales de la aplicacion.
+- Visualizacion de reservas y compradores, permitiendo consultar el estado de las solicitudes y el historial de interacciones entre usuarios.
+- Creacion de actas de asistencias en reuniones.
+- Desarrollo del flujo de alquiler y compra de productos, cubriendo desde la solicitud inicial hasta la gestion de la operacion.
+- Implementacion de validacion para permitir unicamente correos institucionales, asegurando el uso de cuentas autorizadas dentro del entorno del proyecto.
+- Funcionalidad de contrato al aceptar una solicitud de alquiler, incluyendo la generacion automatica del contrato, su firma y la liberacion del objeto cuando finaliza el alquiler.
+- Apoyo en la preparacion de entregables tecnicos, alineando decisiones de implementacion con la documentacion funcional y los objetivos de cada sprint.
+- Creacion de 2 videos de usuario junto con Pazos, orientados a mostrar las funcionalidades principales y el uso real de la aplicacion.
+- Correcion de errores y mejoras generales, incluyendo ajustes visuales, temas de contraste siguiendo las recomendacion WCAG y solucion de problemas de carga de paginas.
+- Creacion de una encuesta de usabilidad junto con Pazos para recoger opiniones de usuarios y evaluar la experiencia de uso de la aplicacion.
+- Analisis de la encuesta de usabilidad en un archivo .ipynb, organizando los resultados por bloques de preguntas, viendo medidas descriptivas para las respuestas Likert, revisando la aceptacion de funcionalidades concretas y estimando una metrica tipo NPS para obtener una vision global de la satisfaccion, la disposicion a recomendar la aplicacion y los principales puntos de mejora.
+- Creacion del documento con plantilla y redaccion de apartados clave: introduccion, descripcion detallada del proyecto, aplicaciones similares y diferenciacion de la app, objetivos especificos con Chus, tecnologias, accesibilidad web, metodologia de desarrollo, algunas historias de usuario, sprint 1, sprint 2 completo salvo fotos, sprint 3 centrado en la firma de contratos, formato del plan de trabajo desarrollado por Pazos y analisis de la encuesta de usabilidad.
