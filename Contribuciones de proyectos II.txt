@@ -45,7 +45,7 @@ Contribuciones de proyectos II:
 - Integración de la plantilla de frontend y reestructuración completa de la capa visual: incorporé una plantilla de e-commerce, organizando toda la estructura de componentes (navbar, footer, tarjetas de productos, carrito, checkout, favoritos, blog, contacto, categorías).
 - Creé los layouts base del proyecto (Base.astro, Layout.astro).
 - Añadí stores de estado para el carrito y los favoritos (cartStore.ts, favoriteStore.ts), y configuré el script de arranque del entorno de desarrollo (run-dev.ps1) junto con las tareas de VS Code.
-- Integré en el mismo commit la estructura completa de entidades del backend (Producto, FotoProducto, Solicitud, Transaccion, Reporte de producto y de usuario, Usuario), incluyendo los archivos SQL iniciales de la base de datos y datos semilla en JSON.
+- Resolución de conflictos del merge entre la plantilla frontend y el código existente del equipo, y actualización del .gitignore para excluir artefactos de compilación y binarios de la base de datos (commit: 058d0047).
 - Corrección de accesibilidad y asociación de labels en formularios del perfil: mejoré la página de perfil añadiendo atributos for/id a todos los campos de los formularios de edición de datos y publicación de anuncios, garantizando la correcta asociación entre etiquetas e inputs.
 - Corregí los mensajes de alerta en la página principal ajustando su comportamiento y presentación.
 - Implementación del sistema de reservas (backend y frontend): extendió SolicitudController con nuevos endpoints para crear y gestionar solicitudes de reserva entre usuarios, añadí queries personalizados en SolicitudRepository, e implementé la lógica de negocio completa en SolicitudService.
